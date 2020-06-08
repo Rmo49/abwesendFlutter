@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "523700940441",
+    "firebase_url": "https://abwesenddb.firebaseio.com",
+    "project_id": "abwesenddb",
+    "storage_bucket": "abwesenddb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:523700940441:android:14c52dac1e50e059401208",
+        "android_client_info": {
+          "package_name": "ch.nomadus.abwesend"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "523700940441-ipn4tr27lgjei8mef9k9v4q7op9d8gl1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7pwa4YgTKIk9XhP7sY1JKG5SFt3jt-rs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "523700940441-ipn4tr27lgjei8mef9k9v4q7op9d8gl1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
