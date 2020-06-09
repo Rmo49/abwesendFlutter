@@ -29,9 +29,6 @@ class AbwesendTable extends StatelessWidget {
     abwListLength = abwesendList.length;
 
     startDatum = dateFormDb.parse(spieler.begin);
-
-//    List<TableRow> listRow = [];
-
     return Column(
       children: <Widget>[
         Table(
@@ -54,24 +51,22 @@ class AbwesendTable extends StatelessWidget {
     List<TableRow> list = new List<TableRow>();
     for (int i = 0; i < abwListLength; i++) {
       isWeekend = (startDatum.weekday >= 6);
-      String value = abwesendList[i];
+      String abwTag = abwesendList[i];
+      double posStart = getPosStart(abwTag, isWeekend);
+      double posEnd = getPosEnd(abwTag, isWeekend, posStart);
+
       list.add(
         TableRow(children: [
           TableCell(
               child: Container(
             child: Text(dateFormDb.format(startDatum)),
-                color: isWeekend ? Colors.grey : Colors.white,
+            color: isWeekend ? Colors.grey : Colors.white,
           )),
-          TableCell(child: Text('$value')),
+          TableCell(child: Text('$abwTag')),
           TableCell(
               child: Container(
             height: 20.0,
-//                color: Colors.yellow,
-            child: CustomPaint(painter: MyPainter()),
-//                child: FittedBox(
-//                  fit: BoxFit.contain,
-//                  child: CustomPaint(painter: MyPainter()),
-//                )),
+            child: CustomPaint(painter: MyPainter(posStart, posEnd)),
           )),
         ]),
       );
@@ -79,18 +74,74 @@ class AbwesendTable extends StatelessWidget {
     }
     return list;
   }
+
+  /// Berechnet die Start Position, 0..1 innerhalb der Zeitspannen
+  /// von Start-Zeit und Ende
+  double getPosStart(String abwTag, bool isWeekend) {
+    if ((abwTag == null) || (abwTag.length <= 0)) {
+      // nichts zeichnen
+      return 1;
+    }
+    if (abwTag.startsWith('-') || (abwTag.compareTo('0') == 0)) {
+      return 0;
+    }
+    String zahl = abwTag.substring(0, abwTag.indexOf('-'));
+    if (zahl.length > 0) {
+      int start = int.parse(zahl);
+      if (isWeekend) {
+        double relativ = (weekendEnd - start) / (weekendEnd - weekendBegin);
+        return relativ;
+      } else {
+        double relativ = (weekEnd - start) / (weekEnd - weekBegin);
+        return 1-relativ;
+      }
+    }
+    return 1;
+  }
+
+  /// Berechnet die Start Position, von 0..1 innerhalb der Zeitspannen
+  /// von Start-Zeit und Ende
+  double getPosEnd(String abwTag, bool isWeekend, double posStart) {
+    if (posStart >= 1) {
+      // nichts zeichnen
+      return 1;
+    }
+    if (abwTag.compareTo('0') == 0) {
+      return 1;
+    }
+    if (abwTag.startsWith('-')) {
+      String zahl = abwTag.substring(abwTag.indexOf('-')+1, abwTag.length);
+      if (zahl.length > 0) {
+        int end = int.parse(zahl);
+        if (isWeekend) {
+          double relativ = (end - weekendBegin) / (weekendEnd - weekendBegin);
+          return relativ;
+        } else {
+          double relativ = (end - weekBegin) / (weekEnd - weekBegin);
+          return relativ;
+        }
+      }
+    }
+    return 1.0;
+  }
 }
 
 class MyPainter extends CustomPainter {
+  final double posStart;
+  final double posEnd;
+  // Konstruktor
+  MyPainter(this.posStart, this.posEnd);
+
+  final painter = Paint()..color = Colors.deepOrangeAccent;
+
   @override
   void paint(Canvas canvas, Size size) {
-    // Define a paint object
-//    final paint = Paint()
-//      ..style = PaintingStyle.stroke
-//      ..strokeWidth = 1.0
-//      ..color = Colors.indigo;
-
-    canvas.drawRect(Rect.fromLTWH(0.0, 0.0, 10.0, 10.0), Paint());
+    if (posStart < 1) {
+      double left = posStart * size.width;
+      double width = (posEnd * size.width) - left;
+      canvas.drawRect(Rect.fromLTWH(left, 0.0, width, size.height), painter);
+    }
+    canvas.drawRect(Rect.fromLTWH(20, 0.0, 5, size.height), Paint());
   }
 
   @override
