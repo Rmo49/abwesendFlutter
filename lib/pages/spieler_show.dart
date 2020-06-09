@@ -1,9 +1,8 @@
 import 'dart:convert';
-
-import 'package:abwesend/model/match.dart';
-import 'package:abwesend/model/spieler.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:abwesend/model/spieler.dart';
+import 'package:abwesend/pages/abwesend_table.dart';
 
 class SpielerShow extends StatefulWidget {
   @override
@@ -15,7 +14,7 @@ class _SpielerShowState extends State<SpielerShow> {
   Map _selection = {};
   String _spielerId;
   Spieler _spieler;
-  Matches _matches;
+//  Matches _matches;
 
   TextEditingController _txtController;
 
@@ -49,14 +48,16 @@ class _SpielerShowState extends State<SpielerShow> {
       ),
       body: Column(
         children: <Widget>[
-          Text("spielerId: $_spielerId"),
           TextField(
             controller: _txtController,
             decoration: InputDecoration(
               border: OutlineInputBorder(),
-              labelText: 'Spieler',
+              labelText: 'Spieler wählen',
             ),
-          )
+          ),
+          AbwesendTable(
+            spieler: _spieler,
+          ),
         ],
       ),
     );
@@ -64,7 +65,6 @@ class _SpielerShowState extends State<SpielerShow> {
 
   /// Spieler von der DB lesen, dieser werden in json-format geliefert
   Future readSpieler(String spielerId) async {
-    Spieler spieler;
     var url = "https://nomadus.ch/tca/db/readSpieler.php";
     final response = await http.post(url, body: {
       "id": spielerId,
@@ -80,7 +80,7 @@ class _SpielerShowState extends State<SpielerShow> {
       _spieler = Spieler.fromMap(spielerMap);
       final List<dynamic> matcheMap = data['matches'];
       if (matcheMap.length > 0) {
-        _matches = Matches.fromList(matcheMap);
+//        _matches = Matches.fromList(matcheMap);
       }
     }
     setState(() {

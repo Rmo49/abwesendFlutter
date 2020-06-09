@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'file:///D:/Daten/Flutter/abwesend/lib/model/spieler.dart';
-import 'package:abwesend/pages/spieler_import.dart';
+import 'package:abwesend/pages/bak/spieler_import.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -35,6 +33,7 @@ class _HomeState extends State<Home> {
     );
   }
 
+/*
   Widget _buildBody(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
       stream: Firestore.instance.collection('Spieler').snapshots(),
@@ -44,14 +43,18 @@ class _HomeState extends State<Home> {
       },
     );
   }
+*/
 
+/*
   Widget _buildList(BuildContext context, List<DocumentSnapshot> snapshot) {
     return ListView(
       padding: const EdgeInsets.only(top: 20.0),
       children: snapshot.map((data) => _buildListItem(context, data)).toList(),
     );
   }
+*/
 
+/*
   Widget _buildListItem(BuildContext context, DocumentSnapshot data) {
     final record = Spieler.fromSnapshot(data);
 
@@ -70,6 +73,7 @@ class _HomeState extends State<Home> {
           )),
     );
   }
+*/
 }
 
 /// Das Menu links mit der Haupt-Navigation

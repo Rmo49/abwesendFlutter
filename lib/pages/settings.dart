@@ -1,6 +1,4 @@
-import 'package:abwesend/pages/spieler_import.dart';
 import 'package:flutter/material.dart';
-import 'spieler_import.dart';
 
 class Settings extends StatelessWidget {
   @override

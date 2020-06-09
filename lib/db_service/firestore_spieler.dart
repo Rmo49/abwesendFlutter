@@ -1,9 +1,6 @@
-
-import 'package:abwesend/model/spieler.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_database/firebase_database.dart';
 
-class DbSpieler {
+class FirestoreSpieler {
 
   // Collection Reference, wenn nicht existiert, dann wird durch DB angelegt
   final CollectionReference spielerCollection =

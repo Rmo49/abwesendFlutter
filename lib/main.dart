@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:abwesend/pages/home.dart';
 import 'package:abwesend/pages/settings.dart';
-import 'package:abwesend/pages/spieler_import.dart';
+import 'package:abwesend/pages/bak/spieler_import.dart';
 import 'package:abwesend/pages/spieler_select.dart';
 import 'package:abwesend/pages/spieler_show.dart';
 
