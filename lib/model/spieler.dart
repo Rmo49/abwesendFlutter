@@ -7,6 +7,7 @@ class Spieler {
   String email;
   String abwesend;
   String begin; // Begin datum des Truniers
+  List<Match> matches = null;
 
   Spieler(this.name, this.vorname, this.email);
 
@@ -19,6 +20,14 @@ class Spieler {
         email = map['email'],
         abwesend = map['abwesendArray'],
         begin = map['begin'];
+
+  setMatches(List<dynamic> matchList) {
+    matches = new List<Match>();
+    matchList.forEach((element) {
+      Match match = Match.fromMap(element);
+      matches.add(match);
+    });
+  }
 
   Spieler.fromSnapshot(DocumentSnapshot snapshot) : this.fromMap(snapshot.data);
 
@@ -41,4 +50,30 @@ class SpielerShort {
   SpielerShort.fromMap(Map<String, dynamic> map)
       : id = map['id'],
         names = map['names'];
+}
+
+/// Attribute von einem Match
+class Match {
+  final int day;
+  final String time;
+  final String type;
+
+  Match(this.day, this.time, this.type);
+
+  Match.fromMap(Map<String, dynamic> map)
+      : day = int.parse(map['day']),
+        time = map['time'],
+        type = map['type'];
+}
+
+/// Attribute von einem Match zur Darstellung
+class MatchDisplay {
+  final double pos;
+  final String type;
+
+  MatchDisplay(this.pos, this.type);
+
+  MatchDisplay.fromMap(Map<String, dynamic> map)
+      : pos = double.parse(map['pos']),
+        type = map['type'];
 }

@@ -14,7 +14,6 @@ class _SpielerShowState extends State<SpielerShow> {
   Map _selection = {};
   String _spielerId;
   Spieler _spieler;
-//  Matches _matches;
 
   TextEditingController _txtController;
 
@@ -22,12 +21,12 @@ class _SpielerShowState extends State<SpielerShow> {
   void initState() {
     super.initState();
     _txtController = TextEditingController();
-    _txtController.text = "warte...";
+    _txtController.text = "lese Spieler von DB";
   }
 
   @override
   void setState(fn) {
-    if(mounted){
+    if (mounted) {
       super.setState(fn);
     }
   }
@@ -76,14 +75,9 @@ class _SpielerShowState extends State<SpielerShow> {
       List<String> lines = ls.convert(response.body);
       // die erste Zeile enthält keine Daten
       final Map<String, dynamic> data = json.decode(lines.elementAt(1));
-      final Map<String, dynamic> spielerMap = data['spieler'];
-      _spieler = Spieler.fromMap(spielerMap);
-      final List<dynamic> matcheMap = data['matches'];
-      if (matcheMap.length > 0) {
-//        _matches = Matches.fromList(matcheMap);
-      }
+      _spieler = Spieler.fromMap(data['spieler']);
+      _spieler.setMatches(data['matches']);
     }
-    setState(() {
-    });
+    setState(() {});
   }
 }

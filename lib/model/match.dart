@@ -1,26 +1,26 @@
 /// Alle Matches eines Spielers
 class Matches {
-  List<Match> matches;
+  List<Match2> matches = null;
 
   Matches.fromList(List<dynamic> matchList) {
-    if (matchList.length > 0) {
-      matches = new List<Match>();
+      matches = new List<Match2>();
       matchList.forEach((element) {
-        Match match = Match.fromMap(element);
+        Match2 match = Match2.fromMap(element);
         matches.add(match);
       });
     }
   }
-}
 
 /// Attribute von einem Match
-class Match {
+class Match2 {
+  final int day;
   final String time;
   final String type;
 
-  Match(this.time, this.type);
+  Match2(this.day, this.time, this.type);
 
-  Match.fromMap(Map<String, dynamic> map)
-      : time = map['time'],
+  Match2.fromMap(Map<String, dynamic> map)
+      : day = int.parse(map['day']),
+        time = map['time'],
         type = map['type'];
 }

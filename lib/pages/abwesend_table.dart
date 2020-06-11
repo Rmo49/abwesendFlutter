@@ -12,7 +12,7 @@ class AbwesendTable extends StatelessWidget {
 
   final Spieler spieler;
   List abwesendList;
-  int abwListLength;
+  List<Match> matchList;
   DateTime startDatum;
 
   // Konstruktor
@@ -22,13 +22,12 @@ class AbwesendTable extends StatelessWidget {
   Widget build(BuildContext context) {
     if (spieler == null) {
       return Container(
-        child: Text("Daten werden geladen"),
+        child: Text("lese Spieler von DB"),
       );
     }
     abwesendList = spieler.abwesend.split(';');
-    abwListLength = abwesendList.length;
-
     startDatum = dateFormDb.parse(spieler.begin);
+
     return Column(
       children: <Widget>[
         Table(
@@ -38,7 +37,7 @@ class AbwesendTable extends StatelessWidget {
             1: FractionColumnWidth(.1),
             2: FixedColumnWidth(40.0),
           },
-          children: getRows(),
+          children: getAllRows(),
 //          TableRow(children: listValues = getColValue()),
 //          TableRow(children: listPaint = getColPaint()),
         ),
@@ -46,15 +45,19 @@ class AbwesendTable extends StatelessWidget {
     );
   }
 
-  List<TableRow> getRows() {
+  List<TableRow> getAllRows() {
     bool isWeekend = false;
     List<TableRow> list = new List<TableRow>();
-    for (int i = 0; i < abwListLength; i++) {
+    // iteration ueber alle Tage
+    for (int i = 0; i < abwesendList.length; i++) {
+      // die Werte für diesen Tag
       isWeekend = (startDatum.weekday >= 6);
+      // abwesend
       String abwTag = abwesendList[i];
-      double posStart = getPosStart(abwTag, isWeekend);
-      double posEnd = getPosEnd(abwTag, isWeekend, posStart);
-
+      double abwStart = getPosStart(abwTag, isWeekend);
+      double abwEnd = getPosEnd(abwTag, isWeekend, abwStart);
+      // matches, wenn von diesem Tag
+      List<MatchDisplay> matchDisplayList = getMatches(i, isWeekend);
       list.add(
         TableRow(children: [
           TableCell(
@@ -66,7 +69,8 @@ class AbwesendTable extends StatelessWidget {
           TableCell(
               child: Container(
             height: 20.0,
-            child: CustomPaint(painter: MyPainter(posStart, posEnd)),
+            child: CustomPaint(
+                painter: MyPainter(abwStart, abwEnd, matchDisplayList)),
           )),
         ]),
       );
@@ -85,18 +89,11 @@ class AbwesendTable extends StatelessWidget {
     if (abwTag.startsWith('-') || (abwTag.compareTo('0') == 0)) {
       return 0;
     }
-    String zahl = abwTag.substring(0, abwTag.indexOf('-'));
-    if (zahl.length > 0) {
-      int start = int.parse(zahl);
-      if (isWeekend) {
-        double relativ = (weekendEnd - start) / (weekendEnd - weekendBegin);
-        return relativ;
-      } else {
-        double relativ = (weekEnd - start) / (weekEnd - weekBegin);
-        return 1-relativ;
-      }
+    String zeit = abwTag.substring(0, abwTag.indexOf('-'));
+    if (zeit.length > 0) {
+      return getPosTime(zeit, isWeekend);
     }
-    return 1;
+    return 1.0;
   }
 
   /// Berechnet die Start Position, von 0..1 innerhalb der Zeitspannen
@@ -110,38 +107,87 @@ class AbwesendTable extends StatelessWidget {
       return 1;
     }
     if (abwTag.startsWith('-')) {
-      String zahl = abwTag.substring(abwTag.indexOf('-')+1, abwTag.length);
-      if (zahl.length > 0) {
-        int end = int.parse(zahl);
-        if (isWeekend) {
-          double relativ = (end - weekendBegin) / (weekendEnd - weekendBegin);
-          return relativ;
-        } else {
-          double relativ = (end - weekBegin) / (weekEnd - weekBegin);
-          return relativ;
-        }
+      String zeit = abwTag.substring(abwTag.indexOf('-') + 1, abwTag.length);
+      if (zeit.length > 0) {
+        return getPosTime(zeit, isWeekend);
       }
     }
     return 1.0;
   }
+
+  /// Die Position von 0..1 innerhalb der Zeitspannen
+  /// wenn 1 dann ausserhalb der Zeitspanne
+  double getPosTime(String time, bool isWeekend) {
+    // wenn Zeit 18:30, dann minuten weglassen
+    int index = time.indexOf(':');
+    if (index > 0) {
+      time = time.substring(0, index);
+    }
+    index = time.indexOf('.');
+    if (index > 0) {
+      time = time.substring(0, index);
+    }
+
+    double pos = 1.0;
+    int zeit = int.parse(time);
+    if (isWeekend) {
+      pos = (zeit - weekendBegin) / (weekendEnd - weekendBegin);
+    } else {
+      pos = (zeit - weekBegin) / (weekEnd - weekBegin);
+    }
+    return pos;
+  }
+
+  List<MatchDisplay> getMatches(int day, bool isWeekend) {
+    List<MatchDisplay> matchDispalyList = new List<MatchDisplay>();
+    for (int i = 0; i < spieler.matches.length; i++) {
+      MatchDisplay matchDisplay;
+      getPosTime(spieler.matches[i].time, isWeekend);
+
+      if (spieler.matches[i].day == day) {
+        matchDisplay = MatchDisplay(
+            getPosTime(spieler.matches[i].time, isWeekend),
+            spieler.matches[i].type);
+        matchDispalyList.add(matchDisplay);
+      }
+    }
+    return matchDispalyList;
+  }
 }
 
+/// Der Painter für die grafische Dartstellung
 class MyPainter extends CustomPainter {
   final double posStart;
   final double posEnd;
+  final List<MatchDisplay> matchDisplayList;
   // Konstruktor
-  MyPainter(this.posStart, this.posEnd);
+  MyPainter(this.posStart, this.posEnd, this.matchDisplayList);
 
-  final painter = Paint()..color = Colors.deepOrangeAccent;
+  final painterAbw = Paint()..color = Colors.deepOrangeAccent;
+  final painterEinzel = Paint()..color = Colors.blue[700];
+  final painterDoppel = Paint()..color = Colors.green[700];
 
   @override
   void paint(Canvas canvas, Size size) {
     if (posStart < 1) {
       double left = posStart * size.width;
       double width = (posEnd * size.width) - left;
-      canvas.drawRect(Rect.fromLTWH(left, 0.0, width, size.height), painter);
+      canvas.drawRect(Rect.fromLTWH(left, 0.0, width, size.height), painterAbw);
     }
-    canvas.drawRect(Rect.fromLTWH(20, 0.0, 5, size.height), Paint());
+    if (matchDisplayList != null) {
+      matchDisplayList.forEach((match) {
+        if (match.pos < 1) {
+          double left = match.pos * size.width;
+          if (match.type.contains('E')) {
+            canvas.drawRect(
+                Rect.fromLTWH(left, 0.0, 8, size.height), painterEinzel);
+          } else {
+            canvas.drawRect(
+                Rect.fromLTWH(left, 0.0, 8, size.height), painterDoppel);
+          }
+        }
+      });
+    }
   }
 
   @override
