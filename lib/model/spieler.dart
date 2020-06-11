@@ -7,7 +7,7 @@ class Spieler {
   String email;
   String abwesend;
   String begin; // Begin datum des Truniers
-  List<Match> matches = null;
+  List<Match> matches;
 
   Spieler(this.name, this.vorname, this.email);
 
@@ -36,8 +36,6 @@ class Spieler {
 
   @override
   String toString() => "Spieler <$name: $vorname>";
-
-  void addAbwesend(String) {}
 }
 
 /// Spieler kurzform, um in einer Liste anzuzeigen

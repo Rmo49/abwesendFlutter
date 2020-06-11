@@ -1,6 +1,6 @@
 /// Alle Matches eines Spielers
 class Matches {
-  List<Match2> matches = null;
+  List<Match2> matches;
 
   Matches.fromList(List<dynamic> matchList) {
       matches = new List<Match2>();

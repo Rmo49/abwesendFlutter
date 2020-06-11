@@ -11,9 +11,9 @@ class AbwesendTable extends StatelessWidget {
   final int weekendEnd = 17;
 
   final Spieler spieler;
-  List abwesendList;
-  List<Match> matchList;
-  DateTime startDatum;
+//  List abwesendList;
+//  List<Match> matchList;
+//  DateTime startDatum;
 
   // Konstruktor
   AbwesendTable({this.spieler});
@@ -25,9 +25,8 @@ class AbwesendTable extends StatelessWidget {
         child: Text("lese Spieler von DB"),
       );
     }
-    abwesendList = spieler.abwesend.split(';');
-    startDatum = dateFormDb.parse(spieler.begin);
 
+//    var abwL = <TableRow>[];
     return Column(
       children: <Widget>[
         Table(
@@ -37,17 +36,43 @@ class AbwesendTable extends StatelessWidget {
             1: FractionColumnWidth(.1),
             2: FixedColumnWidth(40.0),
           },
-          children: getAllRows(),
-//          TableRow(children: listValues = getColValue()),
-//          TableRow(children: listPaint = getColPaint()),
+          children: getAbwesendRows(spieler),
+//        <TableRow>[
+//          TableRow(children: []),
+//          abw,
+//          TableRow(children: []),
         ),
       ],
     );
   }
 
-  List<TableRow> getAllRows() {
+  TableRow getRows() {
+    return new TableRow(children: []);
+  }
+
+  /// Die Zeilen mit den Abwesenheiten
+  List<TableRow> getAbwesendRows(Spieler spieler) {
+    // die lokale Vars
+    List abwesendList = spieler.abwesend.split(';');
+    DateTime startDatum = dateFormDb.parse(spieler.begin);
+
     bool isWeekend = false;
     List<TableRow> list = new List<TableRow>();
+    // das ist der Header
+    list.add(
+      TableRow(children: [
+        TableCell(
+          child: Text('Datum'),
+        ),
+        TableCell(
+          child: Text(spieler.name,
+          ),
+        ),
+        TableCell(
+          child: Text(spieler.vorname),
+        ),
+      ]),
+    );
     // iteration ueber alle Tage
     for (int i = 0; i < abwesendList.length; i++) {
       // die Werte für diesen Tag
