@@ -1,9 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:abwesend/model/spieler.dart';
 
-class AbwesendTable extends StatelessWidget {
+class AbwesendTableV extends StatelessWidget {
 //  Intl.defaultLocal = 'de_DE';
   final DateFormat dateFormDb = new DateFormat('yyyy-MM-dd');
   final int weekBegin = 17;
@@ -17,7 +16,7 @@ class AbwesendTable extends StatelessWidget {
 //  DateTime startDatum;
 
   // Konstruktor
-  AbwesendTable({this.spieler});
+  AbwesendTableV({this.spieler});
 
   @override
   Widget build(BuildContext context) {
@@ -28,43 +27,27 @@ class AbwesendTable extends StatelessWidget {
     }
 
 //    var abwL = <TableRow>[];
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Table(
-        border: TableBorder.all(),
-        defaultColumnWidth: FixedColumnWidth(30.0),
-        columnWidths: {
-          0: FixedColumnWidth(40.0),
-        },
-//          children: getAbwesendRows(spieler),
-        children: getAllRows(),
-      ),
+    return Column(
+      children: <Widget>[
+        Table(
+          border: TableBorder.all(),
+          columnWidths: {
+            0: FractionColumnWidth(.2),
+            1: FractionColumnWidth(.1),
+            2: FixedColumnWidth(40.0),
+          },
+          children: getAbwesendRows(spieler),
+//        <TableRow>[
+//          TableRow(children: []),
+//          abw,
+//          TableRow(children: []),
+        ),
+      ],
     );
   }
 
-  List<TableRow> getAllRows() {
-    List<TableRow> list = new List<TableRow>();
-    list.add(getRow1());
-    list.add(getRow2());
-    return list;
-  }
-
-  TableRow getRow1() {
-    return TableRow(children: getCellList('1'));
-  }
-
-  TableRow getRow2() {
-    return TableRow(children: getCellList('2'));
-  }
-
-  List<TableCell> getCellList(String nr) {
-    List<TableCell> list = new List<TableCell>();
-    for (int i = 0; i < 20; i++) {
-      list.add(
-        TableCell(child: Text(nr + ' $i')),
-      );
-    }
-    return list;
+  TableRow getRows() {
+    return new TableRow(children: []);
   }
 
   /// Die Zeilen mit den Abwesenheiten
@@ -76,21 +59,20 @@ class AbwesendTable extends StatelessWidget {
     bool isWeekend = false;
     List<TableRow> list = new List<TableRow>();
     // das ist der Header
-//    list.add(
-//      TableRow(children: [
-//        TableCell(
-//          child: Text('Datum'),
-//        ),
-//        TableCell(
-//          child: Text(
-//            spieler.name,
-//          ),
-//        ),
-//        TableCell(
-//          child: Text(spieler.vorname),
-//        ),
-//      ]),
-//    );
+    list.add(
+      TableRow(children: [
+        TableCell(
+          child: Text('Datum'),
+        ),
+        TableCell(
+          child: Text(spieler.name,
+          ),
+        ),
+        TableCell(
+          child: Text(spieler.vorname),
+        ),
+      ]),
+    );
     // iteration ueber alle Tage
     for (int i = 0; i < abwesendList.length; i++) {
       // die Werte für diesen Tag
@@ -101,18 +83,22 @@ class AbwesendTable extends StatelessWidget {
       double abwEnd = getPosEnd(abwTag, isWeekend, abwStart);
       // matches, wenn von diesem Tag
       List<MatchDisplay> matchDisplayList = getMatches(i, isWeekend);
-
-      list.add(TableRow(children: [
-        TableCell(
-            child: Container(
-          child: Text(dateFormDb.format(startDatum)),
-          color: isWeekend ? Colors.grey : Colors.white,
-        ))
-      ]));
-
-      list.add(TableRow(children: [
-        TableCell(child: Text('$abwTag')),
-      ]));
+      list.add(
+        TableRow(children: [
+          TableCell(
+              child: Container(
+            child: Text(dateFormDb.format(startDatum)),
+            color: isWeekend ? Colors.grey : Colors.white,
+          )),
+          TableCell(child: Text('$abwTag')),
+          TableCell(
+              child: Container(
+            height: 20.0,
+            child: CustomPaint(
+                painter: MyPainter(abwStart, abwEnd, matchDisplayList)),
+          )),
+        ]),
+      );
       startDatum = startDatum.add(Duration(days: 1));
     }
     return list;
