@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
 import 'package:abwesend/pages/bak/spieler_import.dart';
+import 'package:abwesend/model/globals.dart' as global;
 
 class Home extends StatefulWidget {
   @override
@@ -10,9 +13,20 @@ class Home extends StatefulWidget {
 
 /// Der Hauptscreen
 class _HomeState extends State<Home> {
+
+  final DateFormat dateForm = new DateFormat('d.M.yyyy');
+  TextEditingController txtDatumStart = TextEditingController();
+
   @override
+  void initState() {
+    super.initState();
+    txtDatumStart.text = dateForm.format(global.startDatum);
+  }
+
+    @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called
+
     return new Scaffold(
       appBar: AppBar(
         title: Text('Abwesend TCA'),
@@ -21,7 +35,7 @@ class _HomeState extends State<Home> {
             icon: const Icon(Icons.more_vert),
             tooltip: 'Setup Screens',
             onPressed: () {
-              Navigator.pushNamed(context, '/loading');
+//              Navigator.pushNamed(context, '/loading');
             },
           ),
         ],
@@ -29,51 +43,57 @@ class _HomeState extends State<Home> {
       //getActions(context)
 
       drawer: AbwMenu(),
-      //    body: _buildBody(context),
+      body: Container(
+        child: Column(
+          children: <Widget>[
+            Text(global.dbname),
+            FlatButton(
+              color: Colors.orange[500],
+              textColor: Colors.white,
+              padding: EdgeInsets.all(10.0),
+              onPressed: () {
+                Navigator.pushNamed(context, '/spieler_select');
+              },
+              child: Row(children: <Widget>[
+                Icon(Icons.person),
+                Text(
+                  '  Spieler wählen',
+                  style: TextStyle(fontSize: 20.0),
+                ),
+              ]),
+            ),
+            FlatButton(
+              color: Colors.orange[700],
+              textColor: Colors.white,
+              padding: EdgeInsets.all(10.0),
+              onPressed: () {
+                Navigator.pushNamed(context, '/spieler_select');
+              },
+              child: Row(children: <Widget>[
+                Icon(Icons.people),
+                Text(
+                  '  Tableau wählen',
+                  style: TextStyle(fontSize: 20.0),
+                ),
+              ]),
+            ),
+            TextField(
+              controller: txtDatumStart,
+              decoration: InputDecoration(
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.greenAccent, width: 2.0),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(width: 2.0, color: Colors.black38),
+                ),
+                hintText: 'ab Datum anzeigen',
+              ),
+            )
+          ],
+        ),
+      ),
     );
   }
-
-/*
-  Widget _buildBody(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: Firestore.instance.collection('Spieler').snapshots(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) return LinearProgressIndicator();
-        return _buildList(context, snapshot.data.documents);
-      },
-    );
-  }
-*/
-
-/*
-  Widget _buildList(BuildContext context, List<DocumentSnapshot> snapshot) {
-    return ListView(
-      padding: const EdgeInsets.only(top: 20.0),
-      children: snapshot.map((data) => _buildListItem(context, data)).toList(),
-    );
-  }
-*/
-
-/*
-  Widget _buildListItem(BuildContext context, DocumentSnapshot data) {
-    final record = Spieler.fromSnapshot(data);
-
-    return Padding(
-      key: ValueKey(record.name),
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(5.0),
-          ),
-          child: ListTile(
-            title: Text(record.name),
-            trailing: Text(record.vorname),
-            //           onTap: (), // Detail von Spieler anzeigen
-          )),
-    );
-  }
-*/
 }
 
 /// Das Menu links mit der Haupt-Navigation
@@ -96,9 +116,7 @@ class AbwMenu extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.person),
             title: Text('Spieler'),
-            onTap: () => {
-              Navigator.pushNamed(context, '/spieler_select')
-            },
+            onTap: () => {Navigator.pushNamed(context, '/spieler_select')},
           ),
           ListTile(
             leading: Icon(Icons.group),
@@ -174,7 +192,7 @@ List<Widget> getActions2(BuildContext context) {
 void openPage(BuildContext context) {
   Navigator.push(context, MaterialPageRoute(
     builder: (BuildContext context) {
-      SpielerImport();
+      return SpielerImport();
     },
   ));
 }

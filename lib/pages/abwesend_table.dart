@@ -2,18 +2,21 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:abwesend/model/spieler.dart';
+import 'package:abwesend/model/globals.dart' as global;
 
 class AbwesendTable extends StatelessWidget {
 //  Intl.defaultLocal = 'de_DE';
-  final DateFormat dateFormDb = new DateFormat('yyyy-MM-dd');
+  final DateFormat dateFormList = new DateFormat('d.M.');
+
   final int weekBegin = 17;
   final int weekEnd = 22;
   final int weekendBegin = 10;
   final int weekendEnd = 17;
 
   final Spieler spieler;
-//  List abwesendList;
-//  List<Match> matchList;
+
+  // die maximale Länge des Arrays
+  int listLen;
 //  DateTime startDatum;
 
   // Konstruktor
@@ -32,90 +35,113 @@ class AbwesendTable extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       child: Table(
         border: TableBorder.all(),
-        defaultColumnWidth: FixedColumnWidth(30.0),
+        defaultColumnWidth: FixedColumnWidth(40.0),
         columnWidths: {
-          0: FixedColumnWidth(40.0),
+          0: FixedColumnWidth(60.0),
         },
-//          children: getAbwesendRows(spieler),
-        children: getAllRows(),
+        children: getSpielerRows(spieler),
       ),
     );
   }
 
-  List<TableRow> getAllRows() {
-    List<TableRow> list = new List<TableRow>();
-    list.add(getRow1());
-    list.add(getRow2());
+  /// Die Zeilen mit allen Abwesenheiten eines Spielers
+  List<TableRow> getSpielerRows(Spieler spieler) {
+    // die lokale Vars
+    List abwesendList = spieler.abwesend.split(';');
+    // damit ein header noch platz hat
+    listLen = abwesendList.length;
+    if (listLen > 21) {
+      listLen = 21;
+    }
+
+    List<TableRow> rowList = new List<TableRow>();
+    // die einzelnen Rows
+    rowList.add(getRowDatum('Datum', global.startDatum));
+    rowList.add(getRowAbwesend(spieler.vorname, abwesendList));
+    rowList.add(getRowGrafik(spieler.name, abwesendList));
+    return rowList;
+  }
+
+  /// Zeile Datum
+  TableRow getRowDatum(String header, DateTime startDatum) {
+    return TableRow(children: getCellDatum(header, startDatum));
+  }
+
+  List<TableCell> getCellDatum(String header, DateTime startDatum) {
+    // Die Zeile mit dem Datum
+    DateTime datum = startDatum;
+    List<TableCell> list = new List<TableCell>();
+    list.add(TableCell(child: Text(header)));
+
+    for (int i = 0; i < listLen; i++) {
+      list.add(
+        TableCell(
+            child: Container(
+          child: Text(dateFormList.format(datum)),
+          color: isWeekend(i) ? Colors.grey : Colors.white,
+        )),
+      );
+      datum = datum.add(Duration(days: 1));
+    }
     return list;
   }
 
-  TableRow getRow1() {
-    return TableRow(children: getCellList('1'));
+  /// Row mit den Abwesenheiten eines Spielers
+  TableRow getRowAbwesend(String header, List abwesendList) {
+    return TableRow(children: getCellAbwesend(header, abwesendList));
   }
 
-  TableRow getRow2() {
-    return TableRow(children: getCellList('2'));
-  }
-
-  List<TableCell> getCellList(String nr) {
+  List<TableCell> getCellAbwesend(String header, List abwesendList) {
     List<TableCell> list = new List<TableCell>();
-    for (int i = 0; i < 20; i++) {
+    list.add(TableCell(child: Text(header)));
+    for (int i = 0; i < listLen; i++) {
       list.add(
-        TableCell(child: Text(nr + ' $i')),
+        TableCell(child: Text(abwesendList[i])),
       );
     }
     return list;
   }
 
-  /// Die Zeilen mit den Abwesenheiten
-  List<TableRow> getAbwesendRows(Spieler spieler) {
-    // die lokale Vars
-    List abwesendList = spieler.abwesend.split(';');
-    DateTime startDatum = dateFormDb.parse(spieler.begin);
+  /// Row mit den Abwesenheiten eines Spielers
+  TableRow getRowGrafik(String header, List abwesendList) {
+    return TableRow(children: getCellGrafik(header, abwesendList));
+  }
 
-    bool isWeekend = false;
-    List<TableRow> list = new List<TableRow>();
-    // das ist der Header
-//    list.add(
-//      TableRow(children: [
-//        TableCell(
-//          child: Text('Datum'),
-//        ),
-//        TableCell(
-//          child: Text(
-//            spieler.name,
-//          ),
-//        ),
-//        TableCell(
-//          child: Text(spieler.vorname),
-//        ),
-//      ]),
-//    );
-    // iteration ueber alle Tage
-    for (int i = 0; i < abwesendList.length; i++) {
-      // die Werte für diesen Tag
-      isWeekend = (startDatum.weekday >= 6);
-      // abwesend
+  List<TableCell> getCellGrafik(String header, List abwesendList) {
+    List<TableCell> list = new List<TableCell>();
+    list.add(TableCell(child: Text(header)));
+    for (int i = 0; i < listLen; i++) {
       String abwTag = abwesendList[i];
-      double abwStart = getPosStart(abwTag, isWeekend);
-      double abwEnd = getPosEnd(abwTag, isWeekend, abwStart);
+      double abwStart = getPosStart(abwTag, isWeekend(i));
+      double abwEnd = getPosEnd(abwTag, isWeekend(i), abwStart);
       // matches, wenn von diesem Tag
-      List<MatchDisplay> matchDisplayList = getMatches(i, isWeekend);
-
-      list.add(TableRow(children: [
+      List<MatchDisplay> matchDisplayList = getMatches(i);
+      MyPainter painter = MyPainter(abwStart, abwEnd, matchDisplayList);
+      list.add(
         TableCell(
             child: Container(
-          child: Text(dateFormDb.format(startDatum)),
-          color: isWeekend ? Colors.grey : Colors.white,
-        ))
-      ]));
-
-      list.add(TableRow(children: [
-        TableCell(child: Text('$abwTag')),
-      ]));
-      startDatum = startDatum.add(Duration(days: 1));
+          height: 20.0,
+          child: CustomPaint(painter: painter),
+        )),
+      );
     }
     return list;
+  }
+
+  /// Gibt für einen Tag in der Liste die Matches zurück
+  List<MatchDisplay> getMatches(int day) {
+    List<MatchDisplay> matchDispalyList = new List<MatchDisplay>();
+    for (int i = 0; i < spieler.matches.length; i++) {
+      MatchDisplay matchDisplay;
+      // wenn Spiele an diesem Tag
+      if (spieler.matches[i].day == day) {
+        matchDisplay = MatchDisplay(
+            getPosTime(spieler.matches[i].time, isWeekend(i)),
+            spieler.matches[i].type);
+        matchDispalyList.add(matchDisplay);
+      }
+    }
+    return matchDispalyList;
   }
 
   /// Berechnet die Start Position, 0..1 innerhalb der Zeitspannen
@@ -177,23 +203,17 @@ class AbwesendTable extends StatelessWidget {
     return pos;
   }
 
-  List<MatchDisplay> getMatches(int day, bool isWeekend) {
-    List<MatchDisplay> matchDispalyList = new List<MatchDisplay>();
-    for (int i = 0; i < spieler.matches.length; i++) {
-      MatchDisplay matchDisplay;
-      getPosTime(spieler.matches[i].time, isWeekend);
-
-      if (spieler.matches[i].day == day) {
-        matchDisplay = MatchDisplay(
-            getPosTime(spieler.matches[i].time, isWeekend),
-            spieler.matches[i].type);
-        matchDispalyList.add(matchDisplay);
-      }
-    }
-    return matchDispalyList;
+  /// Ist die Position im Array ein Weekend?
+  bool isWeekend(int pos) {
+    DateTime datum = global.startDatum;
+    datum =  global.startDatum.add(Duration(days: pos));
+//    for (int i = 0; i < listLen; i++) {
+      return (datum.weekday >= 6);
+ //   }
   }
 }
 
+//-------------------------
 /// Der Painter für die grafische Dartstellung
 class MyPainter extends CustomPainter {
   final double posStart;

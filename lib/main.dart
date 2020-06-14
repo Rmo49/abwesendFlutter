@@ -1,3 +1,4 @@
+import 'package:abwesend/pages/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:abwesend/pages/home.dart';
 import 'package:abwesend/pages/settings.dart';
@@ -7,9 +8,10 @@ import 'package:abwesend/pages/spieler_show.dart';
 
 void main() => runApp(MaterialApp(
       // diese Widget wird zuerst geladen
-      initialRoute: '/',
+      initialRoute: '/loading',
       routes: {
-        '/': (context) => Home(),
+        '/home': (context) => Home(),
+        '/loading' : (context) => Loading(),
         '/settings': (context) => Settings(),
         '/spieler_import': (context) => SpielerImport(),
         '/spieler_select' : (context) => SpielerSelect(),
