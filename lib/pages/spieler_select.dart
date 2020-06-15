@@ -25,7 +25,7 @@ class _SpielerSelectState extends State<SpielerSelect> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text("Spieler suchen"),
+        title: new Text("Spieler filtern"),
       ),
       body: Container(
         child: Column(
@@ -38,8 +38,8 @@ class _SpielerSelectState extends State<SpielerSelect> {
                 },
                 controller: editingController,
                 decoration: InputDecoration(
-                    labelText: "Search",
-                    hintText: "Search",
+                    labelText: "Spieler filtern",
+                    hintText: "Name eingeben",
                     prefixIcon: Icon(Icons.search),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(20.0)))),

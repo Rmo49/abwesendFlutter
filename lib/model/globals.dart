@@ -9,9 +9,12 @@ final DateFormat dateFormDb = new DateFormat('yyyy-MM-dd');
 String dbname = "tennis2";
 // Die Werte der Config
 Map<String, dynamic> configData;
-// Start-Datum des Turniers
+// Start- und Edd-Datum des Turniers
 DateTime startDatum;
-// die Länge des Arrays
+DateTime endDatum;
+// ab diesem Datum anzeigen
+DateTime startDatumAnzeigen;
+// die Länge des Arrays für alle Tage
 int arrayLen = 0;
 
 

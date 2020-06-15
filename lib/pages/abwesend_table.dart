@@ -15,10 +15,6 @@ class AbwesendTable extends StatelessWidget {
 
   final Spieler spieler;
 
-  // die maximale Länge des Arrays
-  int listLen;
-//  DateTime startDatum;
-
   // Konstruktor
   AbwesendTable({this.spieler});
 
@@ -48,10 +44,8 @@ class AbwesendTable extends StatelessWidget {
   List<TableRow> getSpielerRows(Spieler spieler) {
     // die lokale Vars
     List abwesendList = spieler.abwesend.split(';');
-    // damit ein header noch platz hat
-    listLen = abwesendList.length;
-    if (listLen > 21) {
-      listLen = 21;
+    if (abwesendList.length < global.arrayLen) {
+      global.arrayLen = abwesendList.length;
     }
 
     List<TableRow> rowList = new List<TableRow>();
@@ -73,7 +67,7 @@ class AbwesendTable extends StatelessWidget {
     List<TableCell> list = new List<TableCell>();
     list.add(TableCell(child: Text(header)));
 
-    for (int i = 0; i < listLen; i++) {
+    for (int i = 0; i < global.arrayLen; i++) {
       list.add(
         TableCell(
             child: Container(
@@ -94,7 +88,7 @@ class AbwesendTable extends StatelessWidget {
   List<TableCell> getCellAbwesend(String header, List abwesendList) {
     List<TableCell> list = new List<TableCell>();
     list.add(TableCell(child: Text(header)));
-    for (int i = 0; i < listLen; i++) {
+    for (int i = 0; i < global.arrayLen; i++) {
       list.add(
         TableCell(child: Text(abwesendList[i])),
       );
@@ -110,7 +104,7 @@ class AbwesendTable extends StatelessWidget {
   List<TableCell> getCellGrafik(String header, List abwesendList) {
     List<TableCell> list = new List<TableCell>();
     list.add(TableCell(child: Text(header)));
-    for (int i = 0; i < listLen; i++) {
+    for (int i = 0; i < global.arrayLen; i++) {
       String abwTag = abwesendList[i];
       double abwStart = getPosStart(abwTag, isWeekend(i));
       double abwEnd = getPosEnd(abwTag, isWeekend(i), abwStart);
@@ -207,7 +201,7 @@ class AbwesendTable extends StatelessWidget {
   bool isWeekend(int pos) {
     DateTime datum = global.startDatum;
     datum =  global.startDatum.add(Duration(days: pos));
-//    for (int i = 0; i < listLen; i++) {
+//    for (int i = 0; i < global.arrayLen; i++) {
       return (datum.weekday >= 6);
  //   }
   }

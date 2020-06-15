@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import 'package:abwesend/pages/bak/spieler_import.dart';
 import 'package:abwesend/model/globals.dart' as global;
 
 class Home extends StatefulWidget {
@@ -13,8 +12,8 @@ class Home extends StatefulWidget {
 
 /// Der Hauptscreen
 class _HomeState extends State<Home> {
-
   final DateFormat dateForm = new DateFormat('d.M.yyyy');
+  final DateFormat dateFormShort = new DateFormat('d.M');
   TextEditingController txtDatumStart = TextEditingController();
 
   @override
@@ -23,29 +22,28 @@ class _HomeState extends State<Home> {
     txtDatumStart.text = dateForm.format(global.startDatum);
   }
 
-    @override
+  @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called
 
     return new Scaffold(
-      appBar: AppBar(
-        title: Text('Abwesend TCA'),
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.more_vert),
-            tooltip: 'Setup Screens',
-            onPressed: () {
+        appBar: AppBar(
+          title: Text('Abwesend TCA'),
+          actions: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.more_vert),
+              tooltip: 'Setup Screens',
+              onPressed: () {
 //              Navigator.pushNamed(context, '/loading');
-            },
-          ),
-        ],
-      ),
-      //getActions(context)
+              },
+            ),
+          ],
+        ),
+        //getActions(context)
 
-      drawer: AbwMenu(),
-      body: Container(
-        child: Column(
-          children: <Widget>[
+        drawer: SideMenu(),
+        body: Container(
+          child: Column(children: <Widget>[
             Text(global.dbname),
             FlatButton(
               color: Colors.orange[500],
@@ -77,27 +75,88 @@ class _HomeState extends State<Home> {
                 ),
               ]),
             ),
-            TextField(
-              controller: txtDatumStart,
-              decoration: InputDecoration(
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.greenAccent, width: 2.0),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(width: 2.0, color: Colors.black38),
-                ),
-                hintText: 'ab Datum anzeigen',
-              ),
-            )
-          ],
-        ),
+            getStartDatum(),
+          ]),
+        ));
+  }
+
+  /// Die Wahl des Startdatums
+  Widget getStartDatum() {
+    return Column(children: <Widget>[
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('Anzeige der Abwesenheiten ab: '),
+          Text( dateForm.format(global.startDatumAnzeigen)),
+        ],
       ),
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: ButtonBar(
+          mainAxisSize: MainAxisSize
+              .min, // this will take space as minimum as posible(to center)
+          buttonHeight: 25.0,
+          buttonPadding: EdgeInsets.all(2.0),
+          children: getDatumButtons(),
+        ),
+      )
+    ]);
+  }
+
+  /// Die Liste mit allen möglichen Datum
+  List<Widget> getDatumButtons() {
+    List<RaisedButton> list = new List<RaisedButton>();
+    DateTime datum = global.startDatum;
+    while (datum.compareTo(global.endDatum) < 0) {
+      DateTime datumButton = datum;
+      list.add(
+        new RaisedButton(
+          color: Colors.orange[400],
+          padding: const EdgeInsets.all(0.0),
+          child: Text(dateFormShort.format(datumButton)),
+          onPressed: () {
+            getSelectedDatum(datumButton);
+          },
+          highlightColor: Colors.orange[900],
+        ),
+      );
+      datum = datum.add(Duration(days: 2));
+    }
+    return list;
+  }
+
+  void getSelectedDatum(DateTime datum) {
+    global.startDatumAnzeigen = datum;
+    setState(() {
+
+    });
+  }
+
+  /// mit ListView
+  Widget getStartDatum1() {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 20.0),
+      height: 100.0,
+      child: ListView(scrollDirection: Axis.horizontal, children: <Widget>[
+        Container(
+          width: 30.0,
+          child: Text('11.1.'),
+        ),
+        Container(
+          width: 30.0,
+          child: Text('12.1.'),
+        ),
+        Container(
+          width: 30.0,
+          child: Text('13.1.'),
+        ),
+      ]),
     );
   }
 }
 
 /// Das Menu links mit der Haupt-Navigation
-class AbwMenu extends StatelessWidget {
+class SideMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -139,75 +198,4 @@ class AbwMenu extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Die Aktionen in der Tast-Liste
-/// Hier ausgelagert.
-List<Widget> getActions(BuildContext context) {
-  List<Widget> widgetList = List<Widget>();
-
-  widgetList.add(IconButton(
-    icon: const Icon(Icons.add_alert),
-    tooltip: 'Show Snackbar 1',
-    onPressed: () {
-      //   scaffoldKey.currentState.showSnackBar(snackBar);
-    },
-  ));
-
-  widgetList.add(
-    IconButton(
-      icon: const Icon(Icons.more_vert),
-      tooltip: 'Setup Screens',
-      onPressed: () {
-        Navigator.pushNamed(context, '/spieler_import');
-      },
-    ),
-  );
-  return widgetList;
-}
-
-List<Widget> getActions2(BuildContext context) {
-  var widgetList;
-  widgetList = <Widget>[
-    IconButton(
-      icon: const Icon(Icons.add_alert),
-      tooltip: 'Show Snackbar 2',
-      onPressed: () {
-//   scaffoldKey.currentState.showSnackBar(snackBar);
-      },
-    ),
-    IconButton(
-      icon: const Icon(Icons.more_vert),
-      tooltip: 'Next page 2',
-      onPressed: () {
-        openPage(context);
-      },
-    ),
-  ];
-  return widgetList;
-}
-
-/// Eine neue Seite öffnen,
-/// diese ist mit der Hauptseite verbunden
-void openPage(BuildContext context) {
-  Navigator.push(context, MaterialPageRoute(
-    builder: (BuildContext context) {
-      return SpielerImport();
-    },
-  ));
-}
-
-/// Die zweite Page
-Scaffold getPage2() {
-  return new Scaffold(
-    appBar: AppBar(
-      title: const Text('Next page'),
-    ),
-    body: const Center(
-      child: Text(
-        'This is Page 2',
-        style: TextStyle(fontSize: 24),
-      ),
-    ),
-  );
 }

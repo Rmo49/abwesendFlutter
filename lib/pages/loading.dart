@@ -68,8 +68,7 @@ class _LoadingState extends State<Loading> {
       return;
     }
 
-    setState(() {
-    });
+    setState(() {});
     Navigator.pushReplacementNamed(context, '/home');
   }
 
@@ -78,5 +77,15 @@ class _LoadingState extends State<Loading> {
     global.configData = data;
 
     global.startDatum = global.dateFormDb.parse(data['turnier.beginDatum']);
+    global.startDatumAnzeigen = global.startDatum;
+    global.endDatum = global.dateFormDb.parse(data['turnier.endDatum']);
+    Duration diff = global.endDatum.difference(global.startDatum);
+    global.arrayLen = diff.inDays + 1;
+    global.arrayLen < 0
+        ? global.arrayLen = -global.arrayLen
+        : global.arrayLen = global.arrayLen;
+    if (global.arrayLen > 21) {
+      global.arrayLen = 21;
+    }
   }
 }
