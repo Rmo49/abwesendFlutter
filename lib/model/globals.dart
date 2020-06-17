@@ -16,5 +16,8 @@ DateTime endDatum;
 DateTime startDatumAnzeigen;
 // die Länge des Arrays für alle Tage
 int arrayLen = 0;
+// die selektierte TableauId im Tableau-Screen
+// Ersatz für modale transformation, da im build zu spät
+int tableauId = -1;
 
 

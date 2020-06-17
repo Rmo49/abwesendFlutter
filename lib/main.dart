@@ -1,5 +1,8 @@
-import 'package:abwesend/pages/loading.dart';
 import 'package:flutter/material.dart';
+
+import 'package:abwesend/pages/tableau_select.dart';
+import 'package:abwesend/pages/abwesend_show.dart';
+import 'package:abwesend/pages/loading.dart';
 import 'package:abwesend/pages/home.dart';
 import 'package:abwesend/pages/settings.dart';
 import 'package:abwesend/pages/bak/spieler_import.dart';
@@ -14,8 +17,10 @@ void main() => runApp(MaterialApp(
         '/loading' : (context) => Loading(),
         '/settings': (context) => Settings(),
         '/spieler_import': (context) => SpielerImport(),
+        '/tableau_select' : (context) => TableauSelect(),
         '/spieler_select' : (context) => SpielerSelect(),
         '/spieler_show' : (context) => SpielerShow(),
+        '/abwesend_show' : (context) => AbwesendShow(),
       },
     ));
 

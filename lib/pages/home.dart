@@ -50,8 +50,10 @@ class _HomeState extends State<Home> {
               textColor: Colors.white,
               padding: EdgeInsets.all(10.0),
               onPressed: () {
-                Navigator.pushNamed(context, '/spieler_select');
-              },
+                Navigator.pushNamed(context, '/spieler_select', arguments: {
+                  'spielerId' : 0,
+                });
+             },
               child: Row(children: <Widget>[
                 Icon(Icons.person),
                 Text(
@@ -65,7 +67,7 @@ class _HomeState extends State<Home> {
               textColor: Colors.white,
               padding: EdgeInsets.all(10.0),
               onPressed: () {
-                Navigator.pushNamed(context, '/spieler_select');
+                Navigator.pushNamed(context, '/tableau_select');
               },
               child: Row(children: <Widget>[
                 Icon(Icons.people),

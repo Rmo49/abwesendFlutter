@@ -1,7 +1,9 @@
 import 'dart:convert';
-import 'package:abwesend/model/spieler.dart';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:abwesend/model/spieler.dart';
+import 'package:abwesend/model/globals.dart' as global;
 
 class SpielerSelect extends StatefulWidget {
   @override
@@ -11,6 +13,9 @@ class SpielerSelect extends StatefulWidget {
 class _SpielerSelectState extends State<SpielerSelect> {
   TextEditingController editingController = TextEditingController();
 
+  // die daten vom Aufrufer (Home, TableauSelect)
+  Map _selection = {};
+  int _tableauId = -1;
   List<SpielerShort> spielerAlle;
   List<SpielerShort> spielerShow = List<SpielerShort>();
 
@@ -23,6 +28,9 @@ class _SpielerSelectState extends State<SpielerSelect> {
 
   @override
   Widget build(BuildContext context) {
+    _selection = ModalRoute.of(context).settings.arguments;
+    _tableauId = _selection['tableauId'];
+
     return new Scaffold(
       appBar: new AppBar(
         title: new Text("Spieler filtern"),
@@ -30,6 +38,8 @@ class _SpielerSelectState extends State<SpielerSelect> {
       body: Container(
         child: Column(
           children: <Widget>[
+            Text('Tableau: ' + _tableauId.toString()),
+//            Text(_txtError),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: TextField(
@@ -89,20 +99,60 @@ class _SpielerSelectState extends State<SpielerSelect> {
 
   /// Alle Spieler von der DB lesen, diese werden in json-format geliefert
   Future readAllSpieler() async {
+    var url = '';
+    if (global.tableauId < 0)
+      url = "https://nomadus.ch/tca/db/readSpielerAll.php";
+    else {
+      url = "https://nomadus.ch/tca/db/readTableauSpieler.php";
+    }
+    try {
+      final response = await http.post(url, body: {
+        "dbname": global.dbname,
+        "tableauId": global.tableauId.toString(),
+      });
+      if (response.statusCode == 200) {
+        if (response.body.length > 0) {
+          List spielerFromDb = json.decode(response.body);
+          setSpielerData(spielerFromDb);
+        } else {
+          setSpielerData(getSpielerMessage('keine Spieler gefunden'));
+        }
+        setState(() {});
+      } else {
+        setSpielerData(getSpielerMessage(response.body));
+        setState(() {});
+        return;
+      }
+    } catch (e) {
+      // Könnte sein, dass response eine Error-Message enthält
+//      LineSplitter ls = new LineSplitter();
+//      List<String> lines = ls.convert(response.body);
+      setSpielerData(getSpielerMessage(e));
+      setState(() {});
+      return;
+    }
+  }
+
+  /// Wenn statt Spieler eine Message in der Liste angezeigt werden soll.
+  List getSpielerMessage(String message) {
+    List msgList = new List();
+    msgList.add({'id': '-1', 'name': message, 'vorname': '!'});
+    return msgList;
+  }
+
+  /// Die Listen mi den entsprechenden Spielern füllen
+  void setSpielerData(List spielerFromDb) {
     List<SpielerShort> spielerList = new List<SpielerShort>();
-    var url = "https://nomadus.ch/tca/db/readSpielerAll.php";
-    final String res = await http.read(url);
-    LineSplitter ls = new LineSplitter();
-    List<String> lines = ls.convert(res);
-    // die erste Zeile enthält keine Daten
-    List spielerFromDb = json.decode(lines.elementAt(1));
     spielerFromDb.forEach((element) {
       Map<String, dynamic> map = element;
-      SpielerShort spielerShort = SpielerShort(map['id'], map['name'] + " " + map['vorname']);
+      // Name und Vorname zusammen in einem Feld
+      SpielerShort spielerShort =
+          SpielerShort(map['id'], map['name'] + " " + map['vorname']);
       spielerList.add(spielerShort);
     });
     // Liste sortieren
-    Comparator<SpielerShort> spielerComparator = (a, b) => a.names.compareTo(b.names);
+    Comparator<SpielerShort> spielerComparator =
+        (a, b) => a.names.compareTo(b.names);
     spielerList.sort(spielerComparator);
     // anzeigen, da build bereits ausgeführt
     setState(() {
@@ -118,7 +168,7 @@ class _SpielerSelectState extends State<SpielerSelect> {
     print(spielerShow[index]);
 
     Navigator.pushNamed(context, '/spieler_show', arguments: {
-      'spielerId' : spielerShow[index].id,
+      'spielerId': spielerShow[index].id,
     });
   }
 }
