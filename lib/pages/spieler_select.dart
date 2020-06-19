@@ -13,9 +13,9 @@ class SpielerSelect extends StatefulWidget {
 class _SpielerSelectState extends State<SpielerSelect> {
   TextEditingController editingController = TextEditingController();
 
-  // die daten vom Aufrufer (Home, TableauSelect)
-  Map _selection = {};
-  int _tableauId = -1;
+  // Flip-Flop wenn alle selektiert
+  bool _alleSelektiert = false;
+  String selButtonText = 'alle';
   List<SpielerShort> spielerAlle;
   List<SpielerShort> spielerShow = List<SpielerShort>();
 
@@ -23,54 +23,85 @@ class _SpielerSelectState extends State<SpielerSelect> {
   void initState() {
     // wird genau einmal aufgerufen, wenn das Objekt initialisiert wird
     super.initState();
-    readAllSpieler();
+    readAllSpielerShort();
   }
 
   @override
   Widget build(BuildContext context) {
-    _selection = ModalRoute.of(context).settings.arguments;
-    _tableauId = _selection['tableauId'];
-
     return new Scaffold(
       appBar: new AppBar(
         title: new Text("Spieler filtern"),
       ),
       body: Container(
-        child: Column(
-          children: <Widget>[
-            Text('Tableau: ' + _tableauId.toString()),
-//            Text(_txtError),
+        child: Column(children: <Widget>[
+          Row(children: [
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                onChanged: (value) {
-                  filterSearchResults(value);
-                },
-                controller: editingController,
-                decoration: InputDecoration(
-                    labelText: "Spieler filtern",
-                    hintText: "Name eingeben",
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20.0)))),
+              child: SizedBox(
+                width: 200.0,
+                height: 40.0,
+                child: TextField(
+                  onChanged: (value) {
+                    filterSearchResults(value);
+                  },
+                  controller: editingController,
+                  decoration: InputDecoration(
+                      labelText: "Name eingeben",
+                      hintText: "Name",
+                      prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.all(Radius.circular(10.0)))),
+                ),
               ),
             ),
-            Expanded(
+            Padding(
+              padding: const EdgeInsets.all(2.0),
+              child: FlatButton(
+                child: Text(
+                  selButtonText,
+//                  style: TextStyle(fontSize: 20.0),
+                ),
+                color: Colors.orange[200],
+                onPressed: selectAll,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(2.0),
+              child: FlatButton(
+                child: Text('anzeigen'),
+                color: Colors.orange[400],
+                padding: EdgeInsets.all(4.0),
+                onPressed: () { spielerAnzeigen(context); },
+              ),
+            ),
+          ]),
+          Expanded(
               child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: spielerShow == null ? 0 : spielerShow.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text('${spielerShow.elementAt(index).names}'),
-                    onTap: () {
-                      spielerSelektiert(context, index);
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+            shrinkWrap: true,
+            itemCount: spielerShow == null ? 0 : spielerShow.length,
+            itemBuilder: _getListItemTile,
+          )),
+        ]),
+      ),
+    );
+  }
+
+  Widget _getListItemTile(BuildContext context, int index) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 2),
+      color: spielerShow[index].isSelected ? Colors.orange[300] : Colors.white,
+      height: 40.0,
+      child: ListTile(
+        title: Text('${spielerShow.elementAt(index).names}'),
+        onTap: () {
+          setState(() {
+            spielerShow[index].isSelected = !spielerShow[index].isSelected;
+          });
+        },
+        onLongPress: () {
+          spielerAnzeigen(context);
+        },
       ),
     );
   }
@@ -97,8 +128,51 @@ class _SpielerSelectState extends State<SpielerSelect> {
     }
   }
 
-  /// Alle Spieler von der DB lesen, diese werden in json-format geliefert
-  Future readAllSpieler() async {
+  // alle selektieren, wenn vorher bereits selektiert, dann unselect
+  void selectAll() {
+    if (spielerShow.length > 20) {
+      // TODO popup anzeigen
+      return;
+    }
+    if (_alleSelektiert) {
+      spielerShow.forEach((element) {
+        element.isSelected = false;
+      });
+      selButtonText = 'alle';
+    } else {
+      spielerShow.forEach((element) {
+        element.isSelected = true;
+      });
+      selButtonText = 'keine';
+    }
+    _alleSelektiert = !_alleSelektiert;
+    setState(() {});
+  }
+
+  /// Wenn mehrere Spieler selektiert wurden, wird diese Funkion aufgerufen.
+  /// index ist die position in der Liste
+  void spielerAnzeigen(BuildContext context) {
+    global.spielerIdList.clear();
+    spielerShow.forEach((element) {
+      if (element.isSelected) {
+        global.spielerIdList.add(int.parse(element.id));
+      }
+    });
+    Navigator.pushNamed(context, '/abwesend_show', arguments: {
+    });
+  }
+
+  /// Wenn ein Spieler selektiert wurde, wird diese Funkion aufgerufen.
+  /// index ist die position in der Liste
+  void spielerSelect(BuildContext context, int index) {
+    Navigator.pushNamed(context, '/spieler_show', arguments: {
+      'spielerId': spielerShow[index].id,
+    });
+  }
+
+  //------------- DB access ------------------------
+  /// Kruzform aller Spieler von der DB lesen, diese werden in json-format geliefert
+  Future readAllSpielerShort() async {
     var url = '';
     if (global.tableauId < 0)
       url = "https://nomadus.ch/tca/db/readSpielerAll.php";
@@ -117,7 +191,6 @@ class _SpielerSelectState extends State<SpielerSelect> {
         } else {
           setSpielerData(getSpielerMessage('keine Spieler gefunden'));
         }
-        setState(() {});
       } else {
         setSpielerData(getSpielerMessage(response.body));
         setState(() {});
@@ -128,6 +201,7 @@ class _SpielerSelectState extends State<SpielerSelect> {
 //      LineSplitter ls = new LineSplitter();
 //      List<String> lines = ls.convert(response.body);
       setSpielerData(getSpielerMessage(e));
+      // anzeigen, da build bereits ausgeführt
       setState(() {});
       return;
     }
@@ -147,28 +221,18 @@ class _SpielerSelectState extends State<SpielerSelect> {
       Map<String, dynamic> map = element;
       // Name und Vorname zusammen in einem Feld
       SpielerShort spielerShort =
-          SpielerShort(map['id'], map['name'] + " " + map['vorname']);
+          SpielerShort(map['id'], map['name'] + " " + map['vorname'], false);
       spielerList.add(spielerShort);
     });
     // Liste sortieren
     Comparator<SpielerShort> spielerComparator =
         (a, b) => a.names.compareTo(b.names);
     spielerList.sort(spielerComparator);
-    // anzeigen, da build bereits ausgeführt
+    // anzeigen, da build bereits ausgeführt, aber nur wenn neu
+
     setState(() {
       spielerAlle = spielerList;
       spielerShow.addAll(spielerAlle);
-    });
-  }
-
-  /// Wenn ein Spieler selektiert wurde, wird diese Funkion aufgerufen.
-  /// index ist die position in der Liste
-  void spielerSelektiert(BuildContext context, int index) {
-    print('spielerSelektiert: $index');
-    print(spielerShow[index]);
-
-    Navigator.pushNamed(context, '/spieler_show', arguments: {
-      'spielerId': spielerShow[index].id,
     });
   }
 }

@@ -7,7 +7,6 @@ import 'package:abwesend/pages/home.dart';
 import 'package:abwesend/pages/settings.dart';
 import 'package:abwesend/pages/bak/spieler_import.dart';
 import 'package:abwesend/pages/spieler_select.dart';
-import 'package:abwesend/pages/spieler_show.dart';
 
 void main() => runApp(MaterialApp(
       // diese Widget wird zuerst geladen
@@ -19,7 +18,6 @@ void main() => runApp(MaterialApp(
         '/spieler_import': (context) => SpielerImport(),
         '/tableau_select' : (context) => TableauSelect(),
         '/spieler_select' : (context) => SpielerSelect(),
-        '/spieler_show' : (context) => SpielerShow(),
         '/abwesend_show' : (context) => AbwesendShow(),
       },
     ));

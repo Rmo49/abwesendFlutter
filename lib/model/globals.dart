@@ -1,5 +1,4 @@
 library my_pri.globals;
-
 import 'package:intl/intl.dart';
 
 // das Datenformat in der DB
@@ -14,10 +13,14 @@ DateTime startDatum;
 DateTime endDatum;
 // ab diesem Datum anzeigen
 DateTime startDatumAnzeigen;
+// ab dieser Position anzeigen
+int arrayStart = 0;
 // die Länge des Arrays für alle Tage
 int arrayLen = 0;
 // die selektierte TableauId im Tableau-Screen
 // Ersatz für modale transformation, da im build zu spät
 int tableauId = -1;
+// Die Liste der Spieler für die Anzeige der Abwesenheiten
+List<int> spielerIdList = new List<int>();
 
 

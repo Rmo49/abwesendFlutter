@@ -5,14 +5,15 @@ import 'package:abwesend/model/spieler.dart';
 import 'package:abwesend/pages/abwesend_table.dart';
 import 'package:abwesend/model/globals.dart' as global;
 
-/// Alle Abwesenheiten anzeigen
-class AbwesendShow extends StatefulWidget {
+class SpielerShow extends StatefulWidget {
   @override
-  _AbwesendShowState createState() => _AbwesendShowState();
+  _SpielerShowState createState() => _SpielerShowState();
 }
 
-class _AbwesendShowState extends State<AbwesendShow> {
+class _SpielerShowState extends State<SpielerShow> {
   // lokale Vars
+  String _txtStart = 'lese Daten';
+  Spieler _spieler;
   List<Spieler> _spielerAll = new List<Spieler>();
 
   @override
@@ -38,6 +39,7 @@ class _AbwesendShowState extends State<AbwesendShow> {
       ),
       body: Column(
         children: <Widget>[
+          Text(_txtStart),
           AbwesendTable(
             spielerList: _spielerAll,
           ),
@@ -83,5 +85,23 @@ class _AbwesendShowState extends State<AbwesendShow> {
     } else {
       return null;
     }
+  }
+
+  /// Spieler von der DB lesen, dieser werden in json-format geliefert
+  Future readSpieler(int spielerId) async {
+    var url = "https://nomadus.ch/tca/db/readSpieler.php";
+    var response = await http.post(url, body: {
+      "dbname": global.dbname,
+      "id": spielerId.toString(),
+    });
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(response.body);
+      _spieler = Spieler.fromMap(data['spieler']);
+      _spieler.setMatches(data['matches']);
+      _spielerAll.add(_spieler);
+    } else {
+      return;
+    }
+    setState(() {});
   }
 }

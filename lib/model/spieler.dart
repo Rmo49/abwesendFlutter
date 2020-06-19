@@ -42,12 +42,14 @@ class Spieler {
 class SpielerShort {
   final String id;
   final String names;
+  bool isSelected;
 
-  SpielerShort(this.id, this.names);
+  SpielerShort(this.id, this.names, this.isSelected);
 
   SpielerShort.fromMap(Map<String, dynamic> map)
       : id = map['id'],
-        names = map['names'];
+        names = map['names'],
+        isSelected = false;
 }
 
 /// Attribute von einem Match

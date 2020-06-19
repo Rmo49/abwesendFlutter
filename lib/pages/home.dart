@@ -44,14 +44,14 @@ class _HomeState extends State<Home> {
         drawer: SideMenu(),
         body: Container(
           child: Column(children: <Widget>[
-            Text(global.dbname),
             FlatButton(
               color: Colors.orange[500],
               textColor: Colors.white,
               padding: EdgeInsets.all(10.0),
               onPressed: () {
+                global.tableauId = -1;
                 Navigator.pushNamed(context, '/spieler_select', arguments: {
-                  'spielerId' : 0,
+                'tableauId' : -1,
                 });
              },
               child: Row(children: <Widget>[
@@ -78,6 +78,7 @@ class _HomeState extends State<Home> {
               ]),
             ),
             getStartDatum(),
+            Text(global.dbname),
           ]),
         ));
   }
@@ -129,32 +130,12 @@ class _HomeState extends State<Home> {
 
   void getSelectedDatum(DateTime datum) {
     global.startDatumAnzeigen = datum;
+    Duration duration = datum.difference(global.startDatum);
+    global.arrayStart = duration.inDays;
     setState(() {
-
     });
   }
 
-  /// mit ListView
-  Widget getStartDatum1() {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 20.0),
-      height: 100.0,
-      child: ListView(scrollDirection: Axis.horizontal, children: <Widget>[
-        Container(
-          width: 30.0,
-          child: Text('11.1.'),
-        ),
-        Container(
-          width: 30.0,
-          child: Text('12.1.'),
-        ),
-        Container(
-          width: 30.0,
-          child: Text('13.1.'),
-        ),
-      ]),
-    );
-  }
 }
 
 /// Das Menu links mit der Haupt-Navigation
