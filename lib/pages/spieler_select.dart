@@ -38,8 +38,8 @@ class _SpielerSelectState extends State<SpielerSelect> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: SizedBox(
-                width: 200.0,
-                height: 40.0,
+                width: 100.0,
+                height: 50.0,
                 child: TextField(
                   onChanged: (value) {
                     filterSearchResults(value);
@@ -59,7 +59,17 @@ class _SpielerSelectState extends State<SpielerSelect> {
               padding: const EdgeInsets.all(2.0),
               child: FlatButton(
                 child: Text(
-                  selButtonText,
+                  'alle',
+//                  style: TextStyle(fontSize: 20.0),
+                ),
+                onPressed: selectAll,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(2.0),
+              child: FlatButton(
+                child: Text(
+                  'keine',
 //                  style: TextStyle(fontSize: 20.0),
                 ),
                 color: Colors.orange[200],
@@ -72,7 +82,9 @@ class _SpielerSelectState extends State<SpielerSelect> {
                 child: Text('anzeigen'),
                 color: Colors.orange[400],
                 padding: EdgeInsets.all(4.0),
-                onPressed: () { spielerAnzeigen(context); },
+                onPressed: () {
+                  spielerAnzeigen(context);
+                },
               ),
             ),
           ]),
@@ -80,14 +92,15 @@ class _SpielerSelectState extends State<SpielerSelect> {
               child: ListView.builder(
             shrinkWrap: true,
             itemCount: spielerShow == null ? 0 : spielerShow.length,
-            itemBuilder: _getListItemTile,
+            itemBuilder: _getListOfSpieler,
           )),
         ]),
       ),
     );
   }
 
-  Widget _getListItemTile(BuildContext context, int index) {
+  /// Die Liste der angezeigten Spieler
+  Widget _getListOfSpieler(BuildContext context, int index) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 2),
       color: spielerShow[index].isSelected ? Colors.orange[300] : Colors.white,
@@ -153,13 +166,12 @@ class _SpielerSelectState extends State<SpielerSelect> {
   /// index ist die position in der Liste
   void spielerAnzeigen(BuildContext context) {
     global.spielerIdList.clear();
-    spielerShow.forEach((element) {
+    spielerAlle.forEach((element) {
       if (element.isSelected) {
         global.spielerIdList.add(int.parse(element.id));
       }
     });
-    Navigator.pushNamed(context, '/abwesend_show', arguments: {
-    });
+    Navigator.pushNamed(context, '/abwesend_show', arguments: {});
   }
 
   /// Wenn ein Spieler selektiert wurde, wird diese Funkion aufgerufen.

@@ -13,12 +13,12 @@ void main() => runApp(MaterialApp(
       initialRoute: '/loading',
       routes: {
         '/home': (context) => Home(),
-        '/loading' : (context) => Loading(),
+        '/loading': (context) => Loading(),
         '/settings': (context) => Settings(),
         '/spieler_import': (context) => SpielerImport(),
-        '/tableau_select' : (context) => TableauSelect(),
-        '/spieler_select' : (context) => SpielerSelect(),
-        '/abwesend_show' : (context) => AbwesendShow(),
+        '/tableau_select': (context) => TableauSelect(),
+        '/spieler_select': (context) => SpielerSelect(),
+        '/abwesend_show': (context) => AbwesendShow(),
       },
     ));
 
@@ -30,6 +30,11 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        buttonTheme: ButtonThemeData(
+          buttonColor: Colors.orange[200],
+          shape: RoundedRectangleBorder(),
+          minWidth: 60.0,
+        ),
       ),
       home: Home(),
     );

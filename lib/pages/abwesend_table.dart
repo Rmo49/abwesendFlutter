@@ -21,34 +21,39 @@ class AbwesendTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-     return SingleChildScrollView(
+    return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      child: Table(
-        border: TableBorder.all(),
-        defaultColumnWidth: FixedColumnWidth(40.0),
-        columnWidths: {
-          0: FixedColumnWidth(60.0),
-        },
-        children: getTableRows(),
+      child: Column(
+        children: getTableList(),
       ),
     );
   }
 
   /// alle Zeilen der Tabelle anzeigen, iteration über alle Spieler
-  List<TableRow> getTableRows() {
+  List<Table> getTableList() {
+    List<Table> tableList = new List<Table>();
+    tableList.add(getTableDatum());
+    // iteration über alle Spieler
+    spielerList.forEach((element) {
+      tableList.add(getTableSpieler(element));
+    });
+    return tableList;
+  }
+
+
+  /// Tabelle mit Datum
+  Table getTableDatum() {
     List<TableRow> rowList = new List<TableRow>();
     rowList.add(getRowDatum('', global.startDatumAnzeigen));
 
-    spielerList.forEach((element) {
-      List abwesendList = element.abwesend.split(';');
-      if (abwesendList.length < global.arrayLen) {
-        global.arrayLen = abwesendList.length;
-      }
-      rowList.add(getRowAbwesend(element.vorname, abwesendList));
-      rowList.add(getRowGrafik(element, abwesendList));
-    });
-
-     return rowList;
+    return Table(
+      border: TableBorder.all(),
+      defaultColumnWidth: FixedColumnWidth(40.0),
+      columnWidths: {
+        0: FixedColumnWidth(60.0),
+      },
+      children: rowList,
+    );
   }
 
   /// Zeile Datum
@@ -66,13 +71,30 @@ class AbwesendTable extends StatelessWidget {
       list.add(
         TableCell(
             child: Container(
-          child: Text(dateFormList.format(datum)),
-          color: isWeekend(i) ? Colors.grey : Colors.white,
-        )),
+              child: Text(dateFormList.format(datum)),
+              color: isWeekend(i) ? Colors.grey : Colors.white,
+            )),
       );
       datum = datum.add(Duration(days: 1));
     }
     return list;
+  }
+
+  /// Die Tabelle eines Spielers
+  Table getTableSpieler(Spieler spieler) {
+    List abwesendList = spieler.abwesend.split(';');
+    List<TableRow> rowList = new List<TableRow>();
+    rowList.add(getRowAbwesend(spieler.vorname, abwesendList));
+    rowList.add(getRowGrafik(spieler, abwesendList));
+
+    return Table(
+      border: TableBorder.all(),
+      defaultColumnWidth: FixedColumnWidth(40.0),
+      columnWidths: {
+        0: FixedColumnWidth(60.0),
+      },
+      children: rowList,
+    );
   }
 
   /// Row mit den Abwesenheiten eines Spielers
@@ -195,10 +217,10 @@ class AbwesendTable extends StatelessWidget {
   /// Ist die Position im Array ein Weekend?
   bool isWeekend(int pos) {
     DateTime datum = global.startDatum;
-    datum =  global.startDatum.add(Duration(days: pos));
+    datum = global.startDatum.add(Duration(days: pos));
 //    for (int i = 0; i < global.arrayLen; i++) {
-      return (datum.weekday >= 6);
- //   }
+    return (datum.weekday >= 6);
+    //   }
   }
 }
 
