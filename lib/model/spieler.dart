@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:abwesend/model/match.dart';
 
 class Spieler {
   int id;
@@ -28,14 +28,6 @@ class Spieler {
       matches.add(match);
     });
   }
-
-  Spieler.fromSnapshot(DocumentSnapshot snapshot) : this.fromMap(snapshot.data);
-
-  Map<String, dynamic> toJson() =>
-      {"name": name, "vorname": vorname, "email": email};
-
-  @override
-  String toString() => "Spieler <$name: $vorname>";
 }
 
 /// Spieler kurzform, um in einer Liste anzuzeigen
@@ -50,20 +42,6 @@ class SpielerShort {
       : id = map['id'],
         names = map['names'],
         isSelected = false;
-}
-
-/// Attribute von einem Match
-class Match {
-  final int day;
-  final String time;
-  final String type;
-
-  Match(this.day, this.time, this.type);
-
-  Match.fromMap(Map<String, dynamic> map)
-      : day = int.parse(map['day']),
-        time = map['time'],
-        type = map['type'];
 }
 
 /// Attribute von einem Match zur Darstellung
