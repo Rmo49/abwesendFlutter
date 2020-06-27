@@ -13,9 +13,9 @@ class SpielerSelect extends StatefulWidget {
 class _SpielerSelectState extends State<SpielerSelect> {
   TextEditingController editingController = TextEditingController();
 
-  // Flip-Flop wenn alle selektiert
-  bool _alleSelektiert = false;
-  String selButtonText = 'alle';
+  // Steuerung des Anzeige-Buttons
+  bool _isButtonAnzeigeEnabled;
+
   List<SpielerShort> spielerAlle;
   List<SpielerShort> spielerShow = List<SpielerShort>();
 
@@ -24,6 +24,7 @@ class _SpielerSelectState extends State<SpielerSelect> {
     // wird genau einmal aufgerufen, wenn das Objekt initialisiert wird
     super.initState();
     readAllSpielerShort();
+    _isButtonAnzeigeEnabled = false;
   }
 
   @override
@@ -38,7 +39,7 @@ class _SpielerSelectState extends State<SpielerSelect> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: SizedBox(
-                width: 100.0,
+                width: 150.0,
                 height: 50.0,
                 child: TextField(
                   onChanged: (value) {
@@ -55,37 +56,33 @@ class _SpielerSelectState extends State<SpielerSelect> {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(2.0),
-              child: FlatButton(
-                child: Text(
-                  'alle',
+            ButtonBar(
+              children: [
+                FlatButton(
+                  child: Text(
+                    'alle',
 //                  style: TextStyle(fontSize: 20.0),
+                  ),
+                  color: Colors.orange[400],
+                  onPressed: selectAll,
                 ),
-                onPressed: selectAll,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(2.0),
-              child: FlatButton(
-                child: Text(
-                  'keine',
+                FlatButton(
+                  child: Text(
+                    'keine',
 //                  style: TextStyle(fontSize: 20.0),
+                  ),
+                  color: Colors.orange[400],
+                  onPressed: unselectAll,
                 ),
-                color: Colors.orange[200],
-                onPressed: selectAll,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(2.0),
-              child: FlatButton(
-                child: Text('anzeigen'),
-                color: Colors.orange[400],
-                padding: EdgeInsets.all(4.0),
-                onPressed: () {
-                  spielerAnzeigen(context);
-                },
-              ),
+                _buttonAnzeige(),
+//                FlatButton(
+//                  child: Text('anzeigen'),
+//                  color: Colors.orange[400],
+//                  onPressed: () {
+//                    spielerAnzeigen(context);
+//                  },
+//                ),
+              ],
             ),
           ]),
           Expanded(
@@ -99,6 +96,37 @@ class _SpielerSelectState extends State<SpielerSelect> {
     );
   }
 
+  /// wenn etwas selektiert, sollte aktiviert werden
+  Widget _buttonAnzeige() {
+    return new FlatButton(
+      child: Text('anzeigen'),
+      color: _isButtonAnzeigeEnabled ? Colors.orange[400] : Colors.orange[200],
+      padding: EdgeInsets.all(4.0),
+      onPressed: _anzeigePress,
+    );
+  }
+
+  /// Wenn der Button anzeige gedrückt ist
+  void _anzeigePress() {
+    if (_isButtonAnzeigeEnabled) {
+      spielerAnzeigen(context);
+    } else {
+      return null;
+    }
+    return null;
+  }
+
+  /// überprüfen, ob ein Spieler selektiert wurde
+  void _checkSelected() {
+    _isButtonAnzeigeEnabled = false;
+    for (int i = 0; i < spielerAlle.length; i++) {
+      if (spielerAlle.elementAt(i).isSelected) {
+        _isButtonAnzeigeEnabled = true;
+        break;
+      }
+    }
+  }
+
   /// Die Liste der angezeigten Spieler
   Widget _getListOfSpieler(BuildContext context, int index) {
     return Container(
@@ -106,10 +134,16 @@ class _SpielerSelectState extends State<SpielerSelect> {
       color: spielerShow[index].isSelected ? Colors.orange[300] : Colors.white,
       height: 40.0,
       child: ListTile(
-        title: Text('${spielerShow.elementAt(index).names}'),
+        title: Text(
+          '${spielerShow.elementAt(index).names}',
+          style: TextStyle(fontSize: 18.0),
+//          style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 1.2),
+        ),
+        dense: true,
         onTap: () {
           setState(() {
             spielerShow[index].isSelected = !spielerShow[index].isSelected;
+            _checkSelected();
           });
         },
         onLongPress: () {
@@ -131,35 +165,40 @@ class _SpielerSelectState extends State<SpielerSelect> {
       setState(() {
         spielerShow.clear();
         spielerShow.addAll(tempList);
+        _checkSelected();
       });
       return;
     } else {
       setState(() {
         spielerShow.clear();
         spielerShow.addAll(spielerAlle);
+        _checkSelected();
       });
     }
   }
 
-  // alle selektieren, wenn vorher bereits selektiert, dann unselect
+  // alle Spieler selektieren,
   void selectAll() {
     if (spielerShow.length > 20) {
       // TODO popup anzeigen
       return;
     }
-    if (_alleSelektiert) {
-      spielerShow.forEach((element) {
-        element.isSelected = false;
-      });
-      selButtonText = 'alle';
-    } else {
-      spielerShow.forEach((element) {
-        element.isSelected = true;
-      });
-      selButtonText = 'keine';
-    }
-    _alleSelektiert = !_alleSelektiert;
-    setState(() {});
+    spielerShow.forEach((element) {
+      element.isSelected = true;
+    });
+    setState(() {
+      _checkSelected();
+    });
+  }
+
+  /// keine selektieren
+  void unselectAll() {
+    spielerShow.forEach((element) {
+      element.isSelected = false;
+    });
+    setState(() {
+      _checkSelected();
+    });
   }
 
   /// Wenn mehrere Spieler selektiert wurden, wird diese Funkion aufgerufen.
@@ -210,8 +249,6 @@ class _SpielerSelectState extends State<SpielerSelect> {
       }
     } catch (e) {
       // Könnte sein, dass response eine Error-Message enthält
-//      LineSplitter ls = new LineSplitter();
-//      List<String> lines = ls.convert(response.body);
       setSpielerData(getSpielerMessage(e));
       // anzeigen, da build bereits ausgeführt
       setState(() {});

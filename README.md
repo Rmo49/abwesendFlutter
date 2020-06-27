@@ -3,8 +3,6 @@
 Absence of player for a tennis tournament
 
 Next:
-Spieler Filtern: anzeigen inaktiv, bis ein Spieler ausgewählt
-Auswahl Button wenn nur Grafik
 Wenn Tabelle zu gross, dann Fehler-Meldung
 
 

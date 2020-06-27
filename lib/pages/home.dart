@@ -13,7 +13,7 @@ class Home extends StatefulWidget {
 /// Der Hauptscreen
 class _HomeState extends State<Home> {
   final DateFormat dateForm = new DateFormat('d.M.yyyy');
-  final DateFormat dateFormShort = new DateFormat('d.M');
+  final DateFormat dateFormShort = new DateFormat('d.M.');
   TextEditingController txtDatumStart = TextEditingController();
 
   @override
@@ -29,81 +29,101 @@ class _HomeState extends State<Home> {
     return new Scaffold(
         appBar: AppBar(
           title: Text('Abwesend TCA'),
-          actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.more_vert),
-              tooltip: 'Setup Screens',
-              onPressed: () {
-//              Navigator.pushNamed(context, '/loading');
-              },
-            ),
-          ],
         ),
         //getActions(context)
 
-        drawer: SideMenu(),
         body: Container(
-          child: Column(children: <Widget>[
-            FlatButton(
-              color: Colors.orange[500],
-              textColor: Colors.white,
-              padding: EdgeInsets.all(10.0),
-              onPressed: () {
-                global.tableauId = -1;
-                Navigator.pushNamed(context, '/spieler_select', arguments: {
-                'tableauId' : -1,
-                });
-             },
-              child: Row(children: <Widget>[
-                Icon(Icons.person),
-                Text(
-                  '  Spieler wählen',
-                  style: TextStyle(fontSize: 20.0),
+          padding: EdgeInsets.all(4.0),
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                FlatButton(
+                  color: Colors.orange[500],
+                  textColor: Colors.white,
+                  padding: EdgeInsets.all(10.0),
+                  onPressed: () {
+                    global.tableauId = -1;
+                    Navigator.pushNamed(context, '/spieler_select', arguments: {
+                      'tableauId': -1,
+                    });
+                  },
+                  child: Row(children: <Widget>[
+                    Icon(Icons.person),
+                    Text(
+                      '  Spieler wählen',
+                      style: TextStyle(fontSize: 20.0),
+                    ),
+                  ]),
                 ),
-              ]),
-            ),
-            FlatButton(
-              color: Colors.orange[700],
-              textColor: Colors.white,
-              padding: EdgeInsets.all(10.0),
-              onPressed: () {
-                Navigator.pushNamed(context, '/tableau_select');
-              },
-              child: Row(children: <Widget>[
-                Icon(Icons.people),
-                Text(
-                  '  Tableau wählen',
-                  style: TextStyle(fontSize: 20.0),
+                FlatButton(
+                  color: Colors.orange[700],
+                  textColor: Colors.white,
+                  padding: EdgeInsets.all(10.0),
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/tableau_select');
+                  },
+                  child: Row(children: <Widget>[
+                    Icon(Icons.people),
+                    Text(
+                      '  Tableau wählen',
+                      style: TextStyle(fontSize: 20.0),
+                    ),
+                  ]),
                 ),
+                getStartDatum(),
+                Text(' '),
+                Container(
+                  color: Colors.orange[300],
+                  child: CheckboxListTile(
+                    title: Text(
+                      'nur Grafik anzeigen',
+                      style: TextStyle(fontSize: 20.0),
+                    ),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    value: global.nurGrafik,
+                    onChanged: (bool value) {
+                      setState(() {
+                        global.nurGrafik = value;
+                      });
+                    },
+                  ),
+                ),
+                Text(global.dbname),
               ]),
-            ),
-            getStartDatum(),
-            Text(global.dbname),
-          ]),
         ));
   }
 
   /// Die Wahl des Startdatums
   Widget getStartDatum() {
-    return Column(children: <Widget>[
-      Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text('Anzeige der Abwesenheiten ab: '),
-          Text( dateForm.format(global.startDatumAnzeigen)),
-        ],
-      ),
-      SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: ButtonBar(
-          mainAxisSize: MainAxisSize
-              .min, // this will take space as minimum as posible(to center)
-          buttonHeight: 25.0,
-          buttonPadding: EdgeInsets.all(2.0),
-          children: getDatumButtons(),
-        ),
-      )
-    ]);
+    return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(' '),
+          Text(
+            'Anzeige',
+            style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+          ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: ButtonBar(
+              mainAxisSize: MainAxisSize
+                  .min, // this will take space as minimum as posible(to center)
+              buttonHeight: 25.0,
+              buttonPadding: EdgeInsets.all(2.0),
+              children: getDatumButtons(),
+            ),
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('ab Datum: ', style: TextStyle(fontSize: 18.0)),
+              Text(
+                dateForm.format(global.startDatumAnzeigen),
+                style: TextStyle(fontSize: 18.0),
+              ),
+            ],
+          ),
+        ]);
   }
 
   /// Die Liste mit allen möglichen Datum
@@ -132,10 +152,8 @@ class _HomeState extends State<Home> {
     global.startDatumAnzeigen = datum;
     Duration duration = datum.difference(global.startDatum);
     global.arrayStart = duration.inDays;
-    setState(() {
-    });
+    setState(() {});
   }
-
 }
 
 /// Das Menu links mit der Haupt-Navigation

@@ -37,7 +37,11 @@ class _TableauSelectState extends State<TableauSelect> {
                 itemCount: tableauList == null ? 0 : tableauList.length,
                 itemBuilder: (context, index) {
                   return ListTile(
-                    title: Text('${tableauList.elementAt(index).bezeichnung}'),
+                    title: Text(
+                      '${tableauList.elementAt(index).bezeichnung}',
+                      style: TextStyle(fontSize: 18.0),
+                    ),
+                    dense: true,
                     onTap: () {
                       tableauSelektiert(context, index);
                     },
@@ -51,7 +55,7 @@ class _TableauSelectState extends State<TableauSelect> {
     );
   }
 
-  /// Wenn ein Spieler selektiert wurde, wird diese Funkion aufgerufen.
+  /// Wenn ein Tableau selektiert wurde, wird diese Funkion aufgerufen.
   /// index ist die position in der Liste
   void tableauSelektiert(BuildContext context, int index) {
     global.tableauId = tableauList[index].id;
@@ -80,8 +84,7 @@ class _TableauSelectState extends State<TableauSelect> {
     } catch (e) {
       print('Error:  $e');
       setState(() {
-        txtError =
-            'Keine Verbindung zu DB, Internet-Verbindung vorhanden?';
+        txtError = 'Keine Verbindung zu DB, Internet-Verbindung vorhanden?';
       });
       return;
     }

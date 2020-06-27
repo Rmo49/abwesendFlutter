@@ -22,5 +22,7 @@ int arrayLen = 0;
 int tableauId = -1;
 // Die Liste der Spieler für die Anzeige der Abwesenheiten
 List<int> spielerIdList = new List<int>();
+// wenn nur die Grafik in der Abwesend-Tabelle angezeigt werden soll
+bool nurGrafik = false;
 
 

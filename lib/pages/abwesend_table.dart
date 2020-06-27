@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:abwesend/model/spieler.dart';
+//import 'package:abwesend/model/match.dart';
 import 'package:abwesend/model/globals.dart' as global;
 
 class AbwesendTable extends StatelessWidget {
@@ -21,6 +22,7 @@ class AbwesendTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+//    double height = MediaQuery.of(context).size.height;
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Column(
@@ -84,7 +86,9 @@ class AbwesendTable extends StatelessWidget {
   Table getTableSpieler(Spieler spieler) {
     List abwesendList = spieler.abwesend.split(';');
     List<TableRow> rowList = new List<TableRow>();
-    rowList.add(getRowAbwesend(spieler.vorname, abwesendList));
+    if (!global.nurGrafik) {
+      rowList.add(getRowAbwesend(spieler.vorname, abwesendList));
+    }
     rowList.add(getRowGrafik(spieler, abwesendList));
 
     return Table(
@@ -104,11 +108,13 @@ class AbwesendTable extends StatelessWidget {
 
   List<TableCell> getCellAbwesend(String header, List abwesendList) {
     List<TableCell> list = new List<TableCell>();
-    list.add(TableCell(child: Text(header)));
+    list.add(TableCell(child: Text(header, overflow: TextOverflow.ellipsis,)));
     for (int i = global.arrayStart; i < global.arrayLen; i++) {
-      list.add(
-        TableCell(child: Text(abwesendList[i])),
-      );
+      if (i < abwesendList.length) {
+        list.add(
+          TableCell(child: Text(abwesendList[i])),
+        );
+      }
     }
     return list;
   }
@@ -120,21 +126,23 @@ class AbwesendTable extends StatelessWidget {
 
   List<TableCell> getCellGrafik(Spieler spieler, List abwesendList) {
     List<TableCell> list = new List<TableCell>();
-    list.add(TableCell(child: Text(spieler.name)));
+    list.add(TableCell(child: Text(spieler.name, overflow: TextOverflow.ellipsis,)));
     for (int i = global.arrayStart; i < global.arrayLen; i++) {
-      String abwTag = abwesendList[i];
-      double abwStart = getPosStart(abwTag, isWeekend(i));
-      double abwEnd = getPosEnd(abwTag, isWeekend(i), abwStart);
-      // matches, wenn von diesem Tag
-      List<MatchDisplay> matchDisplayList = getMatches(spieler, i);
-      MyPainter painter = MyPainter(abwStart, abwEnd, matchDisplayList);
-      list.add(
-        TableCell(
-            child: Container(
-          height: 20.0,
-          child: CustomPaint(painter: painter),
-        )),
-      );
+      if (i < abwesendList.length) {
+        String abwTag = abwesendList[i];
+        double abwStart = getPosStart(abwTag, isWeekend(i));
+        double abwEnd = getPosEnd(abwTag, isWeekend(i), abwStart);
+        // matches, wenn von diesem Tag
+        List<MatchDisplay> matchDisplayList = getMatches(spieler, i);
+        MyPainter painter = MyPainter(abwStart, abwEnd, matchDisplayList);
+        list.add(
+          TableCell(
+              child: Container(
+                height: 20.0,
+                child: CustomPaint(painter: painter),
+              )),
+        );
+      }
     }
     return list;
   }
@@ -145,7 +153,7 @@ class AbwesendTable extends StatelessWidget {
     for (int i = 0; i < spieler.matches.length; i++) {
       MatchDisplay matchDisplay;
       // wenn Spiele an diesem Tag
-      if (spieler.matches[i].day == day) {
+      if (spieler.matches.elementAt(i).day == day) {
         matchDisplay = MatchDisplay(
             getPosTime(spieler.matches[i].time, isWeekend(i)),
             spieler.matches[i].type);
