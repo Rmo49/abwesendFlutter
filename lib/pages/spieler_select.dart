@@ -35,46 +35,48 @@ class _SpielerSelectState extends State<SpielerSelect> {
       ),
       body: Container(
         child: Column(children: <Widget>[
-          Row(children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: SizedBox(
-                width: 150.0,
-                height: 50.0,
-                child: TextField(
-                  onChanged: (value) {
-                    filterSearchResults(value);
-                  },
-                  controller: editingController,
-                  decoration: InputDecoration(
-                      labelText: "Name eingeben",
-                      hintText: "Name",
-                      prefixIcon: Icon(Icons.search),
-                      border: OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.all(Radius.circular(10.0)))),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: SizedBox(
+                  width: 150.0,
+                  height: 50.0,
+                  child: TextField(
+                    onChanged: (value) {
+                      filterSearchResults(value);
+                    },
+                    controller: editingController,
+                    decoration: InputDecoration(
+                        labelText: "Name eingeben",
+                        hintText: "Name",
+                        prefixIcon: Icon(Icons.search),
+                        border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(10.0)))),
+                  ),
                 ),
               ),
-            ),
-            ButtonBar(
-              children: [
-                FlatButton(
-                  child: Text(
-                    'alle',
+              ButtonBar(
+                children: [
+                  FlatButton(
+                    child: Text(
+                      'alle',
 //                  style: TextStyle(fontSize: 20.0),
+                    ),
+                    color: Colors.orange[400],
+                    onPressed: selectAll,
                   ),
-                  color: Colors.orange[400],
-                  onPressed: selectAll,
-                ),
-                FlatButton(
-                  child: Text(
-                    'keine',
+                  FlatButton(
+                    child: Text(
+                      'keine',
 //                  style: TextStyle(fontSize: 20.0),
+                    ),
+                    color: Colors.orange[400],
+                    onPressed: unselectAll,
                   ),
-                  color: Colors.orange[400],
-                  onPressed: unselectAll,
-                ),
-                _buttonAnzeige(),
+                  _buttonAnzeige(),
 //                FlatButton(
 //                  child: Text('anzeigen'),
 //                  color: Colors.orange[400],
@@ -82,9 +84,10 @@ class _SpielerSelectState extends State<SpielerSelect> {
 //                    spielerAnzeigen(context);
 //                  },
 //                ),
-              ],
-            ),
-          ]),
+                ],
+              ),
+            ]),
+          ),
           Expanded(
               child: ListView.builder(
             shrinkWrap: true,
