@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:abwesend/model/globals.dart' as global;
@@ -37,6 +38,8 @@ class _LoadingState extends State<Loading> {
         Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
+              keyboardType: TextInputType.multiline,
+              maxLines: 3,
               controller: txtError,
             )),
       ])),
@@ -63,7 +66,7 @@ class _LoadingState extends State<Loading> {
       print('Error:  $e');
       setState(() {
         txtError.text =
-            'Keine Verbindung zu DB, Internet-Verbindutng vorhanden?';
+            'Keine Verbindung zur DB, ist eine Internet-Verbindung vorhanden?';
       });
       return;
     }
