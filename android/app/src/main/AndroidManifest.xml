@@ -9,7 +9,7 @@
     <application
         android:name="io.flutter.app.FlutterApplication"
         android:label="abwesend"
-        android:icon="@mipmap/tca_launcher">
+        android:icon="@mipmap/tca_launcher2">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
