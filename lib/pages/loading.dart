@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:abwesend/model/globals.dart' as global;
+import 'package:abwesend/model/login_storage.dart';
 
 class Loading extends StatefulWidget {
   @override
@@ -11,6 +12,8 @@ class Loading extends StatefulWidget {
 }
 
 class _LoadingState extends State<Loading> {
+  final LoginStorage loginStorage = new LoginStorage();
+
   TextEditingController txtUser = TextEditingController();
   TextEditingController txtPasswort = TextEditingController();
   TextEditingController txtError = TextEditingController();
@@ -30,38 +33,40 @@ class _LoadingState extends State<Loading> {
       ),
       body: Container(
           child: Column(children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.all(4.0),
-          child: TextField(
-            controller: txtUser,
-            decoration: InputDecoration(
-                labelText: "Benutzer Name",
-                hintText: "Vorname",
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(4.0),
-          child: TextField(
-            controller: txtPasswort,
-            decoration: InputDecoration(
-                labelText: "Passwort",
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-          ),
-        ),
+            Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: TextField(
+                controller: txtUser,
+                decoration: InputDecoration(
+                    labelText: "Benutzer Name",
+                    hintText: "Vorname",
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: TextField(
+                controller: txtPasswort,
+                obscureText: true,
+                decoration: InputDecoration(
+                    labelText: "Passwort",
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+              ),
+            ),
+
         RaisedButton(
-          onPressed: () {
-            login();
-          },
           child: const Text('Login', style: TextStyle(fontSize: 16)),
+          onPressed: () {
+            loginCheck();
+          },
         ),
         Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               keyboardType: TextInputType.multiline,
-              maxLines: 3,
+              maxLines: 2,
               controller: txtError,
               readOnly: true,
             )),
@@ -69,8 +74,8 @@ class _LoadingState extends State<Loading> {
     );
   }
 
-  // zuerst login
-  Future login() async {
+  /// login service zum prüfen, ob erlaubt, wenn ja, ruft home auf.
+  Future loginCheck() async {
     var url = "https://nomadus.ch/tca/db/userCheck.php";
     try {
       final response = await http.post(url, body: {
@@ -80,8 +85,8 @@ class _LoadingState extends State<Loading> {
 
       if (response.statusCode == 200) {
         if (response.body.startsWith("OK")) {
+          saveLogin(txtUser.text, txtPasswort.text);
           // weitermachen
-//          setState(() {});
           Navigator.pushReplacementNamed(context, '/home');
         }
         if (response.body.startsWith("NOK")) {
@@ -105,14 +110,32 @@ class _LoadingState extends State<Loading> {
     }
   }
 
+  /// Die Login-Infos in File speichern
+  void saveLogin(String user, String password) {
+    String userPw = user + ";" + password;
+    loginStorage.writeLogin(userPw);
+  }
+
   /// Die Basisdaten lesen, zuerst Name der DB, dann Config
   Future readBasicData() async {
+    readLogin();
     await readDbName();
     readConfig();
   }
 
+  Future readLogin() async {
+    var result = await loginStorage.readLogin();
+    String userPw = result;
+    List<String> login = userPw.split(";");
+    if (login.length == 2) {
+      txtUser.text = login.elementAt(0);
+      txtPasswort.text = login.elementAt(1);
+    }
+    setState(() {
+    });
+  }
 
-  // den Namen der Datenbank
+  /// den Namen der Datenbank
   Future readDbName() async {
     var url = "https://nomadus.ch/tca/db/readDbName.php";
     try {
@@ -137,7 +160,6 @@ class _LoadingState extends State<Loading> {
     }
   }
 
-
   /// Die Configuration von DB lesen, die Daten werden in json-format geliefert
   Future readConfig() async {
     var url = "https://nomadus.ch/tca/db/readConfig.php";
@@ -148,8 +170,7 @@ class _LoadingState extends State<Loading> {
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
         setConfigData(data);
-      }
-      else {
+      } else {
         setState(() {
           txtError.text = response.body;
         });
