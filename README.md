@@ -3,6 +3,9 @@
 Absence of player for a tennis tournament
 
 Next:
+dart userId + passwort speichern
+Flutter: Passwort ändern
+Flutter: DB-Name ändern
 Wenn Tabelle zu gross, dann Fehler-Meldung
 
 

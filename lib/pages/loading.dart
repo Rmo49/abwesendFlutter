@@ -11,56 +11,89 @@ class Loading extends StatefulWidget {
 }
 
 class _LoadingState extends State<Loading> {
-  TextEditingController txtMessage = TextEditingController();
+  TextEditingController txtUser = TextEditingController();
+  TextEditingController txtPasswort = TextEditingController();
   TextEditingController txtError = TextEditingController();
 
   @override
   void initState() {
     // wird genau einmal aufgerufen, wenn das Objekt initialisiert wird
     super.initState();
-    txtMessage.text = 'Lese Config von DB';
-    readConfig();
+    readBasicData();
   }
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text("Abwesend TCA"),
+        title: new Text("TCA CM abwesend"),
       ),
       body: Container(
           child: Column(children: <Widget>[
         Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: txtMessage,
-            )),
+          padding: const EdgeInsets.all(4.0),
+          child: TextField(
+            controller: txtUser,
+            decoration: InputDecoration(
+                labelText: "Benutzer Name",
+                hintText: "Vorname",
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: TextField(
+            controller: txtPasswort,
+            decoration: InputDecoration(
+                labelText: "Passwort",
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+          ),
+        ),
+        RaisedButton(
+          onPressed: () {
+            login();
+          },
+          child: const Text('Login', style: TextStyle(fontSize: 16)),
+        ),
         Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               keyboardType: TextInputType.multiline,
               maxLines: 3,
               controller: txtError,
+              readOnly: true,
             )),
       ])),
     );
   }
 
-  /// Die Configuration von DB lesen, die Daten werden in json-format geliefert
-  Future readConfig() async {
-    var url = "https://nomadus.ch/tca/db/readConfig.php";
+  // zuerst login
+  Future login() async {
+    var url = "https://nomadus.ch/tca/db/userCheck.php";
     try {
       final response = await http.post(url, body: {
-        "dbname": global.dbname,
+        "userName": txtUser.text.trim(),
+        "passwort": txtPasswort.text.trim(),
       });
-      if (response.statusCode != 200) {
-        setState(() {
-          txtError.text = response.body;
-        });
-        return;
+
+      if (response.statusCode == 200) {
+        if (response.body.startsWith("OK")) {
+          // weitermachen
+//          setState(() {});
+          Navigator.pushReplacementNamed(context, '/home');
+        }
+        if (response.body.startsWith("NOK")) {
+          setState(() {
+            txtError.text = "falscher Benutzer Name oder Passwort";
+          });
+          return;
+        }
       } else {
-        final Map<String, dynamic> data = json.decode(response.body);
-        setConfigData(data);
+        setState(() {
+          txtError.text = "falscher Benutzer Name oder Passwort";
+        });
       }
     } catch (e) {
       print('Error:  $e');
@@ -70,9 +103,66 @@ class _LoadingState extends State<Loading> {
       });
       return;
     }
+  }
 
-    setState(() {});
-    Navigator.pushReplacementNamed(context, '/home');
+  /// Die Basisdaten lesen, zuerst Name der DB, dann Config
+  Future readBasicData() async {
+    await readDbName();
+    readConfig();
+  }
+
+
+  // den Namen der Datenbank
+  Future readDbName() async {
+    var url = "https://nomadus.ch/tca/db/readDbName.php";
+    try {
+      final response = await http.post(url, body: {
+        "passwort": "tcaDb4123",
+      });
+      if (response.statusCode == 200) {
+        global.dbname = response.body.trim();
+      } else {
+        setState(() {
+          txtError.text = response.body;
+        });
+        return;
+      }
+    } catch (e) {
+      print('Error:  $e');
+      setState(() {
+        txtError.text =
+            'Keine Verbindung zur DB, ist eine Internet-Verbindung vorhanden?';
+      });
+      return;
+    }
+  }
+
+
+  /// Die Configuration von DB lesen, die Daten werden in json-format geliefert
+  Future readConfig() async {
+    var url = "https://nomadus.ch/tca/db/readConfig.php";
+    try {
+      final response = await http.post(url, body: {
+        "dbname": global.dbname,
+      });
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        setConfigData(data);
+      }
+      else {
+        setState(() {
+          txtError.text = response.body;
+        });
+        return;
+      }
+    } catch (e) {
+      print('Error:  $e');
+      setState(() {
+        txtError.text =
+            'Keine Verbindung zur DB, ist eine Internet-Verbindung vorhanden?';
+      });
+      return;
+    }
   }
 
   /// Die Config-Daten setzen
@@ -83,6 +173,7 @@ class _LoadingState extends State<Loading> {
     global.startDatumAnzeigen = global.startDatum;
     global.endDatum = global.dateFormDb.parse(data['turnier.endDatum']);
     Duration diff = global.endDatum.difference(global.startDatum);
+    // die Anzahl tage für die Anzeige
     global.arrayLen = diff.inDays + 1;
     global.arrayLen < 0
         ? global.arrayLen = -global.arrayLen
