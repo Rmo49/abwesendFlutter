@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:abwesend/model/globals.dart' as global;
+import 'package:abwesend/model/login_storage.dart';
+import 'package:abwesend/model/menu_settings.dart';
+import 'package:abwesend/pages/app_info.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -15,6 +19,8 @@ class _HomeState extends State<Home> {
   final DateFormat dateForm = new DateFormat('d.M.yyyy');
   final DateFormat dateFormShort = new DateFormat('d.M.');
   TextEditingController txtDatumStart = TextEditingController();
+  TextEditingController txtPasswort = TextEditingController();
+  TextEditingController txtError = TextEditingController();
 
   @override
   void initState() {
@@ -29,8 +35,19 @@ class _HomeState extends State<Home> {
     return new Scaffold(
         appBar: AppBar(
           title: Text('Abwesend TCA'),
+          actions: <Widget>[
+            PopupMenuButton<String>(
+                onSelected: menuAction,
+                itemBuilder: (BuildContext context) {
+                  return MenuSetting.menu.map((String wahl) {
+                    return PopupMenuItem<String>(
+                      value: wahl,
+                      child: Text(wahl),
+                    );
+                  }).toList();
+                }),
+          ],
         ),
-        //getActions(context)
 
         body: Container(
           padding: EdgeInsets.all(4.0),
@@ -88,9 +105,118 @@ class _HomeState extends State<Home> {
                     },
                   ),
                 ),
-                Text(global.dbname),
               ]),
         ));
+  }
+
+  /// Die Wahl des Menues
+  void menuAction(String wahl) {
+    if(wahl == MenuSetting.PasswordChange) {
+      _passwortAendern();
+    }
+    if(wahl == MenuSetting.Infos) {
+      AppInfo appInfo = new AppInfo();
+      appInfo.showAppInfo(context);
+    }
+    if(wahl == MenuSetting.Logount) {
+      print ("Logout");
+    }
+  }
+
+  /// Das Menu an der rechten Seite
+  void _passwortAendern() {
+    txtPasswort.text = "";
+    txtError.text = "";
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return SimpleDialog(
+          title: new Text("Passwort ändern"),
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                controller: txtPasswort,
+                decoration: InputDecoration(
+                    labelText: "Neues Passwort eingeben",
+                    hintText: "Passwort",
+                    prefixIcon: Icon(Icons.search),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: RaisedButton(
+                child: Text("Speichern"),
+                onPressed: _setNewPassword,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                keyboardType: TextInputType.multiline,
+                maxLines: 2,
+                controller: txtError,
+                readOnly: true,
+              ),
+            ),
+            // usually buttons at the bottom of the dialog
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: RaisedButton(
+                child: new Text("Close"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _setNewPassword() async {
+    if (txtPasswort.text.length < 4) {
+      txtError.text = "mindestens 4 Zeichen";
+      return;
+    }
+    _savePassword();
+  }
+
+  void _savePassword() async {
+    var url = "https://nomadus.ch/tca/db/userSet.php";
+    try {
+      final response = await http.post(url, body: {
+        "userName": global.userName,
+        "passwort": txtPasswort.text,
+      });
+
+      if (response.statusCode == 200) {
+        if (response.body.startsWith("OK")) {
+          LoginStorage loginStorage = new LoginStorage();
+          loginStorage.saveLoginToFile(global.userName, txtPasswort.text);
+          txtError.text = "neues Passwort gespeichert";
+        }
+        if (response.body.startsWith("NOK")) {
+          txtError.text = "kann Passwort nicht ändern";
+          return;
+        }
+      } else {
+        String fehler = response.body;
+        txtError.text = "konnte Passwort nicht speichern \n $fehler";
+      }
+    } catch (e) {
+      print('Error:  $e');
+      setState(() {
+        txtError.text =
+            'Keine Verbindung zur DB, ist eine Internet-Verbindung vorhanden?';
+      });
+      return;
+    }
   }
 
   /// Die Wahl des Startdatums
@@ -156,47 +282,3 @@ class _HomeState extends State<Home> {
   }
 }
 
-/// Das Menu links mit der Haupt-Navigation
-class SideMenu extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: <Widget>[
-          DrawerHeader(
-            child: Text(
-              'Side menu',
-              style: TextStyle(color: Colors.white, fontSize: 25),
-            ),
-            decoration: BoxDecoration(
-              color: Colors.blue,
-            ),
-          ),
-          ListTile(
-            leading: Icon(Icons.person),
-            title: Text('Spieler'),
-            onTap: () => {Navigator.pushNamed(context, '/spieler_select')},
-          ),
-          ListTile(
-            leading: Icon(Icons.group),
-            title: Text('Tableau'),
-            // onTap: () => {Navigator.of(context).pop()},
-          ),
-          ListTile(
-            leading: Icon(Icons.settings),
-            title: Text('Settings'),
-            onTap: () {
-              Navigator.pushNamed(context, '/settings');
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.exit_to_app),
-            title: Text('Logout'),
-            //onTap: () => {Navigator.of(context).pop()},
-          ),
-        ],
-      ),
-    );
-  }
-}

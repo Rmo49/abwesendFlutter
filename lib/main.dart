@@ -8,7 +8,7 @@ import 'package:abwesend/pages/settings.dart';
 import 'package:abwesend/pages/spieler_select.dart';
 
 void main() => runApp(MaterialApp(
-      // diese Widget wird zuerst geladen
+      // dieses Widget wird zuerst geladen
       initialRoute: '/loading',
       routes: {
         '/home': (context) => Home(),

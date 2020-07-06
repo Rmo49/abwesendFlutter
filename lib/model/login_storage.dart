@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:io';
-
 import 'package:path_provider/path_provider.dart';
 
+import 'package:abwesend/model/globals.dart' as global;
+
+
 class LoginStorage {
+
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
 
@@ -35,5 +38,12 @@ class LoginStorage {
 
     // Write the file
     return file.writeAsString(userPassword);
+  }
+
+  /// Die Login-Infos in File speichern
+  void saveLoginToFile(String user, String password) {
+    String userPw = user + ";" + password;
+    writeLogin(userPw);
+    global.userName = user;
   }
 }

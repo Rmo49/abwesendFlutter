@@ -33,29 +33,28 @@ class _LoadingState extends State<Loading> {
       ),
       body: Container(
           child: Column(children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: TextField(
-                controller: txtUser,
-                decoration: InputDecoration(
-                    labelText: "Benutzer Name",
-                    hintText: "Vorname",
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: TextField(
-                controller: txtPasswort,
-                obscureText: true,
-                decoration: InputDecoration(
-                    labelText: "Passwort",
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-              ),
-            ),
-
+        Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: TextField(
+            controller: txtUser,
+            decoration: InputDecoration(
+                labelText: "Benutzer Name",
+                hintText: "Vorname",
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: TextField(
+            controller: txtPasswort,
+            obscureText: true,
+            decoration: InputDecoration(
+                labelText: "Passwort",
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+          ),
+        ),
         RaisedButton(
           child: const Text('Login', style: TextStyle(fontSize: 16)),
           onPressed: () {
@@ -85,7 +84,7 @@ class _LoadingState extends State<Loading> {
 
       if (response.statusCode == 200) {
         if (response.body.startsWith("OK")) {
-          saveLogin(txtUser.text, txtPasswort.text);
+          _saveLoginToFile(txtUser.text.trim(), txtPasswort.text.trim());
           // weitermachen
           Navigator.pushReplacementNamed(context, '/home');
         }
@@ -111,9 +110,10 @@ class _LoadingState extends State<Loading> {
   }
 
   /// Die Login-Infos in File speichern
-  void saveLogin(String user, String password) {
-    String userPw = user + ";" + password;
-    loginStorage.writeLogin(userPw);
+  void _saveLoginToFile(String user, String password) {
+    LoginStorage loginStorage = new LoginStorage();
+    loginStorage.saveLoginToFile(user, password);
+    global.userName = user;
   }
 
   /// Die Basisdaten lesen, zuerst Name der DB, dann Config
@@ -131,8 +131,7 @@ class _LoadingState extends State<Loading> {
       txtUser.text = login.elementAt(0);
       txtPasswort.text = login.elementAt(1);
     }
-    setState(() {
-    });
+    setState(() {});
   }
 
   /// den Namen der Datenbank

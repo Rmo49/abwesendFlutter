@@ -4,8 +4,10 @@ import 'package:intl/intl.dart';
 // das Datenformat in der DB
 final DateFormat dateFormDb = new DateFormat('yyyy-MM-dd');
 
+// der Name des Benutzers
+String userName;
 // der Name der DB
-String dbname = "tennis2";
+String dbname;
 // Die Werte der Config
 Map<String, dynamic> configData;
 // Start- und Edd-Datum des Turniers
