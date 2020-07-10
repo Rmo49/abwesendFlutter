@@ -4,7 +4,6 @@ Absence of player for a tennis tournament
 
 Next:
 Restart Button, wenn "Keine Verbindung zu DB"
-Expand bei spieler_select
 
 Wenn Tabelle zu gross, dann Fehler-Meldung
 

@@ -18,6 +18,8 @@ class _LoadingState extends State<Loading> {
   TextEditingController txtPasswort = TextEditingController();
   TextEditingController txtError = TextEditingController();
 
+  bool _showPassword = false;
+
   @override
   void initState() {
     // wird genau einmal aufgerufen, wenn das Objekt initialisiert wird
@@ -48,11 +50,22 @@ class _LoadingState extends State<Loading> {
           padding: const EdgeInsets.all(4.0),
           child: TextField(
             controller: txtPasswort,
-            obscureText: true,
             decoration: InputDecoration(
                 labelText: "Passwort",
                 border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                    borderRadius: BorderRadius.all(Radius.circular(10.0))),
+             suffixIcon: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _showPassword = !_showPassword;
+                  });
+                },
+                child: Icon(
+                  _showPassword ? Icons.visibility : Icons.visibility_off,
+                ),
+              ),
+            ),
+            obscureText: !_showPassword,
           ),
         ),
         RaisedButton(
