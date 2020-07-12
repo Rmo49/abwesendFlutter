@@ -35,54 +35,54 @@ class _LoadingState extends State<Loading> {
       ),
       body: Container(
           child: Column(children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.all(4.0),
-          child: TextField(
-            controller: txtUser,
-            decoration: InputDecoration(
-                labelText: "Benutzer Name",
-                hintText: "Vorname",
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(4.0),
-          child: TextField(
-            controller: txtPasswort,
-            decoration: InputDecoration(
-                labelText: "Passwort",
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0))),
-             suffixIcon: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _showPassword = !_showPassword;
-                  });
-                },
-                child: Icon(
-                  _showPassword ? Icons.visibility : Icons.visibility_off,
-                ),
+            Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: TextField(
+                controller: txtUser,
+                decoration: InputDecoration(
+                    labelText: "Benutzer Name",
+                    hintText: "Vorname",
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)))),
               ),
             ),
-            obscureText: !_showPassword,
-          ),
-        ),
-        RaisedButton(
-          child: const Text('Login', style: TextStyle(fontSize: 16)),
-          onPressed: () {
-            loginCheck();
-          },
-        ),
-        Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              keyboardType: TextInputType.multiline,
-              maxLines: 2,
-              controller: txtError,
-              readOnly: true,
-            )),
-      ])),
+            Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: TextField(
+                controller: txtPasswort,
+                decoration: InputDecoration(
+                  labelText: "Passwort",
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                  suffixIcon: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _showPassword = !_showPassword;
+                      });
+                    },
+                    child: Icon(
+                      _showPassword ? Icons.visibility : Icons.visibility_off,
+                    ),
+                  ),
+                ),
+                obscureText: !_showPassword,
+              ),
+            ),
+            RaisedButton(
+              child: const Text('Login', style: TextStyle(fontSize: 16)),
+              onPressed: () {
+                loginCheck();
+              },
+            ),
+            Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  keyboardType: TextInputType.multiline,
+                  maxLines: 2,
+                  controller: txtError,
+                  readOnly: true,
+                )),
+          ])),
     );
   }
 
@@ -113,10 +113,10 @@ class _LoadingState extends State<Loading> {
         });
       }
     } catch (e) {
-      print('Error:  $e');
+      print('Fehler:  $e');
       setState(() {
         txtError.text =
-            'Keine Verbindung zur DB, ist eine Internet-Verbindung vorhanden?';
+        'Kann Login-Check nicht ausführen, ist eine Internet-Verbindung vorhanden? \n $e';
       });
       return;
     }
@@ -133,7 +133,9 @@ class _LoadingState extends State<Loading> {
   Future readBasicData() async {
     readLogin();
     await readDbName();
-    readConfig();
+    if (global.dbname.length > 2) {
+      readConfig();
+    }
   }
 
   Future readLogin() async {
@@ -163,10 +165,10 @@ class _LoadingState extends State<Loading> {
         return;
       }
     } catch (e) {
-      print('Error:  $e');
+      print('Fehler:  $e');
       setState(() {
         txtError.text =
-            'Keine Verbindung zur DB, ist eine Internet-Verbindung vorhanden?';
+        'Kann DB-Name nicht lesen, ist eine Internet-Verbindung vorhanden? \n $e';
       });
       return;
     }
@@ -189,10 +191,10 @@ class _LoadingState extends State<Loading> {
         return;
       }
     } catch (e) {
-      print('Error:  $e');
+      print('Fehler:  $e');
       setState(() {
         txtError.text =
-            'Keine Verbindung zur DB, ist eine Internet-Verbindung vorhanden?';
+        'Kann Config nicht lesen, ist eine Internet-Verbindung vorhanden? \n $e';
       });
       return;
     }
