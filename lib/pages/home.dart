@@ -167,7 +167,7 @@ class _HomeState extends State<Home> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: RaisedButton(
-                child: new Text("Close"),
+                child: new Text("Schliessen"),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
