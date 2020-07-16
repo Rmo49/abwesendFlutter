@@ -2,17 +2,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:abwesend/model/spieler.dart';
-//import 'package:abwesend/model/match.dart';
 import 'package:abwesend/model/globals.dart' as global;
 
+/// zeigt die Tabelle Abwesend aller Spieler
 class AbwesendTable extends StatelessWidget {
 //  Intl.defaultLocal = 'de_DE';
+  final double sizeName = 65.0;
   final DateFormat dateFormList = new DateFormat('d.M.');
-
-  final int weekBegin = 17;
-  final int weekEnd = 22;
-  final int weekendBegin = 10;
-  final int weekendEnd = 17;
+  final BorderSide borderSide = BorderSide(color: Colors.blueGrey, width: 1.0, style: BorderStyle.solid);
 
 //  final Spieler spieler;
   final List<Spieler> spielerList;
@@ -49,10 +46,10 @@ class AbwesendTable extends StatelessWidget {
     rowList.add(getRowDatum('', global.startDatumAnzeigen));
 
     return Table(
-      border: TableBorder.all(),
+      border: TableBorder(bottom: borderSide, verticalInside: borderSide),
       defaultColumnWidth: FixedColumnWidth(40.0),
       columnWidths: {
-        0: FixedColumnWidth(60.0),
+        0: FixedColumnWidth(sizeName),
       },
       children: rowList,
     );
@@ -92,10 +89,10 @@ class AbwesendTable extends StatelessWidget {
     rowList.add(getRowGrafik(spieler, abwesendList));
 
     return Table(
-      border: TableBorder.all(),
+      border: TableBorder(bottom: borderSide, verticalInside: borderSide),
       defaultColumnWidth: FixedColumnWidth(40.0),
       columnWidths: {
-        0: FixedColumnWidth(60.0),
+        0: FixedColumnWidth(sizeName),
       },
       children: rowList,
     );
@@ -173,9 +170,16 @@ class AbwesendTable extends StatelessWidget {
     if (abwTag.startsWith('-') || (abwTag.compareTo('0') == 0)) {
       return 0;
     }
-    String zeit = abwTag.substring(0, abwTag.indexOf('-'));
-    if (zeit.length > 0) {
-      return getPosTime(zeit, isWeekend);
+    int posEnd = abwTag.indexOf('-');
+    if (posEnd > 0) {
+      String zeit = abwTag.substring(0, posEnd);
+      if (zeit.length > 0) {
+        return getPosTime(zeit, isWeekend);
+      }
+    }
+    else {
+      // kein '-' gefunden
+      return 0;
     }
     return 1.0;
   }
@@ -185,10 +189,10 @@ class AbwesendTable extends StatelessWidget {
   double getPosEnd(String abwTag, bool isWeekend, double posStart) {
     if (posStart >= 1) {
       // nichts zeichnen
-      return 1;
+      return 1.0;
     }
     if (abwTag.compareTo('0') == 0) {
-      return 1;
+      return 1.0;
     }
     if (abwTag.startsWith('-')) {
       String zeit = abwTag.substring(abwTag.indexOf('-') + 1, abwTag.length);
@@ -215,9 +219,9 @@ class AbwesendTable extends StatelessWidget {
     double pos = 1.0;
     int zeit = int.parse(time);
     if (isWeekend) {
-      pos = (zeit - weekendBegin) / (weekendEnd - weekendBegin);
+      pos = (zeit - global.zeitWeekendBegin) / (global.zeitWeekendEnd - global.zeitWeekendBegin);
     } else {
-      pos = (zeit - weekBegin) / (weekEnd - weekBegin);
+      pos = (zeit - global.zeitWeekBegin) / (global.zeitWeekEnd - global.zeitWeekBegin);
     }
     return pos;
   }

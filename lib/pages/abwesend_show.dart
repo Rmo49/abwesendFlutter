@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:percent_indicator/linear_percent_indicator.dart';
+
 import 'package:abwesend/model/spieler.dart';
 import 'package:abwesend/pages/abwesend_table.dart';
 import 'package:abwesend/model/globals.dart' as global;
@@ -14,6 +16,8 @@ class AbwesendShow extends StatefulWidget {
 class _AbwesendShowState extends State<AbwesendShow> {
   // lokale Vars
   List<Spieler> _spielerAll = new List<Spieler>();
+  double _percent = 0;
+  String _percentString = "";
 
   @override
   void initState() {
@@ -23,11 +27,23 @@ class _AbwesendShowState extends State<AbwesendShow> {
 
   @override
   Widget build(BuildContext context) {
-
     if (_spielerAll.length <= 0) {
       return new Scaffold(
         appBar: new AppBar(
           title: Text("lese Spieler von DB"),
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: LinearPercentIndicator(
+              width: 250.0,
+              lineHeight: 25.0,
+              progressColor: Colors.orangeAccent,
+              percent: _percent,
+              center: Text("lese Spieler $_percentString %"),
+              animation: false,
+            ),
+          ),
         ),
       );
     }
@@ -57,6 +73,11 @@ class _AbwesendShowState extends State<AbwesendShow> {
   Future<List<Spieler>> getSpielerList(List<int> spielerIdList) async {
     List<Spieler> spielerAll = new List<Spieler>();
     for (int i = 0; i < spielerIdList.length; i++) {
+      setState(() {
+        _percent = i / spielerIdList.length;
+        _percentString = (_percent * 100).toStringAsFixed(0);
+
+      });
       var spieler = await readElement(spielerIdList.elementAt(i));
       spielerAll.add(spieler);
     }
@@ -72,7 +93,9 @@ class _AbwesendShowState extends State<AbwesendShow> {
   Future<Spieler> readElement(int id) async {
     var url = "https://nomadus.ch/tca/db/readSpieler.php";
     var response = await http.post(url, body: {
-      "dbname": global.dbname,
+      "dbname": global.dbName,
+      "dbuser": global.dbUser,
+      "dbpass": global.dbPass,
       "id": id.toString(),
     });
     if (response.statusCode == 200) {

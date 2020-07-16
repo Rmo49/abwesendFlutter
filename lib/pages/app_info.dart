@@ -1,16 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:package_info/package_info.dart';
 import 'package:abwesend/model/globals.dart' as global;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class AppInfo {
-  void showAppInfo(BuildContext context) async {
-    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  String appName = "";
+  String packageName = "";
+  String version = "";
+  String buildNumber = "";
+  String datenbank = global.dbName;
 
-    String appName = packageInfo.appName;
-    String packageName = packageInfo.packageName;
-    String version = packageInfo.version;
-    String buildNumber = packageInfo.buildNumber;
-    String datenbank = global.dbname;
+
+  void showAppInfo(BuildContext context) async {
+    if (kIsWeb) {
+      version = "1.9.0";
+      buildNumber = "9";
+    }
+    else {
+      PackageInfo packageInfo = await PackageInfo.fromPlatform();
+
+      appName = packageInfo.appName;
+      packageName = packageInfo.packageName;
+      version = packageInfo.version;
+      buildNumber = packageInfo.buildNumber;
+      datenbank = global.dbName;
+    }
 
     showDialog(
         context: context,

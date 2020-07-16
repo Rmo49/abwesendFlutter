@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:device_info/device_info.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 import 'package:abwesend/model/globals.dart' as global;
 import 'package:abwesend/model/login_storage.dart';
 
@@ -88,11 +91,28 @@ class _LoadingState extends State<Loading> {
 
   /// login service zum prüfen, ob erlaubt, wenn ja, ruft home auf.
   Future loginCheck() async {
+    if ( (txtUser.text.length < 1) || (txtPasswort.text.length < 1) ) {
+      setState(() {
+        txtError.text = "Du musst schon etwas eingeben";
+      });
+      return;
+    }
+    String brand = "Browser";
+    String device = "";
+    if (! kIsWeb) {
+      AndroidDeviceInfo androidInfo = await DeviceInfoPlugin().androidInfo;
+      brand = androidInfo.brand;
+      device = androidInfo.device;
+    }
+
     var url = "https://nomadus.ch/tca/db/userCheck.php";
     try {
       final response = await http.post(url, body: {
         "userName": txtUser.text.trim(),
         "passwort": txtPasswort.text.trim(),
+        "brand": brand,
+        "device": device,
+        "dbpass": global.dbPass,
       });
 
       if (response.statusCode == 200) {
@@ -133,7 +153,7 @@ class _LoadingState extends State<Loading> {
   Future readBasicData() async {
     readLogin();
     await readDbName();
-    if (global.dbname.length > 2) {
+    if (global.dbName.length > 0) {
       readConfig();
     }
   }
@@ -149,7 +169,7 @@ class _LoadingState extends State<Loading> {
     setState(() {});
   }
 
-  /// den Namen der Datenbank
+  /// den Namen der Datenbank und DB-User lesen
   Future readDbName() async {
     var url = "https://nomadus.ch/tca/db/readDbName.php";
     try {
@@ -157,7 +177,12 @@ class _LoadingState extends State<Loading> {
         "passwort": "tcaDb4123",
       });
       if (response.statusCode == 200) {
-        global.dbname = response.body.trim();
+        String antwort = response.body;
+        List<String> dbInfo = antwort.split(',');
+        if (dbInfo.length >=2) {
+          global.dbName = dbInfo[0];
+          global.dbUser = dbInfo[1];
+        }
       } else {
         setState(() {
           txtError.text = response.body;
@@ -179,7 +204,9 @@ class _LoadingState extends State<Loading> {
     var url = "https://nomadus.ch/tca/db/readConfig.php";
     try {
       final response = await http.post(url, body: {
-        "dbname": global.dbname,
+        "dbname": global.dbName,
+        "dbuser": global.dbUser,
+        "dbpass": global.dbPass,
       });
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
@@ -216,5 +243,10 @@ class _LoadingState extends State<Loading> {
     if (global.arrayLen > 21) {
       global.arrayLen = 21;
     }
+
+    global.zeitWeekBegin = double.parse(data['week.beginZeit']);
+    global.zeitWeekEnd = double.parse(data['week.endZeit']);
+    global.zeitWeekendBegin = double.parse(data['weekend.beginZeit']);
+    global.zeitWeekendEnd = double.parse(data['weekend.endZeit']);
   }
 }

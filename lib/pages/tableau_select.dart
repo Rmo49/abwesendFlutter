@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:abwesend/model/globals.dart' as global;
 import 'package:abwesend/model/tableau.dart';
 
+/// Die Liste mit allen Tableau, eines kann dann selektiert werden.
 class TableauSelect extends StatefulWidget {
   @override
   _TableauSelectState createState() => _TableauSelectState();
@@ -69,7 +70,9 @@ class _TableauSelectState extends State<TableauSelect> {
     var url = "https://nomadus.ch/tca/db/readTableau.php";
     try {
       final response = await http.post(url, body: {
-        "dbname": global.dbname,
+        "dbname": global.dbName,
+        "dbuser": global.dbUser,
+        "dbpass": global.dbPass,
       });
       if (response.statusCode == 200) {
         List tableauFromDb = json.decode(response.body);

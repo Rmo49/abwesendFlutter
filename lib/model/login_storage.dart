@@ -4,7 +4,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'package:abwesend/model/globals.dart' as global;
 
-
+/// Die Login-Daten lokal speichern
 class LoginStorage {
 
   Future<String> get _localPath async {

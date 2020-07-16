@@ -6,8 +6,12 @@ final DateFormat dateFormDb = new DateFormat('yyyy-MM-dd');
 
 // der Name des Benutzers
 String userName;
-// der Name der DB
-String dbname;
+// der Name der DB, wird von loading gelesen
+String dbName;
+// der DB-User, muss bei der DB gesetzt sein
+String dbUser;
+// das DB-Passwort ist immer gleich
+String dbPass = "Php.4123";
 // Die Werte der Config
 Map<String, dynamic> configData;
 // Start- und Edd-Datum des Turniers
@@ -26,5 +30,10 @@ int tableauId = -1;
 List<int> spielerIdList = new List<int>();
 // wenn nur die Grafik in der Abwesend-Tabelle angezeigt werden soll
 bool nurGrafik = false;
+// Anfang und End-Zeiten für die Anzeige
+double zeitWeekBegin = 17;
+double zeitWeekEnd = 22;
+double zeitWeekendBegin = 10;
+double zeitWeekendEnd = 17;
 
 

@@ -235,7 +235,9 @@ class _SpielerSelectState extends State<SpielerSelect> {
     }
     try {
       final response = await http.post(url, body: {
-        "dbname": global.dbname,
+        "dbname": global.dbName,
+        "dbuser": global.dbUser,
+        "dbpass": global.dbPass,
         "tableauId": global.tableauId.toString(),
       });
       if (response.statusCode == 200) {
