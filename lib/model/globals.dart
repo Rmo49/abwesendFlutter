@@ -31,9 +31,8 @@ List<int> spielerIdList = new List<int>();
 // wenn nur die Grafik in der Abwesend-Tabelle angezeigt werden soll
 bool nurGrafik = false;
 // Anfang und End-Zeiten für die Anzeige
-double zeitWeekBegin = 17;
-double zeitWeekEnd = 22;
-double zeitWeekendBegin = 10;
-double zeitWeekendEnd = 17;
-
+double zeitWeekBegin = 17.0;
+double zeitWeekEnd = 22.0;
+double zeitWeekendBegin = 10.0;
+double zeitWeekendEnd = 17.0;
 

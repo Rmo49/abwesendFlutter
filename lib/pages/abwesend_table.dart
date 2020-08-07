@@ -151,8 +151,12 @@ class AbwesendTable extends StatelessWidget {
       MatchDisplay matchDisplay;
       // wenn Spiele an diesem Tag
       if (spieler.matches.elementAt(i).day == day) {
-        matchDisplay = MatchDisplay(
-            getPosTime(spieler.matches[i].time, isWeekend(i)),
+        double pos = getPosTime(spieler.matches[i].time, isWeekend(day));
+        if (pos >= 0.8) {
+          pos = 0.8;
+          }
+         matchDisplay = MatchDisplay(
+            pos,
             spieler.matches[i].type);
         matchDispalyList.add(matchDisplay);
       }
@@ -184,7 +188,7 @@ class AbwesendTable extends StatelessWidget {
     return 1.0;
   }
 
-  /// Berechnet die Start Position, von 0..1 innerhalb der Zeitspannen
+  /// Berechnet die End Position, von 0..1 innerhalb der Zeitspannen
   /// von Start-Zeit und Ende
   double getPosEnd(String abwTag, bool isWeekend, double posStart) {
     if (posStart >= 1) {
@@ -222,6 +226,9 @@ class AbwesendTable extends StatelessWidget {
       pos = (zeit - global.zeitWeekendBegin) / (global.zeitWeekendEnd - global.zeitWeekendBegin);
     } else {
       pos = (zeit - global.zeitWeekBegin) / (global.zeitWeekEnd - global.zeitWeekBegin);
+    }
+    if (pos < 0) {
+      pos = 0.0;
     }
     return pos;
   }
