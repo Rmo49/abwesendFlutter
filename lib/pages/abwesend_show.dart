@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:percent_indicator/linear_percent_indicator.dart';
 
+import 'package:abwesend/model/local_storage.dart';
 import 'package:abwesend/model/spieler.dart';
 import 'package:abwesend/pages/abwesend_table.dart';
 import 'package:abwesend/model/globals.dart' as global;
@@ -91,7 +92,8 @@ class _AbwesendShowState extends State<AbwesendShow> {
   }
 
   Future<Spieler> readElement(int id) async {
-    var url = "https://nomadus.ch/tca/db/readSpieler.php";
+    LocalStorage localStorage = LocalStorage();
+    var url = localStorage.webAdress + "/readSpieler.php";
     var response = await http.post(url, body: {
       "dbname": global.dbName,
       "dbuser": global.dbUser,

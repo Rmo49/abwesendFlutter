@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:abwesend/model/local_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:abwesend/model/globals.dart' as global;
@@ -67,7 +68,7 @@ class _TableauSelectState extends State<TableauSelect> {
 
   /// Alle Spieler von der DB lesen, diese werden in json-format geliefert
   Future readAllTableau() async {
-    var url = "https://nomadus.ch/tca/db/readTableau.php";
+    var url = LocalStorage().webAdress + "/readTableau.php";
     try {
       final response = await http.post(url, body: {
         "dbname": global.dbName,

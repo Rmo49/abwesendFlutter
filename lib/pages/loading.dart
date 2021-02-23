@@ -7,7 +7,7 @@ import 'package:device_info/device_info.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'package:abwesend/model/globals.dart' as global;
-import 'package:abwesend/model/login_storage.dart';
+import 'package:abwesend/model/local_storage.dart';
 
 class Loading extends StatefulWidget {
   @override
@@ -15,19 +15,22 @@ class Loading extends StatefulWidget {
 }
 
 class _LoadingState extends State<Loading> {
-  final LoginStorage loginStorage = new LoginStorage();
+  final LocalStorage localStorage = LocalStorage();
 
+  TextEditingController txtUrl = TextEditingController();
+  TextEditingController txtDbPw = TextEditingController();
   TextEditingController txtUser = TextEditingController();
-  TextEditingController txtPasswort = TextEditingController();
+  TextEditingController txtUserPw = TextEditingController();
   TextEditingController txtError = TextEditingController();
 
-  bool _showPassword = false;
+  bool _showDbPw = false;
+  bool _showUserPw = false;
 
   @override
   void initState() {
     // wird genau einmal aufgerufen, wenn das Objekt initialisiert wird
     super.initState();
-    readBasicData();
+    _readBasicData();
   }
 
   @override
@@ -38,60 +41,208 @@ class _LoadingState extends State<Loading> {
       ),
       body: Container(
           child: Column(children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: TextField(
-                controller: txtUser,
-                decoration: InputDecoration(
-                    labelText: "Benutzer Name",
-                    hintText: "Vorname",
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: TextField(
-                controller: txtPasswort,
-                decoration: InputDecoration(
-                  labelText: "Passwort",
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(2.0),
+            child: TextField(
+              controller: txtUrl,
+              decoration: InputDecoration(
+                  labelText: "Verbindung",
+                  hintText: "http://",
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                  suffixIcon: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _showPassword = !_showPassword;
-                      });
-                    },
-                    child: Icon(
-                      _showPassword ? Icons.visibility : Icons.visibility_off,
+                      borderRadius: BorderRadius.all(Radius.circular(5.0)))),
+            ),
+          ),
+        ),
+        Expanded(
+          child: RaisedButton(
+            child:
+                const Text('Verbindung testen', style: TextStyle(fontSize: 16)),
+            onPressed: () {
+              _connectTest();
+            },
+          ),
+        ),
+        Expanded(
+          child: Container(
+            child: Row(children: <Widget>[
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(2.0),
+                  child: TextField(
+                    controller: txtDbPw,
+                    decoration: InputDecoration(
+                      labelText: "DB Passwort",
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(5.0))),
+                      suffixIcon: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _showDbPw = !_showDbPw;
+                          });
+                        },
+                        child: Icon(
+                          _showDbPw ? Icons.visibility : Icons.visibility_off,
+                        ),
+                      ),
                     ),
+                    obscureText: !_showDbPw,
                   ),
                 ),
-                obscureText: !_showPassword,
               ),
-            ),
-            RaisedButton(
-              child: const Text('Login', style: TextStyle(fontSize: 16)),
-              onPressed: () {
-                loginCheck();
-              },
-            ),
-            Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  keyboardType: TextInputType.multiline,
-                  maxLines: 2,
-                  controller: txtError,
-                  readOnly: true,
-                )),
-          ])),
+              Expanded(
+                child: RaisedButton(
+                  child:
+                      const Text('DB testen', style: TextStyle(fontSize: 16)),
+                  onPressed: () {
+                    _dbTest();
+                  },
+                ),
+              ),
+            ]),
+          ),
+        ),
+        Expanded(
+          child: Container(
+            child: Row(children: <Widget>[
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(2.0),
+                  child: TextField(
+                    controller: txtUser,
+                    decoration: InputDecoration(
+                        labelText: "Benutzer Name",
+                        hintText: "Vorname",
+                        border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(5.0)))),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(2.0),
+                  child: TextField(
+                    controller: txtUserPw,
+                    decoration: InputDecoration(
+                      labelText: "Benutzer Passwort",
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(5.0))),
+                      suffixIcon: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _showUserPw = !_showUserPw;
+                          });
+                        },
+                        child: Icon(
+                          _showUserPw ? Icons.visibility : Icons.visibility_off,
+                        ),
+                      ),
+                    ),
+                    obscureText: !_showUserPw,
+                  ),
+                ),
+              ),
+            ]),
+          ),
+        ),
+        Expanded(
+          child: RaisedButton(
+            child: const Text('Login', style: TextStyle(fontSize: 16)),
+            onPressed: () {
+              _loginCheck();
+            },
+          ),
+        ),
+        Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              keyboardType: TextInputType.multiline,
+              maxLines: 4,
+              controller: txtError,
+              readOnly: true,
+            )),
+      ])),
     );
   }
 
+  /// Verbindung zu PHP-funktionen testen
+  Future _connectTest() async {
+    if (txtUrl.text.length < 10) {
+      setState(() {
+        txtError.text = "Eine Web-Adresse eingeben";
+      });
+    } else {
+      localStorage.webAdress = txtUrl.text.trim();
+      localStorage.saveLocalData();
+
+      var url = localStorage.webAdress + "/testConnect.php";
+      // var url = "https://nomadus.ch/tca/db/testConnect.php";
+      try {
+        final response = await http.post(url);
+        if (response.statusCode == 200) {
+          setState(() {
+            txtError.text = response.body;
+          });
+        } else {
+          setState(() {
+            txtError.text = "Konnte keine Verbindung aufbauen, Status: " +
+                response.statusCode.toString();
+          });
+        }
+      } catch (e) {
+        print('Fehler:  $e');
+        setState(() {
+          txtError.text = 'Ist eine Internet-Verbindung vorhanden? \n $e';
+        });
+      }
+    }
+  }
+
+  /// DB-Verbindung testen, ist passwort ok?
+  Future _dbTest() async {
+    if (txtDbPw.text.length < 3) {
+      setState(() {
+        txtError.text = "DB-Passwort zu kurz";
+      });
+      return;
+    } else {
+      await _readDbName();
+      localStorage.dbPw = txtDbPw.text.trim();
+      localStorage.saveLocalData();
+      global.dbPass = localStorage.dbPw;
+
+      var url = localStorage.webAdress + "/testDbPost.php";
+      try {
+        var response = await http.post(url, body: {
+          "dbname": global.dbName,
+          "dbuser": global.dbUser,
+          "dbpass": global.dbPass,
+        });
+
+
+        if (response.statusCode == 200) {
+          setState(() {
+            txtError.text = response.body;
+          });
+        } else {
+          setState(() {
+            txtError.text = "Passwort falsch, Status: " +
+                response.statusCode.toString();
+          });
+        }
+      } catch (e) {
+        print('Fehler:  $e');
+        setState(() {
+          txtError.text = 'Ist eine Internet-Verbindung vorhanden? \n $e';
+        });
+      }
+    }
+  }
+
   /// login service zum prüfen, ob erlaubt, wenn ja, ruft home auf.
-  Future loginCheck() async {
-    if ( (txtUser.text.length < 1) || (txtPasswort.text.length < 1) ) {
+  Future _loginCheck() async {
+    if ((txtUser.text.length < 1) || (txtUserPw.text.length < 1)) {
       setState(() {
         txtError.text = "Du musst schon etwas eingeben";
       });
@@ -99,17 +250,17 @@ class _LoadingState extends State<Loading> {
     }
     String brand = "Browser";
     String device = "";
-    if (! kIsWeb) {
+    if (!kIsWeb) {
       AndroidDeviceInfo androidInfo = await DeviceInfoPlugin().androidInfo;
       brand = androidInfo.brand;
       device = androidInfo.device;
     }
 
-    var url = "https://nomadus.ch/tca/db/userCheck.php";
+    var url = localStorage.webAdress + "/userCheck.php";
     try {
       final response = await http.post(url, body: {
         "userName": txtUser.text.trim(),
-        "passwort": txtPasswort.text.trim(),
+        "passwort": txtUserPw.text.trim(),
         "brand": brand,
         "device": device,
         "dbpass": global.dbPass,
@@ -117,8 +268,14 @@ class _LoadingState extends State<Loading> {
 
       if (response.statusCode == 200) {
         if (response.body.startsWith("OK")) {
-          _saveLoginToFile(txtUser.text.trim(), txtPasswort.text.trim());
+          localStorage.userName = txtUser.text.trim();
+          localStorage.userPw = txtUserPw.text.trim();
+          localStorage.saveLocalData();
+          global.userName = localStorage.userName;
           // weitermachen
+          if (global.dbName.length > 0) {
+            await readConfig();
+          }
           Navigator.pushReplacementNamed(context, '/home');
         }
         if (response.body.startsWith("NOK")) {
@@ -136,42 +293,34 @@ class _LoadingState extends State<Loading> {
       print('Fehler:  $e');
       setState(() {
         txtError.text =
-        'Kann Login-Check nicht ausführen, ist eine Internet-Verbindung vorhanden? \n $e';
+            'Kann Login-Check nicht ausführen, ist eine Internet-Verbindung vorhanden? \n $e';
       });
       return;
     }
   }
 
-  /// Die Login-Infos in File speichern
-  void _saveLoginToFile(String user, String password) {
-    LoginStorage loginStorage = new LoginStorage();
-    loginStorage.saveLoginToFile(user, password);
-    global.userName = user;
-  }
-
   /// Die Basisdaten lesen, zuerst Name der DB, dann Config
-  Future readBasicData() async {
-    readLogin();
-    await readDbName();
-    if (global.dbName.length > 0) {
-      readConfig();
-    }
+  Future _readBasicData() async {
+    await _readLocalData();
+    await _readDbName();
   }
 
-  Future readLogin() async {
-    var result = await loginStorage.readLogin();
-    String userPw = result;
-    List<String> login = userPw.split(";");
-    if (login.length == 2) {
-      txtUser.text = login.elementAt(0);
-      txtPasswort.text = login.elementAt(1);
+  _readLocalData() async {
+    LocalStorage ls = LocalStorage();
+    String error = await ls.readLocalData();
+    txtUrl.text = localStorage.webAdress;
+    txtDbPw.text = localStorage.dbPw;
+    txtUser.text = localStorage.userName;
+    txtUserPw.text = localStorage.userPw;
+    if (error.length > 0) {
+      txtError.text = error;
     }
     setState(() {});
   }
 
-  /// den Namen der Datenbank und DB-User lesen
-  Future readDbName() async {
-    var url = "https://nomadus.ch/tca/db/readDbName.php";
+  /// den Namen der Datenbank und DB-User lesen von Text-file auf Server
+  Future _readDbName() async {
+    var url = localStorage.webAdress + "/readDbName.php";
     try {
       final response = await http.post(url, body: {
         "passwort": "tcaDb4123",
@@ -179,9 +328,10 @@ class _LoadingState extends State<Loading> {
       if (response.statusCode == 200) {
         String antwort = response.body;
         List<String> dbInfo = antwort.split(',');
-        if (dbInfo.length >=2) {
+        if (dbInfo.length >= 2) {
           global.dbName = dbInfo[0];
           global.dbUser = dbInfo[1];
+          // TODO: global.dbPort auch noch variable impl.
         }
       } else {
         setState(() {
@@ -193,7 +343,7 @@ class _LoadingState extends State<Loading> {
       print('Fehler:  $e');
       setState(() {
         txtError.text =
-        'Kann DB-Name nicht lesen, ist eine Internet-Verbindung vorhanden? \n $e';
+            'Kann DB-Name nicht lesen, ist eine Internet-Verbindung vorhanden? \n $e';
       });
       return;
     }
@@ -201,7 +351,8 @@ class _LoadingState extends State<Loading> {
 
   /// Die Configuration von DB lesen, die Daten werden in json-format geliefert
   Future readConfig() async {
-    var url = "https://nomadus.ch/tca/db/readConfig.php";
+    var url = localStorage.webAdress + "/readConfig.php";
+
     try {
       final response = await http.post(url, body: {
         "dbname": global.dbName,
@@ -221,7 +372,7 @@ class _LoadingState extends State<Loading> {
       print('Fehler:  $e');
       setState(() {
         txtError.text =
-        'Kann Config nicht lesen, ist eine Internet-Verbindung vorhanden? \n $e';
+            'Kann Config nicht lesen, ist eine Internet-Verbindung vorhanden? \n $e';
       });
       return;
     }

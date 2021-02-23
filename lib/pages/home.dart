@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:abwesend/model/globals.dart' as global;
-import 'package:abwesend/model/login_storage.dart';
+import 'package:abwesend/model/local_storage.dart';
 import 'package:abwesend/model/menu_settings.dart';
 import 'package:abwesend/pages/app_info.dart';
 
@@ -48,7 +48,6 @@ class _HomeState extends State<Home> {
                 }),
           ],
         ),
-
         body: Container(
           padding: EdgeInsets.all(4.0),
           child: Column(
@@ -111,15 +110,15 @@ class _HomeState extends State<Home> {
 
   /// Die Wahl des Menues
   void menuAction(String wahl) {
-    if(wahl == MenuSetting.PasswordChange) {
+    if (wahl == MenuSetting.PasswordChange) {
       _passwortAendern();
     }
-    if(wahl == MenuSetting.Infos) {
+    if (wahl == MenuSetting.Infos) {
       AppInfo appInfo = new AppInfo();
       appInfo.showAppInfo(context);
     }
-    if(wahl == MenuSetting.Logount) {
-      print ("Logout");
+    if (wahl == MenuSetting.Logount) {
+      print("Logout");
     }
   }
 
@@ -188,7 +187,8 @@ class _HomeState extends State<Home> {
   }
 
   void _savePassword() async {
-    var url = "https://nomadus.ch/tca/db/userSet.php";
+    LocalStorage localStorage = LocalStorage();
+    var url = localStorage.webAdress + "/userSet.php";
     try {
       final response = await http.post(url, body: {
         "userName": global.userName,
@@ -197,8 +197,8 @@ class _HomeState extends State<Home> {
 
       if (response.statusCode == 200) {
         if (response.body.startsWith("OK")) {
-          LoginStorage loginStorage = new LoginStorage();
-          loginStorage.saveLoginToFile(global.userName, txtPasswort.text);
+          localStorage.userPw = txtPasswort.text;
+          localStorage.saveLocalData();
           txtError.text = "neues Passwort gespeichert";
         }
         if (response.body.startsWith("NOK")) {
@@ -281,4 +281,3 @@ class _HomeState extends State<Home> {
     setState(() {});
   }
 }
-

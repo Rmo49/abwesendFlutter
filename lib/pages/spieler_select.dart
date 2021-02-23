@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:abwesend/model/local_storage.dart';
 import 'package:abwesend/model/spieler.dart';
 import 'package:abwesend/model/globals.dart' as global;
 
@@ -229,9 +230,9 @@ class _SpielerSelectState extends State<SpielerSelect> {
   Future readAllSpielerShort() async {
     var url = '';
     if (global.tableauId < 0)
-      url = "https://nomadus.ch/tca/db/readSpielerAll.php";
+      url = LocalStorage().webAdress + "/readSpielerAll.php";
     else {
-      url = "https://nomadus.ch/tca/db/readTableauSpieler.php";
+      url = LocalStorage().webAdress + "/readTableauSpieler.php";
     }
     try {
       final response = await http.post(url, body: {
