@@ -71,22 +71,8 @@ class _HomeState extends State<Home> {
                     ),
                   ]),
                 ),
-                FlatButton(
-                  color: Colors.orange[700],
-                  textColor: Colors.white,
-                  padding: EdgeInsets.all(10.0),
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/tableau_select');
-                  },
-                  child: Row(children: <Widget>[
-                    Icon(Icons.people),
-                    Text(
-                      '  Tableau wählen',
-                      style: TextStyle(fontSize: 20.0),
-                    ),
-                  ]),
-                ),
-                getStartDatum(),
+
+                showStartDatum(),
                 Text(' '),
                 Container(
                   color: Colors.orange[300],
@@ -118,7 +104,7 @@ class _HomeState extends State<Home> {
       appInfo.showAppInfo(context);
     }
     if (wahl == MenuSetting.Logount) {
-      print("Logout");
+      Navigator.pushReplacementNamed(context, '/loading');
     }
   }
 
@@ -220,7 +206,7 @@ class _HomeState extends State<Home> {
   }
 
   /// Die Wahl des Startdatums
-  Widget getStartDatum() {
+  Widget showStartDatum() {
     return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
