@@ -1,0 +1,9 @@
+Neue Menusteuerung oben, statt blauer Balken
+Abwesenheiten eintragen
+Spieler verwalten
+Tableau verwalten
+Spiele einlesen mit sep. Java App
+Mail versenden
+Config verwalten
+
+Spieler einlesen

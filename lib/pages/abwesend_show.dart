@@ -51,7 +51,7 @@ class _AbwesendShowState extends State<AbwesendShow> {
 
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text("Spieler anzeigen"),
+        title: new Text("Abwesenheiten anzeigen"),
       ),
       body: Column(
         children: <Widget>[

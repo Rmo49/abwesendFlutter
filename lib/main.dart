@@ -5,7 +5,9 @@ import 'package:abwesend/pages/loading.dart';
 import 'package:abwesend/pages/home.dart';
 import 'package:abwesend/pages/settings_old.dart';
 import 'package:abwesend/pages/spieler_select.dart';
-import 'package:abwesend/pages/spieler_select.dart';
+import 'package:abwesend/pages/spieler_admin.dart';
+import 'package:abwesend/pages/tableau_verwalten.dart';
+import 'package:abwesend/pages/abwesend_edit.dart';
 
 void main() => runApp(MaterialApp(
       // dieses Widget wird zuerst geladen
@@ -16,6 +18,9 @@ void main() => runApp(MaterialApp(
         '/settings': (context) => Settings(),
         '/spieler_select': (context) => SpielerSelect(),
         '/abwesend_show': (context) => AbwesendShow(),
+        '/abwesend_edit': (context) => AbwesendEdit(),
+        '/spieler_admin': (context) => SpielerAdmin(),
+        '/tableau_verwalten': (context) => TableauVerwalten(),
       },
     ));
 

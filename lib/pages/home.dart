@@ -33,65 +33,122 @@ class _HomeState extends State<Home> {
     // This method is rerun every time setState is called
 
     return new Scaffold(
-        appBar: AppBar(
-          title: Text('Abwesend TCA'),
-          actions: <Widget>[
-            PopupMenuButton<String>(
-                onSelected: menuAction,
-                itemBuilder: (BuildContext context) {
-                  return MenuSetting.menu.map((String wahl) {
-                    return PopupMenuItem<String>(
-                      value: wahl,
-                      child: Text(wahl),
-                    );
-                  }).toList();
-                }),
-          ],
+      appBar: AppBar(
+        title: Text('Abwesend TCA'),
+        leading: Builder(
+          builder: (BuildContext context) {
+            return IconButton(
+              icon: const Icon(Icons.menu),
+              onPressed: () {
+                // ruft scheinbar drawer: Drawer (weiter unten) auf.
+                Scaffold.of(context).openDrawer();
+              },
+              tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+            );
+          },
         ),
-        body: Container(
-          padding: EdgeInsets.all(4.0),
-          child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                FlatButton(
-                  color: Colors.orange[500],
-                  textColor: Colors.white,
-                  padding: EdgeInsets.all(10.0),
-                  onPressed: () {
-                    global.tableauId = -1;
-                    Navigator.pushNamed(context, '/spieler_select', arguments: {
-                      'tableauId': -1,
+        actions: <Widget>[
+          PopupMenuButton<String>(
+              onSelected: menuAction,
+              itemBuilder: (BuildContext context) {
+                return MenuSetting.menu.map((String wahl) {
+                  return PopupMenuItem<String>(
+                    value: wahl,
+                    child: Text(wahl),
+                  );
+                }).toList();
+              }),
+        ],
+      ),
+
+      body: Container(
+        padding: EdgeInsets.all(4.0),
+        child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              FlatButton(
+                color: Colors.orange[500],
+                textColor: Colors.white,
+                padding: EdgeInsets.all(10.0),
+                onPressed: () {
+                  global.tableauId = -1;
+                  Navigator.pushNamed(context, '/spieler_select', arguments: {
+                    'tableauId': -1,
+                  });
+                },
+                child: Row(children: <Widget>[
+                  Icon(Icons.person_search),
+                  Text(
+                    '  Abwesenheiten anzeigen, ändern',
+                    style: TextStyle(fontSize: 20.0),
+                  ),
+                ]),
+              ),
+              showStartDatum(),
+              Text(' '),
+              Container(
+                color: Colors.orange[300],
+                child: CheckboxListTile(
+                  title: Text(
+                    'nur Grafik anzeigen',
+                    style: TextStyle(fontSize: 20.0),
+                  ),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  value: global.nurGrafik,
+                  onChanged: (bool value) {
+                    setState(() {
+                      global.nurGrafik = value;
                     });
                   },
-                  child: Row(children: <Widget>[
-                    Icon(Icons.person),
-                    Text(
-                      '  Spieler wählen',
-                      style: TextStyle(fontSize: 20.0),
-                    ),
-                  ]),
                 ),
+              ),
+              Container(
+                margin: EdgeInsets.only(top: 30),
+              ),
+            ]),
+      ),
 
-                showStartDatum(),
-                Text(' '),
-                Container(
-                  color: Colors.orange[300],
-                  child: CheckboxListTile(
-                    title: Text(
-                      'nur Grafik anzeigen',
-                      style: TextStyle(fontSize: 20.0),
-                    ),
-                    controlAffinity: ListTileControlAffinity.leading,
-                    value: global.nurGrafik,
-                    onChanged: (bool value) {
-                      setState(() {
-                        global.nurGrafik = value;
-                      });
-                    },
-                  ),
+      // das Menü auf der linken Seite
+      drawer: Drawer(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              margin: EdgeInsets.only(top: 30),
+            ),
+            const Text('This is the Drawer'),
+            FlatButton(
+              color: Colors.orange[500],
+              textColor: Colors.white,
+              padding: EdgeInsets.all(10.0),
+              onPressed: () {
+                Navigator.pushNamed(context, '/tableau_verwalten', arguments: {
+                  'tableauId': -1,
+                });
+              },
+              child: Row(children: <Widget>[
+                Icon(Icons.person_add),
+                Text(
+                  '  Tableau verwalten',
+                  style: TextStyle(fontSize: 20.0),
                 ),
               ]),
-        ));
+            ),
+            ElevatedButton(
+              onPressed: _closeDrawer,
+              child: const Text('Close Drawer'),
+            ),
+          ],
+        ),
+      ),
+      // Disable opening the drawer with a swipe gesture.
+      drawerEnableOpenDragGesture: false,
+    );
+  }
+
+  void _closeDrawer() {
+    Navigator.of(context).pop();
   }
 
   /// Die Wahl des Menues
