@@ -1,9 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:percent_indicator/linear_percent_indicator.dart';
 
-import 'package:abwesend/model/local_storage.dart';
 import 'package:abwesend/model/spieler.dart';
 import 'package:abwesend/pages/abwesend_table.dart';
 import 'package:abwesend/model/globals.dart' as global;
@@ -16,7 +13,7 @@ class AbwesendShow extends StatefulWidget {
 
 class _AbwesendShowState extends State<AbwesendShow> {
   // lokale Vars
-  List<Spieler> _spielerAll = new List<Spieler>();
+  List<Spieler> _spielerList = new List<Spieler>();
   double _percent = 0;
   String _percentString = "";
 
@@ -28,7 +25,7 @@ class _AbwesendShowState extends State<AbwesendShow> {
 
   @override
   Widget build(BuildContext context) {
-    if (_spielerAll.length <= 0) {
+    if (_spielerList.length <= 0) {
       return new Scaffold(
         appBar: new AppBar(
           title: Text("lese Spieler von DB"),
@@ -56,7 +53,7 @@ class _AbwesendShowState extends State<AbwesendShow> {
       body: Column(
         children: <Widget>[
           AbwesendTable(
-            spielerList: _spielerAll,
+            spielerList: _spielerList,
           ),
         ],
       ),
@@ -67,46 +64,29 @@ class _AbwesendShowState extends State<AbwesendShow> {
 
   /// Spieler von der DB lesen, dieser werden in json-format geliefert
   Future readAllSpieler(List<int> spielerIdList) async {
-    List<Spieler> spielerAll = await getSpielerList(spielerIdList);
-    doSetState(spielerAll);
+    List<Spieler> spielerAllDb = await getSpielerList(spielerIdList);
+    doSetState(spielerAllDb);
   }
 
   Future<List<Spieler>> getSpielerList(List<int> spielerIdList) async {
-    List<Spieler> spielerAll = new List<Spieler>();
+    List<Spieler> spielerListDb = new List<Spieler>();
     for (int i = 0; i < spielerIdList.length; i++) {
       setState(() {
         _percent = i / spielerIdList.length;
         _percentString = (_percent * 100).toStringAsFixed(0);
 
       });
-      var spieler = await readElement(spielerIdList.elementAt(i));
-      spielerAll.add(spieler);
+
+      var spieler = await Spieler.readSpieler(spielerIdList.elementAt(i));
+      spielerListDb.add(spieler);
     }
-    return spielerAll;
+    return spielerListDb;
   }
 
-  void doSetState(List<Spieler> spielerAll) {
+  void doSetState(List<Spieler> spielerAllDb) {
     setState(() {
-      _spielerAll = spielerAll;
+      _spielerList = spielerAllDb;
     });
   }
 
-  Future<Spieler> readElement(int id) async {
-    LocalStorage localStorage = LocalStorage();
-    var url = localStorage.webAdress + "/readSpieler.php";
-    var response = await http.post(url, body: {
-      "dbname": global.dbName,
-      "dbuser": global.dbUser,
-      "dbpass": global.dbPass,
-      "id": id.toString(),
-    });
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> data = json.decode(response.body);
-      Spieler spieler = Spieler.fromMap(data['spieler']);
-      spieler.setMatches(data['matches']);
-      return spieler;
-    } else {
-      return null;
-    }
-  }
 }

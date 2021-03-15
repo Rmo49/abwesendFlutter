@@ -1,9 +1,29 @@
-Neue Menusteuerung oben, statt blauer Balken
-Abwesenheiten eintragen
-Spieler verwalten
+Next: home_popup testen,
+
+Fehler: Anzeigen ab, wird nicht übernommen
+Login mit Anzeige was geladen wird
+
+Spieler ändern, mit Form
+
+Direkt nach Loin Spieler wählen anzeigen
+
+Einstell-Werte lokal speichern, Anzeige ab, nur Grafik
+
 Tableau verwalten
-Spiele einlesen mit sep. Java App
-Mail versenden
 Config verwalten
 
-Spieler einlesen
+Design anschauen mit Theme
+für Orientation siehe: Flutter > Cookbook > Design / UI based on orientation
+Check Start wenn keine Internet Verbindung, wie kann ich das anzeigen?
+
+Spiele einlesen mit sep. Java App
+Mail versenden
+
+
+Einstellungen Test:
+http://192.168.0.129:8081/db
+Php.4123
+ruedi, tca4
+
+Local Data:
+/data/user/0/ch.nomadus.abwesend/app_flutter

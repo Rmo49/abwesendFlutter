@@ -7,19 +7,19 @@ class Tableau {
   int id;
   final String bezeichnung;
   final String position;
+  bool isSelected;
 
   Tableau(this.id, this.bezeichnung, this.position);
 
   Tableau.fromMap(Map<String, dynamic> map)
       : id = int.parse(map['id']),
         bezeichnung = map['bezeichnung'],
-        position = map['position'];
-
+        position = map['position'],
+        isSelected = false;
 }
 
 // Die Liste alller Tabelaux
 class TableauList {
-
   List<Tableau> allTableau;
 
   /// Alle Tableau von der DB lesen, diese werden in json-format geliefert

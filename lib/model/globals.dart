@@ -11,7 +11,7 @@ String dbName;
 // der DB-User, muss bei der DB gesetzt sein
 String dbUser;
 // das DB-Passwort ist immer gleich
-String dbPass = "Php.4123";
+String dbPass;
 // Die Werte der Config
 Map<String, dynamic> configData;
 // Start- und Edd-Datum des Turniers
@@ -21,7 +21,7 @@ DateTime endDatum;
 DateTime startDatumAnzeigen;
 // ab dieser Position anzeigen
 int arrayStart = 0;
-// die Länge des Arrays für alle Tage
+// die max. Länge des Arrays für alle Tage
 int arrayLen = 0;
 // die selektierte TableauId im Tableau-Screen
 // Ersatz für modale transformation, da im build zu spät

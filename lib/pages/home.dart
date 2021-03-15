@@ -1,9 +1,10 @@
+import 'package:abwesend/model/spieler.dart';
+import 'package:abwesend/model/tableau.dart';
+import 'package:abwesend/pages/home_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:http/http.dart' as http;
 
 import 'package:abwesend/model/globals.dart' as global;
-import 'package:abwesend/model/local_storage.dart';
 import 'package:abwesend/model/menu_settings.dart';
 import 'package:abwesend/pages/app_info.dart';
 
@@ -16,17 +17,54 @@ class Home extends StatefulWidget {
 
 /// Der Hauptscreen
 class _HomeState extends State<Home> {
+
   final DateFormat dateForm = new DateFormat('d.M.yyyy');
   final DateFormat dateFormShort = new DateFormat('d.M.');
   TextEditingController txtDatumStart = TextEditingController();
   TextEditingController txtPasswort = TextEditingController();
   TextEditingController txtError = TextEditingController();
 
+  TextEditingController txtNameSuchen = TextEditingController();
+
+  HomeDrawer homeDrawer = new HomeDrawer();
+
+  // Tableau in der selektionsliste
+  TableauList tableauList;
+  List<Tableau> _allTableau;
+  List<DropdownMenuItem<Tableau>> _dropdownTableauItems;
+  Tableau _selectedTableau;
+
+  // Spieler Listen
+  SpielerList spielerList = SpielerList();
+  // alle Spieler, wird einmal eingelesen, für reset, wenn alle anzeigen
+  List<SpielerShort> _spielerAlle;
+  // Spieler eines Tableau
+  List<SpielerShort> _spielerTableau;
+  // Die angezeigte Liste der Spieler
+  List<SpielerShort> _spielerShow = List<SpielerShort>();
+
   @override
   void initState() {
     super.initState();
     txtDatumStart.text = dateForm.format(global.startDatum);
+    _initData();
   }
+
+  /// Die Spieler- und Tableau-Daten lesen von der DB
+  void _initData() async {
+    // Spieler Date
+    _spielerAlle = await spielerList.readAllSpielerShort();
+    setState(() {
+      _spielerShow = _spielerAlle;
+    });
+    // Tableau Daten lesen
+    tableauList = new TableauList();
+    _allTableau = await tableauList.readAllTableau();
+    setState(() {
+      _buildDropDownMenuItems(_allTableau);
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +73,7 @@ class _HomeState extends State<Home> {
     return new Scaffold(
       appBar: AppBar(
         title: Text('Abwesend TCA'),
+        // das Menu links
         leading: Builder(
           builder: (BuildContext context) {
             return IconButton(
@@ -48,114 +87,118 @@ class _HomeState extends State<Home> {
           },
         ),
         actions: <Widget>[
-          PopupMenuButton<String>(
-              onSelected: menuAction,
-              itemBuilder: (BuildContext context) {
-                return MenuSetting.menu.map((String wahl) {
-                  return PopupMenuItem<String>(
-                    value: wahl,
-                    child: Text(wahl),
-                  );
-                }).toList();
-              }),
+          IconButton(
+            icon: const Icon(Icons.article_outlined),
+            iconSize: 30.0,
+            tooltip: 'Abwesenheiten anzeigen',
+            onPressed: () {
+              abwesendAnzeigen(context);
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.add_chart),
+            iconSize: 30.0,
+            tooltip: 'Abwesenheiten eintragen',
+            onPressed: () {
+              abwesendAendern(context);
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.person_add),
+            iconSize: 30.0,
+            tooltip: 'Spieler verwalten',
+            onPressed: () {
+              spielerAdmin(context);
+            },
+          ),
         ],
       ),
 
       body: Container(
-        padding: EdgeInsets.all(4.0),
-        child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              FlatButton(
-                color: Colors.orange[500],
-                textColor: Colors.white,
-                padding: EdgeInsets.all(10.0),
-                onPressed: () {
-                  global.tableauId = -1;
-                  Navigator.pushNamed(context, '/spieler_select', arguments: {
-                    'tableauId': -1,
-                  });
-                },
-                child: Row(children: <Widget>[
-                  Icon(Icons.person_search),
-                  Text(
-                    '  Abwesenheiten anzeigen, ändern',
-                    style: TextStyle(fontSize: 20.0),
-                  ),
-                ]),
-              ),
-              showStartDatum(),
-              Text(' '),
-              Container(
-                color: Colors.orange[300],
-                child: CheckboxListTile(
-                  title: Text(
-                    'nur Grafik anzeigen',
-                    style: TextStyle(fontSize: 20.0),
-                  ),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  value: global.nurGrafik,
-                  onChanged: (bool value) {
-                    setState(() {
-                      global.nurGrafik = value;
-                    });
+        child: Column(children: <Widget>[
+          // _tableauDropDown();
+          Row(
+            children: [
+              Text("Tableau: "),
+              DropdownButton<Tableau>(
+                  value: _selectedTableau,
+                  items: _dropdownTableauItems,
+                  onChanged: (value) {
+                    _selectedTableau = value;
+                    _readSpielerTableau(value.id);
+                  }),
+            ],
+          ),
+
+          Row(children: [
+            Flexible(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  onChanged: (value) {
+                    filterSearchResults(value);
                   },
+                  controller: txtNameSuchen,
+                  decoration: InputDecoration(
+                      labelText: "Name eingeben",
+                      hintText: "Name",
+                      prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(
+                          borderRadius:
+                          BorderRadius.all(Radius.circular(10.0)))),
                 ),
               ),
-              Container(
-                margin: EdgeInsets.only(top: 30),
+            ),
+            Flexible(
+              flex: 1,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: FlatButton(
+                  child: Text(
+                    'alle',
+//                  style: TextStyle(fontSize: 20.0),
+                  ),
+                  color: Colors.orange[400],
+                  onPressed: selectAll,
+                ),
               ),
-            ]),
+            ),
+            Flexible(
+              flex: 1,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: FlatButton(
+                  child: Text(
+                    'keine',
+//                  style: TextStyle(fontSize: 20.0),
+                  ),
+                  color: Colors.orange[400],
+                  onPressed: unselectAll,
+                ),
+              ),
+            ),
+          ]),
+
+          Expanded(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: _spielerShow == null ? 0 : _spielerShow.length,
+                itemBuilder: _getListOfSpieler,
+              )),
+        ]),
       ),
 
       // das Menü auf der linken Seite
-      drawer: Drawer(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              margin: EdgeInsets.only(top: 30),
-            ),
-            const Text('This is the Drawer'),
-            FlatButton(
-              color: Colors.orange[500],
-              textColor: Colors.white,
-              padding: EdgeInsets.all(10.0),
-              onPressed: () {
-                Navigator.pushNamed(context, '/tableau_verwalten', arguments: {
-                  'tableauId': -1,
-                });
-              },
-              child: Row(children: <Widget>[
-                Icon(Icons.person_add),
-                Text(
-                  '  Tableau verwalten',
-                  style: TextStyle(fontSize: 20.0),
-                ),
-              ]),
-            ),
-            ElevatedButton(
-              onPressed: _closeDrawer,
-              child: const Text('Close Drawer'),
-            ),
-          ],
-        ),
-      ),
+      drawer: homeDrawer.getDrawer(context),
       // Disable opening the drawer with a swipe gesture.
       drawerEnableOpenDragGesture: false,
     );
   }
 
-  void _closeDrawer() {
-    Navigator.of(context).pop();
-  }
-
   /// Die Wahl des Menues
   void menuAction(String wahl) {
-    if (wahl == MenuSetting.PasswordChange) {
-      _passwortAendern();
-    }
+
     if (wahl == MenuSetting.Infos) {
       AppInfo appInfo = new AppInfo();
       appInfo.showAppInfo(context);
@@ -165,162 +208,142 @@ class _HomeState extends State<Home> {
     }
   }
 
-  /// Das Menu an der rechten Seite
-  void _passwortAendern() {
-    txtPasswort.text = "";
-    txtError.text = "";
+   // Wenn ein Tableau selektiert wurde
+  void _readSpielerTableau(int tableauId) async {
+    if (tableauId < 0) {
+      setState(() {
+        _spielerShow = _spielerAlle;
+      });
+    } else {
+      _spielerTableau = await spielerList.readTableauSpielerShort(tableauId);
+      setState(() {
+        _spielerShow = _spielerTableau;
+      });
+    }
+  }
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        // return object of type Dialog
-        return SimpleDialog(
-          title: new Text("Passwort ändern"),
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: txtPasswort,
-                decoration: InputDecoration(
-                    labelText: "Neues Passwort eingeben",
-                    hintText: "Passwort",
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: RaisedButton(
-                child: Text("Speichern"),
-                onPressed: _setNewPassword,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                keyboardType: TextInputType.multiline,
-                maxLines: 2,
-                controller: txtError,
-                readOnly: true,
-              ),
-            ),
-            // usually buttons at the bottom of the dialog
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: RaisedButton(
-                child: new Text("Schliessen"),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ),
-          ],
-        );
-      },
+  // Den Dropdown für Tableau erstellen
+  void _buildDropDownMenuItems(List listItems) {
+    List<DropdownMenuItem<Tableau>> items = List();
+    // erster Eintrag leer
+    Tableau tabLeer = new Tableau(-1, ' ', '0');
+    items.add(DropdownMenuItem(
+      child: Text(tabLeer.bezeichnung),
+      value: tabLeer,
+    ));
+    for (Tableau tableau in listItems) {
+      items.add(
+        DropdownMenuItem(
+          child: Text(tableau.bezeichnung),
+          value: tableau,
+        ),
+      );
+    }
+    _dropdownTableauItems = items;
+  }
+
+  /// Die Liste der angezeigten Spieler
+  Widget _getListOfSpieler(BuildContext context, int index) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 2),
+      color: _spielerShow[index].isSelected ? Colors.orange[300] : Colors.white,
+      // height: 30.0,
+      child: ListTile(
+        title: Text(
+          '${_spielerShow.elementAt(index).names}',
+          style: TextStyle(fontSize: 18.0),
+//          style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 1.2),
+        ),
+        dense: true,
+        onTap: () {
+          setState(() {
+            _spielerShow[index].isSelected = !_spielerShow[index].isSelected;
+          });
+        },
+        onLongPress: () {
+          abwesendAnzeigen(context);
+        },
+      ),
     );
   }
 
-  void _setNewPassword() async {
-    if (txtPasswort.text.length < 4) {
-      txtError.text = "mindestens 4 Zeichen";
-      return;
-    }
-    _savePassword();
-  }
-
-  void _savePassword() async {
-    LocalStorage localStorage = LocalStorage();
-    var url = localStorage.webAdress + "/userSet.php";
-    try {
-      final response = await http.post(url, body: {
-        "userName": global.userName,
-        "passwort": txtPasswort.text,
+  /// Wenn etwas im search-feld eingegeben wurde.
+  void filterSearchResults(String query) {
+    List<SpielerShort> tempList = List<SpielerShort>();
+    if (query.isNotEmpty) {
+      _spielerAlle.forEach((item) {
+        if (item.names.toLowerCase().contains(query.toLowerCase())) {
+          tempList.add(item);
+        }
       });
-
-      if (response.statusCode == 200) {
-        if (response.body.startsWith("OK")) {
-          localStorage.userPw = txtPasswort.text;
-          localStorage.saveLocalData();
-          txtError.text = "neues Passwort gespeichert";
-        }
-        if (response.body.startsWith("NOK")) {
-          txtError.text = "kann Passwort nicht ändern";
-          return;
-        }
-      } else {
-        String fehler = response.body;
-        txtError.text = "konnte Passwort nicht speichern \n $fehler";
-      }
-    } catch (e) {
-      print('Error:  $e');
       setState(() {
-        txtError.text =
-            'Keine Verbindung zur DB, ist eine Internet-Verbindung vorhanden?';
+        _spielerShow.clear();
+        _spielerShow.addAll(tempList);
       });
       return;
+    } else {
+      setState(() {
+        // zurücksetzen auf Ausgang: alle oder Tableau
+        _spielerShow.clear();
+        _spielerShow.addAll(_spielerAlle);
+      });
     }
   }
 
-  /// Die Wahl des Startdatums
-  Widget showStartDatum() {
-    return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(' '),
-          Text(
-            'Anzeige',
-            style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-          ),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: ButtonBar(
-              mainAxisSize: MainAxisSize
-                  .min, // this will take space as minimum as posible(to center)
-              buttonHeight: 25.0,
-              buttonPadding: EdgeInsets.all(2.0),
-              children: getDatumButtons(),
-            ),
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('ab Datum: ', style: TextStyle(fontSize: 18.0)),
-              Text(
-                dateForm.format(global.startDatumAnzeigen),
-                style: TextStyle(fontSize: 18.0),
-              ),
-            ],
-          ),
-        ]);
-  }
-
-  /// Die Liste mit allen möglichen Datum
-  List<Widget> getDatumButtons() {
-    List<RaisedButton> list = new List<RaisedButton>();
-    DateTime datum = global.startDatum;
-    while (datum.compareTo(global.endDatum) < 0) {
-      DateTime datumButton = datum;
-      list.add(
-        new RaisedButton(
-          color: Colors.orange[400],
-          padding: const EdgeInsets.all(0.0),
-          child: Text(dateFormShort.format(datumButton)),
-          onPressed: () {
-            getSelectedDatum(datumButton);
-          },
-          highlightColor: Colors.orange[900],
-        ),
-      );
-      datum = datum.add(Duration(days: 2));
+  // alle Spieler selektieren,
+  void selectAll() {
+    if (_spielerShow.length > 20) {
+      // TODO popup anzeigen
+      return;
     }
-    return list;
-  }
-
-  void getSelectedDatum(DateTime datum) {
-    global.startDatumAnzeigen = datum;
-    Duration duration = datum.difference(global.startDatum);
-    global.arrayStart = duration.inDays;
+    _spielerShow.forEach((element) {
+      element.isSelected = true;
+    });
     setState(() {});
+  }
+
+  /// keine selektieren
+  void unselectAll() {
+    _spielerShow.forEach((element) {
+      element.isSelected = false;
+    });
+    setState(() {});
+  }
+
+  /// Die globale Liste mit den ID's füllen
+  void fillSpielerList() {
+    global.spielerIdList.clear();
+    _spielerShow.forEach((element) {
+      if (element.isSelected) {
+        global.spielerIdList.add(int.parse(element.id));
+      }
+    });
+  }
+
+  /// Wenn Icon gedrückt, wird diese Funkion aufgerufen.
+  /// index ist die position in der Liste
+  void abwesendAnzeigen(BuildContext context) {
+    fillSpielerList();
+    if (global.spielerIdList.length > 0) {
+      Navigator.pushNamed(context, '/abwesend_show', arguments: {});
+    }
+  }
+
+  /// Wenn Icon gedrückt, wird diese Funkion aufgerufen.
+  /// index ist die position in der Liste
+  void abwesendAendern(BuildContext context) {
+    fillSpielerList();
+    if (global.spielerIdList.length > 0) {
+      Navigator.pushNamed(context, '/abwesend_edit', arguments: {});
+    }
+  }
+
+  /// Wenn Icon gedrückt, wird diese Funkion aufgerufen.
+  /// index ist die position in der Liste
+  void spielerAdmin(BuildContext context) {
+    fillSpielerList();
+    if (global.spielerIdList.length > 0) {
+      Navigator.pushNamed(context, '/spieler_admin', arguments: {});
+    }
   }
 }

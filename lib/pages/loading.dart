@@ -15,7 +15,7 @@ class Loading extends StatefulWidget {
 }
 
 class _LoadingState extends State<Loading> {
-  final LocalStorage localStorage = LocalStorage();
+  LocalStorage localStorage = LocalStorage();
 
   TextEditingController txtUrl = TextEditingController();
   TextEditingController txtDbPw = TextEditingController();
@@ -157,7 +157,6 @@ class _LoadingState extends State<Loading> {
         Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-              keyboardType: TextInputType.multiline,
               maxLines: 4,
               controller: txtError,
               readOnly: true,
@@ -261,18 +260,21 @@ class _LoadingState extends State<Loading> {
       final response = await http.post(url, body: {
         "userName": txtUser.text.trim(),
         "passwort": txtUserPw.text.trim(),
+        "dbpass": txtDbPw.text.trim(),
         "brand": brand,
         "device": device,
-        "dbpass": global.dbPass,
       });
 
       if (response.statusCode == 200) {
         if (response.body.startsWith("OK")) {
           localStorage.userName = txtUser.text.trim();
           localStorage.userPw = txtUserPw.text.trim();
+          localStorage.dbPw = txtDbPw.text.trim();
           localStorage.saveLocalData();
           global.userName = localStorage.userName;
+          global.dbPass = localStorage.dbPw;
           // weitermachen
+          await _readDbName();
           if (global.dbName.length > 0) {
             await readConfig();
           }
@@ -302,21 +304,29 @@ class _LoadingState extends State<Loading> {
   /// Die Basisdaten lesen, zuerst Name der DB, dann Config
   Future _readBasicData() async {
     await _readLocalData();
-    await _readDbName();
+    await _setVars();
   }
 
   _readLocalData() async {
-    LocalStorage ls = LocalStorage();
-    String error = await ls.readLocalData();
+    String error = await localStorage.readLocalData();
+    if (error.length > 0) {
+      setState(() {
+        txtError.text = error;
+      });
+    }
+  }
+
+  _setVars() async {
     txtUrl.text = localStorage.webAdress;
     txtDbPw.text = localStorage.dbPw;
     txtUser.text = localStorage.userName;
     txtUserPw.text = localStorage.userPw;
-    if (error.length > 0) {
-      txtError.text = error;
-    }
-    setState(() {});
+    setState(() {
+
+    });
   }
+
+
 
   /// den Namen der Datenbank und DB-User lesen von Text-file auf Server
   Future _readDbName() async {
@@ -381,7 +391,12 @@ class _LoadingState extends State<Loading> {
   /// Die Config-Daten setzen
   setConfigData(Map<String, dynamic> data) {
     global.configData = data;
-
+    if (data.isEmpty) {
+      setState(() {
+        txtError.text =
+        'Config Daten nicht gelesen.';
+      });
+    }
     global.startDatum = global.dateFormDb.parse(data['turnier.beginDatum']);
     global.startDatumAnzeigen = global.startDatum;
     global.endDatum = global.dateFormDb.parse(data['turnier.endDatum']);

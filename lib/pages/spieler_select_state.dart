@@ -9,7 +9,7 @@ class SpielerSelect extends StatefulWidget {
 }
 
 class _SpielerSelectState extends State<SpielerSelect> {
-  TextEditingController editingController = TextEditingController();
+  TextEditingController txtNameSuchen = TextEditingController();
 
   // Tableau in der selektionsliste
   TableauList tableauList;
@@ -33,7 +33,7 @@ class _SpielerSelectState extends State<SpielerSelect> {
     _initData();
   }
 
-  /// Die Daten lesen von der DB
+  /// Die Spieler- und Tableau-Daten lesen von der DB
   void _initData() async {
     // Spieler Date
     _spielerAlle = await spielerList.readAllSpielerShort();
@@ -97,29 +97,30 @@ class _SpielerSelectState extends State<SpielerSelect> {
           ),
 
           Row(children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: SizedBox(
-                width: 150.0,
-                height: 50.0,
+            Flexible(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
                 child: TextField(
                   onChanged: (value) {
                     filterSearchResults(value);
                   },
-                  controller: editingController,
+                  controller: txtNameSuchen,
                   decoration: InputDecoration(
                       labelText: "Name eingeben",
                       hintText: "Name",
                       prefixIcon: Icon(Icons.search),
                       border: OutlineInputBorder(
                           borderRadius:
-                              BorderRadius.all(Radius.circular(10.0)))),
+                          BorderRadius.all(Radius.circular(10.0)))),
                 ),
               ),
             ),
-            ButtonBar(
-              children: [
-                FlatButton(
+            Flexible(
+              flex: 1,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: FlatButton(
                   child: Text(
                     'alle',
 //                  style: TextStyle(fontSize: 20.0),
@@ -127,7 +128,13 @@ class _SpielerSelectState extends State<SpielerSelect> {
                   color: Colors.orange[400],
                   onPressed: selectAll,
                 ),
-                FlatButton(
+              ),
+            ),
+            Flexible(
+              flex: 1,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: FlatButton(
                   child: Text(
                     'keine',
 //                  style: TextStyle(fontSize: 20.0),
@@ -135,16 +142,16 @@ class _SpielerSelectState extends State<SpielerSelect> {
                   color: Colors.orange[400],
                   onPressed: unselectAll,
                 ),
-              ],
+              ),
             ),
           ]),
 
           Expanded(
               child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: _spielerShow == null ? 0 : _spielerShow.length,
-            itemBuilder: _getListOfSpieler,
-          )),
+                shrinkWrap: true,
+                itemCount: _spielerShow == null ? 0 : _spielerShow.length,
+                itemBuilder: _getListOfSpieler,
+              )),
         ]),
       ),
     );
@@ -189,7 +196,7 @@ class _SpielerSelectState extends State<SpielerSelect> {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 2),
       color: _spielerShow[index].isSelected ? Colors.orange[300] : Colors.white,
-      height: 40.0,
+      // height: 30.0,
       child: ListTile(
         title: Text(
           '${_spielerShow.elementAt(index).names}',
@@ -241,8 +248,7 @@ class _SpielerSelectState extends State<SpielerSelect> {
     _spielerShow.forEach((element) {
       element.isSelected = true;
     });
-    setState(() {
-    });
+    setState(() {});
   }
 
   /// keine selektieren
@@ -250,8 +256,7 @@ class _SpielerSelectState extends State<SpielerSelect> {
     _spielerShow.forEach((element) {
       element.isSelected = false;
     });
-    setState(() {
-    });
+    setState(() {});
   }
 
   /// Die globale Liste mit den ID's füllen
@@ -290,6 +295,4 @@ class _SpielerSelectState extends State<SpielerSelect> {
       Navigator.pushNamed(context, '/spieler_admin', arguments: {});
     }
   }
-
-
 }

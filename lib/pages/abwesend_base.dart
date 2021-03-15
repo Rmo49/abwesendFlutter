@@ -1,110 +1,42 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:abwesend/model/spieler.dart';
 import 'package:abwesend/model/globals.dart' as global;
+import 'package:abwesend/model/spieler.dart';
 
-/// zeigt die Tabelle Abwesend aller Spieler
-class AbwesendTable extends StatelessWidget {
-//  Intl.defaultLocal = 'de_DE';
-  final double sizeName = 65.0;
-  final DateFormat dateFormList = new DateFormat('d.M.');
-  final BorderSide borderSide = BorderSide(color: Colors.blueGrey, width: 1.0, style: BorderStyle.solid);
+/// Basis-Funktionen für die Anzeige
+class AbwesendBase {
+  static final DateFormat dateFormList = new DateFormat('d.M.');
 
-//  final Spieler spieler;
-  final List<Spieler> spielerList;
-
-  // Konstruktor
-  AbwesendTable({this.spielerList});
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Column(
-        children: getTableList(),
-      ),
-    );
-  }
-
-  /// alle Zeilen der Tabelle anzeigen, iteration über alle Spieler
-  List<Table> getTableList() {
-    List<Table> tableList = new List<Table>();
-    tableList.add(getTableDatum());
-    // iteration über alle Spieler
-    spielerList.forEach((element) {
-      tableList.add(getTableSpieler(element));
-    });
-    return tableList;
-  }
-
-  /// Tabelle mit Datum
-  Table getTableDatum() {
-    List<TableRow> rowList = new List<TableRow>();
-    rowList.add(getRowDatum('', global.startDatumAnzeigen));
-
-    return Table(
-      border: TableBorder(bottom: borderSide, verticalInside: borderSide),
-      defaultColumnWidth: FixedColumnWidth(40.0),
-      columnWidths: {
-        0: FixedColumnWidth(sizeName),
-      },
-      children: rowList,
-    );
-  }
-
-  /// Zeile Datum
-  TableRow getRowDatum(String header, DateTime startDatum) {
-    return TableRow(children: getCellsDatum(header, startDatum));
-  }
-
-  List<TableCell> getCellsDatum(String header, DateTime startDatum) {
+  static List<TableCell> getCellsDatum(DateTime startDatum, int anzahlTage) {
     // Die Zeile mit dem Datum
     DateTime datum = startDatum;
     List<TableCell> list = new List<TableCell>();
-    list.add(TableCell(child: Text(header)));
 
-    for (int i = global.arrayStart; i < global.arrayLen; i++) {
+    for (int i = 0; i < anzahlTage; i++) {
       list.add(
         TableCell(
             child: Container(
-              child: Text(dateFormList.format(datum)),
-              color: isWeekend(i) ? Colors.grey : Colors.white,
-            )),
+          child: Text(dateFormList.format(datum)),
+          color: isWeekend(i) ? Colors.grey : Colors.white,
+        )),
       );
       datum = datum.add(Duration(days: 1));
     }
     return list;
   }
 
-  /// Die Tabelle eines Spielers
-  Table getTableSpieler(Spieler spieler) {
-    List abwesendList = spieler.abwesend.split(';');
-    List<TableRow> rowList = new List<TableRow>();
-    if (!global.nurGrafik) {
-      rowList.add(getRowAbwesend(spieler.vorname, abwesendList));
-    }
-    rowList.add(getRowGrafik(spieler, abwesendList));
-
-    return Table(
-      border: TableBorder(bottom: borderSide, verticalInside: borderSide),
-      defaultColumnWidth: FixedColumnWidth(40.0),
-      columnWidths: {
-        0: FixedColumnWidth(sizeName),
-      },
-      children: rowList,
-    );
+  /// Ist die Position im Array ein Weekend?
+  static bool isWeekend(int pos) {
+    DateTime datum = global.startDatum;
+    datum = global.startDatum.add(Duration(days: pos));
+    return (datum.weekday >= 6);
   }
 
-  /// Row mit den Abwesenheiten eines Spielers
-  TableRow getRowAbwesend(String header, List abwesendList) {
-    return TableRow(children: getCellAbwesend(header, abwesendList));
-  }
-
-  List<TableCell> getCellAbwesend(String header, List abwesendList) {
+  /// Abwesenheitszeile
+  static List<TableCell> getCellsAbwesend(List<String> abwesendList, int von, int bis) {
     List<TableCell> list = new List<TableCell>();
-    list.add(TableCell(child: Text(header, overflow: TextOverflow.ellipsis,)));
-    for (int i = global.arrayStart; i < global.arrayLen; i++) {
+    // list.add(TableCell(child: Text(header, overflow: TextOverflow.ellipsis,)));
+    for (int i = von; i < bis; i++) {
       if (i < abwesendList.length) {
         list.add(
           TableCell(child: Text(abwesendList[i])),
@@ -114,15 +46,16 @@ class AbwesendTable extends StatelessWidget {
     return list;
   }
 
-  /// Row mit den grafischer Darstellung der Abwesenheiten eines Spielers
-  TableRow getRowGrafik(Spieler spieler, List abwesendList) {
-    return TableRow(children: getCellGrafik(spieler, abwesendList));
-  }
-
-  List<TableCell> getCellGrafik(Spieler spieler, List abwesendList) {
+  /// Abwesenheiten grafisch
+  static List<TableCell> getCellsGrafik(
+      Spieler spieler, List abwesendList, int von, int bis) {
     List<TableCell> list = new List<TableCell>();
-    list.add(TableCell(child: Text(spieler.name, overflow: TextOverflow.ellipsis,)));
-    for (int i = global.arrayStart; i < global.arrayLen; i++) {
+    // list.add(TableCell(
+    //     child: Text(
+    //   spieler.name,
+    //   overflow: TextOverflow.ellipsis,
+    // )));
+    for (int i = von; i < bis; i++) {
       if (i < abwesendList.length) {
         String abwTag = abwesendList[i];
         double abwStart = getPosStart(abwTag, isWeekend(i));
@@ -133,9 +66,9 @@ class AbwesendTable extends StatelessWidget {
         list.add(
           TableCell(
               child: Container(
-                height: 20.0,
-                child: CustomPaint(painter: painter),
-              )),
+            height: 20.0,
+            child: CustomPaint(painter: painter),
+          )),
         );
       }
     }
@@ -143,7 +76,7 @@ class AbwesendTable extends StatelessWidget {
   }
 
   /// Gibt für einen Tag in der Liste die Matches zurück
-  List<MatchDisplay> getMatches(Spieler spieler, int day) {
+  static List<MatchDisplay> getMatches(Spieler spieler, int day) {
     List<MatchDisplay> matchDispalyList = new List<MatchDisplay>();
     for (int i = 0; i < spieler.matches.length; i++) {
       MatchDisplay matchDisplay;
@@ -153,9 +86,7 @@ class AbwesendTable extends StatelessWidget {
         if (pos >= 0.8) {
           pos = 0.8;
         }
-        matchDisplay = MatchDisplay(
-            pos,
-            spieler.matches[i].type);
+        matchDisplay = MatchDisplay(pos, spieler.matches[i].type);
         matchDispalyList.add(matchDisplay);
       }
     }
@@ -164,7 +95,7 @@ class AbwesendTable extends StatelessWidget {
 
   /// Berechnet die Start Position, 0..1 innerhalb der Zeitspannen
   /// von Start-Zeit und Ende
-  double getPosStart(String abwTag, bool isWeekend) {
+  static double getPosStart(String abwTag, bool isWeekend) {
     if ((abwTag == null) || (abwTag.length <= 0)) {
       // nichts zeichnen
       return 1;
@@ -178,8 +109,7 @@ class AbwesendTable extends StatelessWidget {
       if (zeit.length > 0) {
         return getPosTime(zeit, isWeekend);
       }
-    }
-    else {
+    } else {
       // kein '-' gefunden
       return 0;
     }
@@ -188,7 +118,7 @@ class AbwesendTable extends StatelessWidget {
 
   /// Berechnet die End Position, von 0..1 innerhalb der Zeitspannen
   /// von Start-Zeit und Ende
-  double getPosEnd(String abwTag, bool isWeekend, double posStart) {
+  static double getPosEnd(String abwTag, bool isWeekend, double posStart) {
     if (posStart >= 1) {
       // nichts zeichnen
       return 1.0;
@@ -207,7 +137,7 @@ class AbwesendTable extends StatelessWidget {
 
   /// Die Position von 0..1 innerhalb der Zeitspannen
   /// wenn 1 dann ausserhalb der Zeitspanne
-  double getPosTime(String time, bool isWeekend) {
+  static double getPosTime(String time, bool isWeekend) {
     // wenn Zeit 18:30, dann minuten weglassen
     int index = time.indexOf(':');
     if (index > 0) {
@@ -221,23 +151,16 @@ class AbwesendTable extends StatelessWidget {
     double pos = 1.0;
     int zeit = int.parse(time);
     if (isWeekend) {
-      pos = (zeit - global.zeitWeekendBegin) / (global.zeitWeekendEnd - global.zeitWeekendBegin);
+      pos = (zeit - global.zeitWeekendBegin) /
+          (global.zeitWeekendEnd - global.zeitWeekendBegin);
     } else {
-      pos = (zeit - global.zeitWeekBegin) / (global.zeitWeekEnd - global.zeitWeekBegin);
+      pos = (zeit - global.zeitWeekBegin) /
+          (global.zeitWeekEnd - global.zeitWeekBegin);
     }
     if (pos < 0) {
       pos = 0.0;
     }
     return pos;
-  }
-
-  /// Ist die Position im Array ein Weekend?
-  bool isWeekend(int pos) {
-    DateTime datum = global.startDatum;
-    datum = global.startDatum.add(Duration(days: pos));
-//    for (int i = 0; i < global.arrayLen; i++) {
-    return (datum.weekday >= 6);
-    //   }
   }
 }
 
