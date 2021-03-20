@@ -1,24 +1,25 @@
+import 'package:abwesend/pages/config_data.dart';
 import 'package:flutter/material.dart';
 
 import 'package:abwesend/pages/abwesend_show.dart';
-import 'package:abwesend/pages/loading.dart';
+import 'package:abwesend/pages/login.dart';
 import 'package:abwesend/pages/home.dart';
 import 'package:abwesend/pages/einstellungen.dart';
 import 'package:abwesend/pages/spieler_admin.dart';
-import 'package:abwesend/pages/tableau_verwalten.dart';
+import 'package:abwesend/pages/tableau_data.dart';
 import 'package:abwesend/pages/abwesend_edit.dart';
 
 void main() => runApp(MaterialApp(
       // dieses Widget wird zuerst geladen
-      initialRoute: '/loading',
+      initialRoute: '/login',
       routes: {
         '/home': (context) => Home(),
-        '/loading': (context) => Loading(),
-        // '/spieler_select': (context) => SpielerSelect(),
+        '/login': (context) => Login(),
         '/abwesend_show': (context) => AbwesendShow(),
         '/abwesend_edit': (context) => AbwesendEdit(),
         '/spieler_admin': (context) => SpielerAdmin(),
-        '/tableau_verwalten': (context) => TableauVerwalten(),
+        '/tableau_data': (context) => TableauData(),
+        '/config_data': (context) => ConfigData(),
         '/einstellungen': (context) => Einstellungen(),
       },
     ));

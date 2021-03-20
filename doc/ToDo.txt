@@ -1,20 +1,15 @@
-Next: home_popup testen,
-
-Fehler: Anzeigen ab, wird nicht übernommen
-Login mit Anzeige was geladen wird
-
+Spieler wirklich löschen, zuert fragen, vor delete
 Spieler ändern, mit Form
 
-Direkt nach Loin Spieler wählen anzeigen
+Einstell-Werte lokal speichern: "nur Grafik"
 
-Einstell-Werte lokal speichern, Anzeige ab, nur Grafik
+Tableau, Config Liste wenn nochmals selektiert, dann ausblenden
 
-Tableau verwalten
-Config verwalten
 
 Design anschauen mit Theme
 für Orientation siehe: Flutter > Cookbook > Design / UI based on orientation
 Check Start wenn keine Internet Verbindung, wie kann ich das anzeigen?
+Config ändern mehrere Namen eintragen für Berechtigung
 
 Spiele einlesen mit sep. Java App
 Mail versenden
@@ -25,5 +20,8 @@ http://192.168.0.129:8081/db
 Php.4123
 ruedi, tca4
 
+https://nomadus.ch/tca/db
+
 Local Data:
 /data/user/0/ch.nomadus.abwesend/app_flutter
+

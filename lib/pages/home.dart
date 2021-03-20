@@ -1,12 +1,12 @@
+import 'package:abwesend/model/config.dart';
 import 'package:abwesend/model/spieler.dart';
 import 'package:abwesend/model/tableau.dart';
+import 'package:abwesend/pages/alert_popup.dart';
 import 'package:abwesend/pages/home_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'package:abwesend/model/globals.dart' as global;
-import 'package:abwesend/model/menu_settings.dart';
-import 'package:abwesend/pages/app_info.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -18,24 +18,21 @@ class Home extends StatefulWidget {
 /// Der Hauptscreen
 class _HomeState extends State<Home> {
 
-  final DateFormat dateForm = new DateFormat('d.M.yyyy');
-  final DateFormat dateFormShort = new DateFormat('d.M.');
-  TextEditingController txtDatumStart = TextEditingController();
-  TextEditingController txtPasswort = TextEditingController();
-  TextEditingController txtError = TextEditingController();
+  final DateFormat _dateForm = new DateFormat('d.M.yyyy');
+  TextEditingController _txtDatumStart = TextEditingController();
 
   TextEditingController txtNameSuchen = TextEditingController();
 
-  HomeDrawer homeDrawer = new HomeDrawer();
+  HomeDrawer _homeDrawer = new HomeDrawer();
 
   // Tableau in der selektionsliste
-  TableauList tableauList;
+  TableauList _tableauList;
   List<Tableau> _allTableau;
   List<DropdownMenuItem<Tableau>> _dropdownTableauItems;
   Tableau _selectedTableau;
 
   // Spieler Listen
-  SpielerList spielerList = SpielerList();
+  SpielerList _spielerList = SpielerList();
   // alle Spieler, wird einmal eingelesen, für reset, wenn alle anzeigen
   List<SpielerShort> _spielerAlle;
   // Spieler eines Tableau
@@ -46,25 +43,42 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    txtDatumStart.text = dateForm.format(global.startDatum);
     _initData();
   }
 
-  /// Die Spieler- und Tableau-Daten lesen von der DB
+  /// Die Daten lesen von der DB
   void _initData() async {
+    await _initConfig();
+    await _initSpieler();
+    await _initTableau();
+    _txtDatumStart.text = _dateForm.format(global.startDatum);
+  }
+
+  Future _initConfig() async {
+    String message = await Config.readConfig();
+    if (message.length > 0) {
+      AlertPopup alert = AlertPopup(
+          'Config', 'kann Config nicht lesen', context);
+      await alert.showMyDialog();
+    }
+  }
+
+  Future _initSpieler() async {
     // Spieler Date
-    _spielerAlle = await spielerList.readAllSpielerShort();
+    _spielerAlle = await _spielerList.readAllSpielerShort();
     setState(() {
       _spielerShow = _spielerAlle;
     });
+  }
+
+  Future _initTableau() async {
     // Tableau Daten lesen
-    tableauList = new TableauList();
-    _allTableau = await tableauList.readAllTableau();
+    _tableauList = new TableauList();
+    _allTableau = await _tableauList.readAllTableau();
     setState(() {
       _buildDropDownMenuItems(_allTableau);
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +106,7 @@ class _HomeState extends State<Home> {
             iconSize: 30.0,
             tooltip: 'Abwesenheiten anzeigen',
             onPressed: () {
-              abwesendAnzeigen(context);
+              _abwesendAnzeigen(context);
             },
           ),
           IconButton(
@@ -100,7 +114,7 @@ class _HomeState extends State<Home> {
             iconSize: 30.0,
             tooltip: 'Abwesenheiten eintragen',
             onPressed: () {
-              abwesendAendern(context);
+              _abwesendAendern(context);
             },
           ),
           IconButton(
@@ -108,7 +122,7 @@ class _HomeState extends State<Home> {
             iconSize: 30.0,
             tooltip: 'Spieler verwalten',
             onPressed: () {
-              spielerAdmin(context);
+              _spielerAdmin(context);
             },
           ),
         ],
@@ -125,7 +139,7 @@ class _HomeState extends State<Home> {
                   items: _dropdownTableauItems,
                   onChanged: (value) {
                     _selectedTableau = value;
-                    _readSpielerTableau(value.id);
+                    _readSpielerTableau(value.tableauID);
                   }),
             ],
           ),
@@ -137,7 +151,7 @@ class _HomeState extends State<Home> {
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
                   onChanged: (value) {
-                    filterSearchResults(value);
+                    _filterSearchResults(value);
                   },
                   controller: txtNameSuchen,
                   decoration: InputDecoration(
@@ -160,7 +174,7 @@ class _HomeState extends State<Home> {
 //                  style: TextStyle(fontSize: 20.0),
                   ),
                   color: Colors.orange[400],
-                  onPressed: selectAll,
+                  onPressed: _selectAll,
                 ),
               ),
             ),
@@ -174,7 +188,7 @@ class _HomeState extends State<Home> {
 //                  style: TextStyle(fontSize: 20.0),
                   ),
                   color: Colors.orange[400],
-                  onPressed: unselectAll,
+                  onPressed: _unselectAll,
                 ),
               ),
             ),
@@ -190,32 +204,20 @@ class _HomeState extends State<Home> {
       ),
 
       // das Menü auf der linken Seite
-      drawer: homeDrawer.getDrawer(context),
+      drawer: _homeDrawer.getDrawer(context),
       // Disable opening the drawer with a swipe gesture.
       drawerEnableOpenDragGesture: false,
     );
   }
 
-  /// Die Wahl des Menues
-  void menuAction(String wahl) {
-
-    if (wahl == MenuSetting.Infos) {
-      AppInfo appInfo = new AppInfo();
-      appInfo.showAppInfo(context);
-    }
-    if (wahl == MenuSetting.Logount) {
-      Navigator.pushReplacementNamed(context, '/loading');
-    }
-  }
-
    // Wenn ein Tableau selektiert wurde
-  void _readSpielerTableau(int tableauId) async {
-    if (tableauId < 0) {
+  void _readSpielerTableau(int tableauID) async {
+    if (tableauID < 0) {
       setState(() {
         _spielerShow = _spielerAlle;
       });
     } else {
-      _spielerTableau = await spielerList.readTableauSpielerShort(tableauId);
+      _spielerTableau = await _spielerList.readTableauSpielerShort(tableauID);
       setState(() {
         _spielerShow = _spielerTableau;
       });
@@ -226,7 +228,7 @@ class _HomeState extends State<Home> {
   void _buildDropDownMenuItems(List listItems) {
     List<DropdownMenuItem<Tableau>> items = List();
     // erster Eintrag leer
-    Tableau tabLeer = new Tableau(-1, ' ', '0');
+    Tableau tabLeer = new Tableau(-1, ' ', ' ', '0');
     items.add(DropdownMenuItem(
       child: Text(tabLeer.bezeichnung),
       value: tabLeer,
@@ -261,14 +263,14 @@ class _HomeState extends State<Home> {
           });
         },
         onLongPress: () {
-          abwesendAnzeigen(context);
+          _abwesendAnzeigen(context);
         },
       ),
     );
   }
 
   /// Wenn etwas im search-feld eingegeben wurde.
-  void filterSearchResults(String query) {
+  void _filterSearchResults(String query) {
     List<SpielerShort> tempList = List<SpielerShort>();
     if (query.isNotEmpty) {
       _spielerAlle.forEach((item) {
@@ -291,9 +293,10 @@ class _HomeState extends State<Home> {
   }
 
   // alle Spieler selektieren,
-  void selectAll() {
+  void _selectAll() {
     if (_spielerShow.length > 20) {
-      // TODO popup anzeigen
+      AlertPopup popup = AlertPopup("Spieler anzeigen", "das wären zuviele Spieler", context);
+      popup.showMyDialog();
       return;
     }
     _spielerShow.forEach((element) {
@@ -303,7 +306,7 @@ class _HomeState extends State<Home> {
   }
 
   /// keine selektieren
-  void unselectAll() {
+  void _unselectAll() {
     _spielerShow.forEach((element) {
       element.isSelected = false;
     });
@@ -311,19 +314,19 @@ class _HomeState extends State<Home> {
   }
 
   /// Die globale Liste mit den ID's füllen
-  void fillSpielerList() {
+  void _fillSpielerList() {
     global.spielerIdList.clear();
     _spielerShow.forEach((element) {
       if (element.isSelected) {
-        global.spielerIdList.add(int.parse(element.id));
+        global.spielerIdList.add(int.parse(element.spielerID));
       }
     });
   }
 
   /// Wenn Icon gedrückt, wird diese Funkion aufgerufen.
   /// index ist die position in der Liste
-  void abwesendAnzeigen(BuildContext context) {
-    fillSpielerList();
+  void _abwesendAnzeigen(BuildContext context) {
+    _fillSpielerList();
     if (global.spielerIdList.length > 0) {
       Navigator.pushNamed(context, '/abwesend_show', arguments: {});
     }
@@ -331,8 +334,8 @@ class _HomeState extends State<Home> {
 
   /// Wenn Icon gedrückt, wird diese Funkion aufgerufen.
   /// index ist die position in der Liste
-  void abwesendAendern(BuildContext context) {
-    fillSpielerList();
+  void _abwesendAendern(BuildContext context) {
+    _fillSpielerList();
     if (global.spielerIdList.length > 0) {
       Navigator.pushNamed(context, '/abwesend_edit', arguments: {});
     }
@@ -340,8 +343,8 @@ class _HomeState extends State<Home> {
 
   /// Wenn Icon gedrückt, wird diese Funkion aufgerufen.
   /// index ist die position in der Liste
-  void spielerAdmin(BuildContext context) {
-    fillSpielerList();
+  void _spielerAdmin(BuildContext context) {
+    _fillSpielerList();
     if (global.spielerIdList.length > 0) {
       Navigator.pushNamed(context, '/spieler_admin', arguments: {});
     }

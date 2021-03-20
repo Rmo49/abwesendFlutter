@@ -76,7 +76,7 @@ class LocalStorage {
     dbPw = "DB";
     userName = "Vorname";
     userPw = "PW";
-    showAbDatum = "1.1.2020";
+    showAbDatum = "2020-01-01";
   }
 
   // die  Daten von einem file lesen

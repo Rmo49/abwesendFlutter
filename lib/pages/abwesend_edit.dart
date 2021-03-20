@@ -124,10 +124,15 @@ class _AbwesendEditState extends State<AbwesendEdit> {
                 _speichern();
               },
             ),
-            TextField(
-              maxLines: 3,
-              controller: txtMeldung,
-              readOnly: true,
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  maxLines: 3,
+                  controller: txtMeldung,
+                  readOnly: true,
+                ),
+              ),
             ),
           ],
         ));

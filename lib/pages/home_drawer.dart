@@ -18,7 +18,10 @@ class HomeDrawer {
           Container(
             margin: EdgeInsets.only(top: 30),
           ),
-          const Text('This is the Drawer'),
+          const Text(
+            'Setup',
+            style: TextStyle(fontSize: 20),
+          ),
           FlatButton(
             color: Colors.orange[500],
             textColor: Colors.white,
@@ -39,8 +42,8 @@ class HomeDrawer {
             textColor: Colors.white,
             padding: EdgeInsets.all(10.0),
             onPressed: () {
-              Navigator.pushNamed(context, '/tableau_verwalten', arguments: {
-                'tableauId': -1,
+              Navigator.pushNamed(context, '/tableau_data', arguments: {
+                'tableauID': -1,
               });
             },
             child: Row(children: <Widget>[
@@ -55,11 +58,27 @@ class HomeDrawer {
             color: Colors.orange[500],
             textColor: Colors.white,
             padding: EdgeInsets.all(10.0),
+            onPressed: () {
+              Navigator.pushNamed(context, '/config_data', arguments: {}
+               );
+            },
+            child: Row(children: <Widget>[
+              Icon(Icons.person_add),
+              Text(
+                '  Config verwalten',
+                style: TextStyle(fontSize: 20.0),
+              ),
+            ]),
+          ),
+          FlatButton(
+            color: Colors.orange[500],
+            textColor: Colors.white,
+            padding: EdgeInsets.all(10.0),
             onPressed: () => _passwortAendern(context),
             child: Row(children: <Widget>[
               Icon(Icons.person_add),
               Text(
-                '  Passwort ändern x',
+                '  Passwort ändern',
                 style: TextStyle(fontSize: 20.0),
               ),
             ]),
@@ -69,8 +88,8 @@ class HomeDrawer {
             onPressed: () => _showAppInfo(context),
           ),
           ElevatedButton(
-          onPressed: () => _logout(context),
-          child: const Text('Logout'),
+            onPressed: () => _logout(context),
+            child: const Text('Logout'),
           ),
           // ElevatedButton(
           // onPressed: _closeDrawer,
@@ -87,9 +106,10 @@ class HomeDrawer {
   }
 
   void _logout(BuildContext context) {
-    Navigator.pushReplacementNamed(context, '/loading');
+    Navigator.pushReplacementNamed(context, '/login');
   }
 
+  //---- Popup Paswort ändern --------------------
   /// Passwort ändern, Anzeige der Felder
   void _passwortAendern(BuildContext context) {
     txtPasswort.text = "";

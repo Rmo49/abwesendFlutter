@@ -41,7 +41,7 @@ class AbwesendTable extends StatelessWidget {
   /// Tabelle mit Datum
   Table getTableDatum() {
     List<TableRow> rowList = new List<TableRow>();
-    rowList.add(getRowDatum('', global.startDatumAnzeigen));
+    rowList.add(getRowDatum('', global.abDatumAnzeigen));
 
     return Table(
       border: TableBorder(bottom: borderSide, verticalInside: borderSide),
@@ -279,7 +279,6 @@ class MyPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) {
-    // TODO: implement shouldRepaint
     return false;
   }
 }

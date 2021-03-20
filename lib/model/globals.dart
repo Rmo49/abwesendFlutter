@@ -6,26 +6,24 @@ final DateFormat dateFormDb = new DateFormat('yyyy-MM-dd');
 
 // der Name des Benutzers
 String userName;
-// der Name der DB, wird von loading gelesen
+// der Name der DB, wird von login gelesen
 String dbName;
 // der DB-User, muss bei der DB gesetzt sein
 String dbUser;
 // das DB-Passwort ist immer gleich
 String dbPass;
-// Die Werte der Config
-Map<String, dynamic> configData;
 // Start- und Edd-Datum des Turniers
 DateTime startDatum;
 DateTime endDatum;
 // ab diesem Datum anzeigen
-DateTime startDatumAnzeigen;
+DateTime abDatumAnzeigen;
 // ab dieser Position anzeigen
 int arrayStart = 0;
 // die max. Länge des Arrays für alle Tage
 int arrayLen = 0;
 // die selektierte TableauId im Tableau-Screen
 // Ersatz für modale transformation, da im build zu spät
-int tableauId = -1;
+int tableauID = -1;
 // Die Liste der Spieler für die Anzeige der Abwesenheiten
 List<int> spielerIdList = new List<int>();
 // wenn nur die Grafik in der Abwesend-Tabelle angezeigt werden soll

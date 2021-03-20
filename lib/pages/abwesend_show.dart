@@ -74,7 +74,6 @@ class _AbwesendShowState extends State<AbwesendShow> {
       setState(() {
         _percent = i / spielerIdList.length;
         _percentString = (_percent * 100).toStringAsFixed(0);
-
       });
 
       var spieler = await Spieler.readSpieler(spielerIdList.elementAt(i));

@@ -5,7 +5,7 @@ import 'package:abwesend/model/local_storage.dart';
 import 'package:abwesend/model/match.dart';
 
 class Spieler {
-  int spielerId;
+  int spielerID;
   String name;
   String vorname;
   String email;
@@ -19,7 +19,7 @@ class Spieler {
   Spieler.fromMap(Map<String, dynamic> map)
       : assert(map['name'] != null),
         assert(map['vorname'] != null),
-        spielerId = int.parse(map['id']),
+        spielerID = int.parse(map['spielerID']),
         name = map['name'],
         vorname = map['vorname'],
         email = map['email'],
@@ -27,7 +27,7 @@ class Spieler {
         begin = map['begin'];
 
   Map<String, dynamic> toJson() => {
-        'id': spielerId,
+        'spielerID': spielerID,
         'name': name,
         'vorname': vorname,
         'email': email,
@@ -58,14 +58,14 @@ class Spieler {
   }
 
   /// Einen Spieler von der DB lesen.
-  static Future<Spieler> readSpieler(int spielerId) async {
+  static Future<Spieler> readSpieler(int spielerID) async {
     LocalStorage localStorage = LocalStorage();
     var url = localStorage.webAdress + "/readSpieler.php";
     var response = await http.post(url, body: {
       "dbname": global.dbName,
       "dbuser": global.dbUser,
       "dbpass": global.dbPass,
-      "id": spielerId.toString(),
+      "spielerID": spielerID.toString(),
     });
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(response.body);
@@ -100,7 +100,7 @@ class Spieler {
       "dbname": global.dbName,
       "dbuser": global.dbUser,
       "dbpass": global.dbPass,
-      "spielerId": spielerId.toString(),
+      "spielerID": spielerID.toString(),
     });
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
@@ -119,25 +119,39 @@ class Spieler {
       "dbname": global.dbName,
       "dbuser": global.dbUser,
       "dbpass": global.dbPass,
-      "spielerId": spielerId.toString(),
+      "spielerID": spielerID.toString(),
       "tableauList": tabString.toString()
     });
     if (response.statusCode == 200) {
       // final String result = response.body;
     }
   }
+
+  /// Den Spieler in der DB speichern
+  Future<String> deleteSpieler() async {
+    LocalStorage localStorage = LocalStorage();
+    var url = localStorage.webAdress + "/deleteSpieler.php";
+    var response = await http.post(url, body: {
+      "dbname": global.dbName,
+      "dbuser": global.dbUser,
+      "dbpass": global.dbPass,
+      "spielerID": spielerID.toString(),
+    });
+    return response.body;
+  }
+
 }
 
 /// Spieler kurzform, um in einer Liste anzuzeigen
 class SpielerShort {
-  final String id;
+  final String spielerID;
   final String names;
   bool isSelected;
 
-  SpielerShort(this.id, this.names, this.isSelected);
+  SpielerShort(this.spielerID, this.names, this.isSelected);
 
   SpielerShort.fromMap(Map<String, dynamic> map)
-      : id = map['id'],
+      : spielerID = map['spielerID'],
         names = map['names'],
         isSelected = false;
 }
@@ -170,14 +184,15 @@ class SpielerList {
         "dbname": global.dbName,
         "dbuser": global.dbUser,
         "dbpass": global.dbPass,
-        "tableauId": global.tableauId.toString(),
+        "tableauID": global.tableauID.toString(),
       });
       if (response.statusCode == 200) {
         if (response.body.length > 0) {
+          // String resp = response.body;
           List spielerFromDb = json.decode(response.body);
           spielerAlle = setSpielerData(spielerFromDb);
         } else {
-          setSpielerError('keine Spieler gefunden');
+          spielerAlle = setSpielerError('keine Spieler gefunden');
         }
       } else {
         spielerAlle = setSpielerError(response.body);
@@ -189,14 +204,15 @@ class SpielerList {
     return spielerAlle;
   }
 
-  Future<List<SpielerShort>> readTableauSpielerShort(int tableauId) async {
+  /// Alle Spieler eines Tableau lesen.
+  Future<List<SpielerShort>> readTableauSpielerShort(int tableauID) async {
     var url = LocalStorage().webAdress + "/readTableauSpieler.php";
     try {
       final response = await http.post(url, body: {
         "dbname": global.dbName,
         "dbuser": global.dbUser,
         "dbpass": global.dbPass,
-        "tableauId": tableauId.toString(),
+        "tableauID": tableauID.toString(),
       });
 
       if (response.statusCode == 200) {
@@ -204,7 +220,7 @@ class SpielerList {
           List spielerFromDb = json.decode(response.body);
           spielerTableau = setSpielerData(spielerFromDb);
         } else {
-          setSpielerError('keine Spieler gefunden');
+          spielerTableau = setSpielerError('keine Spieler gefunden');
         }
       } else {
         spielerTableau = setSpielerError(response.body);

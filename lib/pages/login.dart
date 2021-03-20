@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -9,19 +7,19 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:abwesend/model/globals.dart' as global;
 import 'package:abwesend/model/local_storage.dart';
 
-class Loading extends StatefulWidget {
+class Login extends StatefulWidget {
   @override
-  _LoadingState createState() => _LoadingState();
+  _LoginState createState() => _LoginState();
 }
 
-class _LoadingState extends State<Loading> {
+class _LoginState extends State<Login> {
   LocalStorage localStorage = LocalStorage();
 
-  TextEditingController txtUrl = TextEditingController();
-  TextEditingController txtDbPw = TextEditingController();
-  TextEditingController txtUser = TextEditingController();
-  TextEditingController txtUserPw = TextEditingController();
-  TextEditingController txtError = TextEditingController();
+  TextEditingController _txtUrl = TextEditingController();
+  TextEditingController _txtDbPw = TextEditingController();
+  TextEditingController _txtUser = TextEditingController();
+  TextEditingController _txtUserPw = TextEditingController();
+  TextEditingController _txtError = TextEditingController();
 
   bool _showDbPw = false;
   bool _showUserPw = false;
@@ -31,6 +29,31 @@ class _LoadingState extends State<Loading> {
     // wird genau einmal aufgerufen, wenn das Objekt initialisiert wird
     super.initState();
     _readBasicData();
+  }
+
+  /// Die Basisdaten lesen, zuerst Name der DB, dann Config
+  Future _readBasicData() async {
+    await _readLocalData();
+    await _setVars();
+  }
+
+  _readLocalData() async {
+    String error = await localStorage.readLocalData();
+    if (error.length > 0) {
+      setState(() {
+        _txtError.text = error;
+      });
+    }
+    global.abDatumAnzeigen =
+        global.dateFormDb.parse(localStorage.showAbDatum);
+  }
+
+  _setVars() async {
+    _txtUrl.text = localStorage.webAdress;
+    _txtDbPw.text = localStorage.dbPw;
+    _txtUser.text = localStorage.userName;
+    _txtUserPw.text = localStorage.userPw;
+    setState(() {});
   }
 
   @override
@@ -45,7 +68,7 @@ class _LoadingState extends State<Loading> {
           child: Padding(
             padding: const EdgeInsets.all(2.0),
             child: TextField(
-              controller: txtUrl,
+              controller: _txtUrl,
               decoration: InputDecoration(
                   labelText: "Verbindung",
                   hintText: "http://",
@@ -70,7 +93,7 @@ class _LoadingState extends State<Loading> {
                 child: Padding(
                   padding: const EdgeInsets.all(2.0),
                   child: TextField(
-                    controller: txtDbPw,
+                    controller: _txtDbPw,
                     decoration: InputDecoration(
                       labelText: "DB Passwort",
                       border: OutlineInputBorder(
@@ -109,7 +132,7 @@ class _LoadingState extends State<Loading> {
                 child: Padding(
                   padding: const EdgeInsets.all(2.0),
                   child: TextField(
-                    controller: txtUser,
+                    controller: _txtUser,
                     decoration: InputDecoration(
                         labelText: "Benutzer Name",
                         hintText: "Vorname",
@@ -123,7 +146,7 @@ class _LoadingState extends State<Loading> {
                 child: Padding(
                   padding: const EdgeInsets.all(2.0),
                   child: TextField(
-                    controller: txtUserPw,
+                    controller: _txtUserPw,
                     decoration: InputDecoration(
                       labelText: "Benutzer Passwort",
                       border: OutlineInputBorder(
@@ -157,8 +180,8 @@ class _LoadingState extends State<Loading> {
         Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-              maxLines: 4,
-              controller: txtError,
+              maxLines: 6,
+              controller: _txtError,
               readOnly: true,
             )),
       ])),
@@ -167,12 +190,12 @@ class _LoadingState extends State<Loading> {
 
   /// Verbindung zu PHP-funktionen testen
   Future _connectTest() async {
-    if (txtUrl.text.length < 10) {
+    if (_txtUrl.text.length < 10) {
       setState(() {
-        txtError.text = "Eine Web-Adresse eingeben";
+        _txtError.text = "Eine Web-Adresse eingeben";
       });
     } else {
-      localStorage.webAdress = txtUrl.text.trim();
+      localStorage.webAdress = _txtUrl.text.trim();
       localStorage.saveLocalData();
 
       var url = localStorage.webAdress + "/testConnect.php";
@@ -181,18 +204,18 @@ class _LoadingState extends State<Loading> {
         final response = await http.post(url);
         if (response.statusCode == 200) {
           setState(() {
-            txtError.text = response.body;
+            _txtError.text = response.body;
           });
         } else {
           setState(() {
-            txtError.text = "Konnte keine Verbindung aufbauen, Status: " +
+            _txtError.text = "Konnte keine Verbindung aufbauen, Status: " +
                 response.statusCode.toString();
           });
         }
       } catch (e) {
         print('Fehler:  $e');
         setState(() {
-          txtError.text = 'Ist eine Internet-Verbindung vorhanden? \n $e';
+          _txtError.text = 'Ist eine Internet-Verbindung vorhanden? \n $e';
         });
       }
     }
@@ -200,14 +223,14 @@ class _LoadingState extends State<Loading> {
 
   /// DB-Verbindung testen, ist passwort ok?
   Future _dbTest() async {
-    if (txtDbPw.text.length < 3) {
+    if (_txtDbPw.text.length < 3) {
       setState(() {
-        txtError.text = "DB-Passwort zu kurz";
+        _txtError.text = "DB-Passwort zu kurz";
       });
       return;
     } else {
       await _readDbName();
-      localStorage.dbPw = txtDbPw.text.trim();
+      localStorage.dbPw = _txtDbPw.text.trim();
       localStorage.saveLocalData();
       global.dbPass = localStorage.dbPw;
 
@@ -219,21 +242,20 @@ class _LoadingState extends State<Loading> {
           "dbpass": global.dbPass,
         });
 
-
         if (response.statusCode == 200) {
           setState(() {
-            txtError.text = response.body;
+            _txtError.text = response.body;
           });
         } else {
           setState(() {
-            txtError.text = "Passwort falsch, Status: " +
-                response.statusCode.toString();
+            _txtError.text =
+                "Passwort falsch, Status: " + response.statusCode.toString();
           });
         }
       } catch (e) {
         print('Fehler:  $e');
         setState(() {
-          txtError.text = 'Ist eine Internet-Verbindung vorhanden? \n $e';
+          _txtError.text = 'Ist eine Internet-Verbindung vorhanden? \n $e';
         });
       }
     }
@@ -241,9 +263,9 @@ class _LoadingState extends State<Loading> {
 
   /// login service zum prüfen, ob erlaubt, wenn ja, ruft home auf.
   Future _loginCheck() async {
-    if ((txtUser.text.length < 1) || (txtUserPw.text.length < 1)) {
+    if ((_txtUser.text.length < 1) || (_txtUserPw.text.length < 1)) {
       setState(() {
-        txtError.text = "Du musst schon etwas eingeben";
+        _txtError.text = "Du musst schon etwas eingeben";
       });
       return;
     }
@@ -258,75 +280,54 @@ class _LoadingState extends State<Loading> {
     var url = localStorage.webAdress + "/userCheck.php";
     try {
       final response = await http.post(url, body: {
-        "userName": txtUser.text.trim(),
-        "passwort": txtUserPw.text.trim(),
-        "dbpass": txtDbPw.text.trim(),
+        "userName": _txtUser.text.trim(),
+        "passwort": _txtUserPw.text.trim(),
+        "dbpass": _txtDbPw.text.trim(),
         "brand": brand,
         "device": device,
       });
 
       if (response.statusCode == 200) {
         if (response.body.startsWith("OK")) {
-          localStorage.userName = txtUser.text.trim();
-          localStorage.userPw = txtUserPw.text.trim();
-          localStorage.dbPw = txtDbPw.text.trim();
+          localStorage.userName = _txtUser.text.trim();
+          localStorage.userPw = _txtUserPw.text.trim();
+          localStorage.dbPw = _txtDbPw.text.trim();
           localStorage.saveLocalData();
           global.userName = localStorage.userName;
           global.dbPass = localStorage.dbPw;
+          global.abDatumAnzeigen =
+              global.dateFormDb.parse(localStorage.showAbDatum);
+
           // weitermachen
           await _readDbName();
           if (global.dbName.length > 0) {
-            await readConfig();
+            // await Config.readConfig();
           }
           Navigator.pushReplacementNamed(context, '/home');
         }
         if (response.body.startsWith("NOK")) {
           setState(() {
-            txtError.text = "falscher Benutzer Name oder Passwort";
+            _txtError.text = "falscher Benutzer Name oder Passwort";
           });
           return;
         }
+        else {
+          _txtError.text = response.body;
+        }
       } else {
         setState(() {
-          txtError.text = "falscher Benutzer Name oder Passwort";
+          _txtError.text = "falscher Benutzer Name oder Passwort";
         });
       }
     } catch (e) {
       print('Fehler:  $e');
       setState(() {
-        txtError.text =
+        _txtError.text =
             'Kann Login-Check nicht ausführen, ist eine Internet-Verbindung vorhanden? \n $e';
       });
       return;
     }
   }
-
-  /// Die Basisdaten lesen, zuerst Name der DB, dann Config
-  Future _readBasicData() async {
-    await _readLocalData();
-    await _setVars();
-  }
-
-  _readLocalData() async {
-    String error = await localStorage.readLocalData();
-    if (error.length > 0) {
-      setState(() {
-        txtError.text = error;
-      });
-    }
-  }
-
-  _setVars() async {
-    txtUrl.text = localStorage.webAdress;
-    txtDbPw.text = localStorage.dbPw;
-    txtUser.text = localStorage.userName;
-    txtUserPw.text = localStorage.userPw;
-    setState(() {
-
-    });
-  }
-
-
 
   /// den Namen der Datenbank und DB-User lesen von Text-file auf Server
   Future _readDbName() async {
@@ -341,78 +342,20 @@ class _LoadingState extends State<Loading> {
         if (dbInfo.length >= 2) {
           global.dbName = dbInfo[0];
           global.dbUser = dbInfo[1];
-          // TODO: global.dbPort auch noch variable impl.
         }
       } else {
         setState(() {
-          txtError.text = response.body;
+          _txtError.text = response.body;
         });
         return;
       }
     } catch (e) {
       print('Fehler:  $e');
       setState(() {
-        txtError.text =
+        _txtError.text =
             'Kann DB-Name nicht lesen, ist eine Internet-Verbindung vorhanden? \n $e';
       });
       return;
     }
-  }
-
-  /// Die Configuration von DB lesen, die Daten werden in json-format geliefert
-  Future readConfig() async {
-    var url = localStorage.webAdress + "/readConfig.php";
-
-    try {
-      final response = await http.post(url, body: {
-        "dbname": global.dbName,
-        "dbuser": global.dbUser,
-        "dbpass": global.dbPass,
-      });
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        setConfigData(data);
-      } else {
-        setState(() {
-          txtError.text = response.body;
-        });
-        return;
-      }
-    } catch (e) {
-      print('Fehler:  $e');
-      setState(() {
-        txtError.text =
-            'Kann Config nicht lesen, ist eine Internet-Verbindung vorhanden? \n $e';
-      });
-      return;
-    }
-  }
-
-  /// Die Config-Daten setzen
-  setConfigData(Map<String, dynamic> data) {
-    global.configData = data;
-    if (data.isEmpty) {
-      setState(() {
-        txtError.text =
-        'Config Daten nicht gelesen.';
-      });
-    }
-    global.startDatum = global.dateFormDb.parse(data['turnier.beginDatum']);
-    global.startDatumAnzeigen = global.startDatum;
-    global.endDatum = global.dateFormDb.parse(data['turnier.endDatum']);
-    Duration diff = global.endDatum.difference(global.startDatum);
-    // die Anzahl tage für die Anzeige
-    global.arrayLen = diff.inDays + 1;
-    global.arrayLen < 0
-        ? global.arrayLen = -global.arrayLen
-        : global.arrayLen = global.arrayLen;
-    if (global.arrayLen > 21) {
-      global.arrayLen = 21;
-    }
-
-    global.zeitWeekBegin = double.parse(data['week.beginZeit']);
-    global.zeitWeekEnd = double.parse(data['week.endZeit']);
-    global.zeitWeekendBegin = double.parse(data['weekend.beginZeit']);
-    global.zeitWeekendEnd = double.parse(data['weekend.endZeit']);
   }
 }

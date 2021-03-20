@@ -1,9 +1,11 @@
 import 'package:abwesend/model/tableau.dart';
+import 'package:abwesend/pages/alert_popup.dart';
 import 'package:flutter/material.dart';
 import 'package:abwesend/model/spieler.dart';
 import 'package:abwesend/model/globals.dart' as global;
 
 /// Einen Spieler ändern, löschen, Beziehung zu Tableau setzen
+/// Der Spieler ist der erste selektierte in der Liste von home.
 class SpielerAdmin extends StatefulWidget {
   @override
   _SpielerAdminState createState() => _SpielerAdminState();
@@ -17,28 +19,28 @@ class _SpielerAdminState extends State<SpielerAdmin> {
   // weil 2 zeilen, hier die berechnete Mitte
   int _tableauListMid;
 
-  TextEditingController txtName = TextEditingController();
-  TextEditingController txtVorname = TextEditingController();
-  TextEditingController txtEmail = TextEditingController();
-  TextEditingController txtId = TextEditingController();
+  TextEditingController _txtName = TextEditingController();
+  TextEditingController _txtVorname = TextEditingController();
+  TextEditingController _txtEmail = TextEditingController();
+  TextEditingController _txtId = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _tableauListMid = 0;
-    readData();
+    _readData();
   }
 
-  void readData() async {
-    await readSpieler(global.spielerIdList);
-    await readSpielerTableau();
-    await readTableau();
-    await setData();
-    doSetState();
+  void _readData() async {
+    await _readSpieler(global.spielerIdList);
+    await _readSpielerTableau();
+    await _readTableau();
+    await _setData();
+    _doSetState();
   }
 
   /// Den ersten Spieler von der DB lesen
-  Future readSpieler(List<int> spielerIdList) async {
+  Future _readSpieler(List<int> spielerIdList) async {
     if (spielerIdList.length > 0) {
       _spieler = await Spieler.readSpieler(spielerIdList.elementAt(0));
     } else {
@@ -46,27 +48,27 @@ class _SpielerAdminState extends State<SpielerAdmin> {
     }
   }
 
-  Future readTableau() async {
+  Future _readTableau() async {
     TableauList tableau = TableauList();
     await tableau.readAllTableau();
     _tableauList = tableau.allTableau;
   }
 
   /// Einlesen der Tableaux eines Spielers
-  Future readSpielerTableau() async {
+  Future _readSpielerTableau() async {
     await _spieler.readTableau();
   }
 
-  Future setData() async {
-    txtName.text = _spieler.name;
-    txtVorname.text = _spieler.vorname;
-    txtEmail.text = _spieler.email;
-    txtId.text = _spieler.spielerId.toString();
+  Future _setData() async {
+    _txtName.text = _spieler.name;
+    _txtVorname.text = _spieler.vorname;
+    _txtEmail.text = _spieler.email;
+    _txtId.text = _spieler.spielerID.toString();
     // Tableau setzen
     Iterator iter = _spieler.tableauList.iterator;
-    while(iter.moveNext()) {
+    while (iter.moveNext()) {
       for (int i = 0; i < _tableauList.length; i++) {
-        if (_tableauList[i].id == iter.current) {
+        if (_tableauList[i].tableauID == iter.current) {
           _tableauList[i].isSelected = true;
           break;
         }
@@ -75,12 +77,12 @@ class _SpielerAdminState extends State<SpielerAdmin> {
   }
 
   /// nachdem alles eingelesen wurde
-  void doSetState() {
+  void _doSetState() {
     if (_spieler != null) {
       // _initTxtController();
     }
     setState(() {
-      double len = _tableauList.length/2;
+      double len = _tableauList.length / 2;
       _tableauListMid = len.round();
     });
   }
@@ -92,38 +94,43 @@ class _SpielerAdminState extends State<SpielerAdmin> {
     return new Scaffold(
       appBar: AppBar(
         title: Text('Spieler ändern'),
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.person_add),
+            iconSize: 30.0,
+            tooltip: 'Neuen Spieler eingeben',
+            onPressed: () {
+              _spielerNeu();
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.save),
+            iconSize: 30.0,
+            tooltip: 'Speichern',
+            onPressed: () {
+              _speichern();
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.person_remove),
+            iconSize: 30.0,
+            tooltip: 'Spieler löschen',
+            onPressed: () {
+              _spielerLoeschen();
+            },
+          ),
+        ],
+
       ),
       body: Column(
         children: <Widget>[
-          Row(
-            children: [
-              RaisedButton(
-                child: const Text('Neue Spieler'),
-                onPressed: () {
-                  _spielerNeu();
-                },
-              ),
-              RaisedButton(
-                child: const Text('Daten speichern'),
-                onPressed: () {
-                  _speichern();
-                },
-              ),
-              RaisedButton(
-                child: const Text('Spieler löschen'),
-                onPressed: () {
-                  _speichern();
-                },
-              ),
-            ],
-          ),
           SizedBox(height: 10),
           Row(
             children: [
               Flexible(
                 flex: 1,
                 child: TextField(
-                  controller: txtName,
+                  controller: _txtName,
                   maxLines: 1,
                   decoration: InputDecoration(
                       labelText: "Name",
@@ -135,7 +142,7 @@ class _SpielerAdminState extends State<SpielerAdmin> {
               Flexible(
                 flex: 1,
                 child: TextField(
-                  controller: txtVorname,
+                  controller: _txtVorname,
                   decoration: InputDecoration(
                       labelText: "Vorname",
                       hintText: "Name",
@@ -151,7 +158,7 @@ class _SpielerAdminState extends State<SpielerAdmin> {
               Flexible(
                 flex: 5,
                 child: TextField(
-                  controller: txtEmail,
+                  controller: _txtEmail,
                   decoration: InputDecoration(
                       labelText: "e-mail",
                       border: OutlineInputBorder(
@@ -162,7 +169,7 @@ class _SpielerAdminState extends State<SpielerAdmin> {
               Flexible(
                 flex: 1,
                 child: TextField(
-                  controller: txtId,
+                  controller: _txtId,
                   decoration: InputDecoration(
                       labelText: "spieler ID",
                       enabled: false,
@@ -180,18 +187,15 @@ class _SpielerAdminState extends State<SpielerAdmin> {
                 Flexible(
                   flex: 1,
                   child: ListView(
-                    shrinkWrap: true,
-                    children:
-                      _getTableauList(context, 0, _tableauListMid)
-                  ),
+                      shrinkWrap: true,
+                      children: _getTableauList(context, 0, _tableauListMid)),
                 ),
                 Flexible(
                   flex: 1,
                   child: ListView(
-                    shrinkWrap: true,
-                    children:
-                    _getTableauList(context, _tableauListMid, _tableauList.length)
-                  ),
+                      shrinkWrap: true,
+                      children: _getTableauList(
+                          context, _tableauListMid, _tableauList.length)),
                 ),
               ],
             ),
@@ -210,14 +214,12 @@ class _SpielerAdminState extends State<SpielerAdmin> {
     for (int index = von; index < bis; index++) {
       Container tableau = Container(
         margin: EdgeInsets.symmetric(vertical: 2),
-        color: _tableauList[index].isSelected ? Colors.orange[300] : Colors
-            .white,
+        color:
+            _tableauList[index].isSelected ? Colors.orange[300] : Colors.white,
         // height: 30.0,
         child: ListTile(
           title: Text(
-            '${_tableauList
-                .elementAt(index)
-                .bezeichnung}',
+            '${_tableauList.elementAt(index).bezeichnung}',
             style: TextStyle(fontSize: 18.0),
 //          style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 1.2),
           ),
@@ -234,21 +236,43 @@ class _SpielerAdminState extends State<SpielerAdmin> {
     return tableauList;
   }
 
-  void _speichern() {
-    _spieler.name = txtName.text;
-    _spieler.vorname = txtVorname.text;
-    _spieler.email = txtEmail.text;
-    _spieler.saveSpieler();
+  void _speichern() async {
+    _spieler.name = _txtName.text;
+    _spieler.vorname = _txtVorname.text;
+    _spieler.email = _txtEmail.text;
+    await _spieler.saveSpieler();
     // Tableau-Liste neu setzen, falls geändert
     List<int> tabList = new List<int>();
     _tableauList.forEach((element) {
       if (element.isSelected) {
-        tabList.add(element.id);
+        tabList.add(element.tableauID);
       }
     });
     _spieler.resetTableauList(tabList);
-    _spieler.saveSpielerTableau();
+    await _spieler.saveSpielerTableau();
+
+    AlertPopup alert = AlertPopup(
+        'Spieler speichern', _spieler.name + ' gespeichert', context);
+    await alert.showMyDialog();
+    Navigator.pushReplacementNamed(context, '/home');
   }
 
-  void _spielerNeu() {}
+  void _spielerNeu() {
+    _txtName.text = '';
+    _txtVorname.text = '';
+    _txtEmail.text = '';
+    _txtId.text = "-1";
+    _spieler.spielerID = -1;
+    _tableauList.forEach((element) {
+      element.isSelected = false;
+    });
+    setState(() {});
+  }
+
+  void _spielerLoeschen() async {
+    String result = await _spieler.deleteSpieler();
+    AlertPopup alert = AlertPopup('Spieler löschen', result, context);
+    await alert.showMyDialog();
+    Navigator.pushReplacementNamed(context, '/home');
+  }
 }

@@ -1,3 +1,4 @@
+import 'package:abwesend/model/local_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:abwesend/model/globals.dart' as global;
 
@@ -11,13 +12,13 @@ class Einstellungen extends StatefulWidget {
 class _EinstellungenState extends State<Einstellungen> {
   final DateFormat _dateLong = new DateFormat('d.M.yyyy');
   final DateFormat _dateShort = new DateFormat('d.M.');
-
-  TextEditingController _txtStartDatum = TextEditingController();
+  String _abDatum = "xx";
 
   @override
   void initState() {
     super.initState();
-    _txtStartDatum.text = _dateLong.format(global.startDatum);
+    _abDatum = _dateLong.format(global.abDatumAnzeigen);
+
   }
 
   @override
@@ -76,14 +77,7 @@ class _EinstellungenState extends State<Einstellungen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text('ab Datum: ', style: TextStyle(fontSize: 18.0)),
-              SizedBox(
-                width: 100,
-                child: TextField(
-                  controller: _txtStartDatum,
-                  maxLines: 1,
-                  readOnly: true,
-                ),
-              ),
+              Text(_abDatum, style: TextStyle(fontSize: 18.0)),
             ],
           ),
         ]);
@@ -115,7 +109,11 @@ class _EinstellungenState extends State<Einstellungen> {
     Duration duration = datumVon.difference(global.startDatum);
     global.arrayStart = duration.inDays;
     setState(() {
-      _txtStartDatum.text = _dateLong.format(datumVon);
+      _abDatum = _dateLong.format(datumVon);
     });
+    LocalStorage localStorage = LocalStorage();
+    localStorage.showAbDatum = global.dateFormDb.format(datumVon);
+    localStorage.saveLocalData();
+    global.abDatumAnzeigen = datumVon;
   }
 }
