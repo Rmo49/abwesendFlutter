@@ -85,19 +85,16 @@ class _EinstellungenState extends State<Einstellungen> {
 
   /// Die Liste mit allen möglichen Datum
   List<Widget> _getDatumButtons() {
-    List<RaisedButton> list = new List<RaisedButton>();
+    List<ElevatedButton> list = [];
     DateTime datum = global.startDatum;
     while (datum.compareTo(global.endDatum) < 0) {
       DateTime datumButton = datum;
       list.add(
-        new RaisedButton(
-          color: Colors.orange[400],
-          padding: const EdgeInsets.all(0.0),
-          child: Text(_dateShort.format(datumButton)),
+        ElevatedButton(
+                    child: Text(_dateShort.format(datumButton)),
           onPressed: () {
             _getSelectedDatum(datumButton);
           },
-          highlightColor: Colors.orange[900],
         ),
       );
       datum = datum.add(Duration(days: 2));

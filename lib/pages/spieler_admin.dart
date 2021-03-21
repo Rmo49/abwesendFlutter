@@ -15,7 +15,7 @@ class _SpielerAdminState extends State<SpielerAdmin> {
   // der gewählte Spieler
   Spieler _spieler;
   // Die angezeigte Liste der Tableau
-  List<Tableau> _tableauList = List<Tableau>();
+  List<Tableau> _tableauList = [];
   // weil 2 zeilen, hier die berechnete Mitte
   int _tableauListMid;
 
@@ -207,7 +207,7 @@ class _SpielerAdminState extends State<SpielerAdmin> {
 
   /// Die Liste der angezeigten Tableau
   List<Widget> _getTableauList(BuildContext context, int von, int bis) {
-    List<Widget> tableauList = List<Widget>();
+    List<Widget> tableauList = [];
     if (von == null || bis == null) {
       return tableauList;
     }
@@ -242,7 +242,7 @@ class _SpielerAdminState extends State<SpielerAdmin> {
     _spieler.email = _txtEmail.text;
     await _spieler.saveSpieler();
     // Tableau-Liste neu setzen, falls geändert
-    List<int> tabList = new List<int>();
+    List<int> tabList = [];
     _tableauList.forEach((element) {
       if (element.isSelected) {
         tabList.add(element.tableauID);

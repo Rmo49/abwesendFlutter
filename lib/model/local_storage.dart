@@ -8,6 +8,9 @@ import 'package:abwesend/model/globals.dart' as global;
 /// Die Lokalen-Daten lesen und speichern, ist ein Singelton
 class LocalStorage {
   String webAdress;
+  String scheme;
+  String host;
+  String path;
   String dbPw;
   String userName;
   String userPw;
@@ -21,7 +24,9 @@ class LocalStorage {
   }
 
   Map<String, dynamic> _toJson() => {
-    'webAdress': webAdress,
+    'scheme': scheme,
+    'host': host,
+    'path': path,
     'dbPw': dbPw,
     'userName': userName,
     'userPw': userPw,
@@ -29,7 +34,9 @@ class LocalStorage {
   };
 
   _fromJson(Map<String, dynamic> map) {
-    _instance.webAdress = map['webAdress'];
+    _instance.scheme = map['scheme'];
+    _instance.host = map['host'];
+    _instance.path = map['path'];
     _instance.dbPw = map['dbPw'];
     _instance.userName = map['userName'];
     _instance.userPw = map['userPw'];
@@ -72,38 +79,13 @@ class LocalStorage {
 
   /// Die Werte für die Vars setzen
   void initDefault() {
-    webAdress = "http://";
+    scheme = "https";
+    host = "web Adresse";
+    path = "Pfad";
     dbPw = "DB";
     userName = "Vorname";
-    userPw = "PW";
+    userPw = "pw";
     showAbDatum = "2020-01-01";
-  }
-
-  // die  Daten von einem file lesen
-  Future<String> readLocalDataOld() async {
-    try {
-      final file = await _localFile;
-      // Read the file
-      String contents = await file.readAsString();
-      List<String> locData = contents.split(";");
-      if (locData.length == 4) {
-        webAdress = locData.elementAt(0);
-        dbPw = locData.elementAt(1);
-        userName = locData.elementAt(2);
-        userPw = locData.elementAt(3);
-      }
-      else {
-        // default-Werte setzen
-        webAdress = "http://";
-        dbPw = "DB";
-        userName = "Vorname";
-        userPw = "PW";
-      }
-      return "";
-    } catch (e) {
-      // If encountering an error, return empty String
-      return e.toString();
-    }
   }
 
   /// Die Infos im lokalen File speichern
@@ -114,19 +96,6 @@ class LocalStorage {
     global.userName = userName;
   }
 
-  /// Die Infos im lokalen File speichern
-  void saveLocalDataOld() async {
-    StringBuffer sb = new StringBuffer();
-    sb.write(webAdress);
-    sb.write(";");
-    sb.write(dbPw);
-    sb.write(";");
-    sb.write(userName);
-    sb.write(";");
-    sb.write(userPw);
-    await _writeLocalData(sb.toString());
-    global.userName = userName;
-  }
 
   // user und Passwort getrennt duch ";"
   Future<File> _writeLocalData(String data) async {

@@ -3,7 +3,7 @@ class Matches {
   List<Match> matches;
 
   Matches.fromList(List<dynamic> matchList) {
-    matches = new List<Match>();
+    matches = [];
     matchList.forEach((element) {
       Match match = Match.fromMap(element);
       matches.add(match);

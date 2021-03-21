@@ -1,3 +1,4 @@
+URI noch port aufnehmen
 Spieler wirklich löschen, zuert fragen, vor delete
 Spieler ändern, mit Form
 

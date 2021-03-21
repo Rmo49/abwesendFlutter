@@ -15,7 +15,9 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   LocalStorage localStorage = LocalStorage();
 
-  TextEditingController _txtUrl = TextEditingController();
+  String _dropdownScheme = 'http';
+  TextEditingController _txtHost = TextEditingController();
+  TextEditingController _txtPath = TextEditingController();
   TextEditingController _txtDbPw = TextEditingController();
   TextEditingController _txtUser = TextEditingController();
   TextEditingController _txtUserPw = TextEditingController();
@@ -23,6 +25,7 @@ class _LoginState extends State<Login> {
 
   bool _showDbPw = false;
   bool _showUserPw = false;
+  int _txtErrorLines = 2;
 
   @override
   void initState() {
@@ -40,16 +43,15 @@ class _LoginState extends State<Login> {
   _readLocalData() async {
     String error = await localStorage.readLocalData();
     if (error.length > 0) {
-      setState(() {
-        _txtError.text = error;
-      });
+      setStateError(error);
     }
-    global.abDatumAnzeigen =
-        global.dateFormDb.parse(localStorage.showAbDatum);
+    global.abDatumAnzeigen = global.dateFormDb.parse(localStorage.showAbDatum);
   }
 
   _setVars() async {
-    _txtUrl.text = localStorage.webAdress;
+    _dropdownScheme = localStorage.scheme;
+    _txtHost.text = localStorage.host;
+    _txtPath.text = localStorage.path;
     _txtDbPw.text = localStorage.dbPw;
     _txtUser.text = localStorage.userName;
     _txtUserPw.text = localStorage.userPw;
@@ -64,21 +66,49 @@ class _LoginState extends State<Login> {
       ),
       body: Container(
           child: Column(children: <Widget>[
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(2.0),
-            child: TextField(
-              controller: _txtUrl,
-              decoration: InputDecoration(
-                  labelText: "Verbindung",
-                  hintText: "http://",
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(5.0)))),
+        Row(
+          children: [
+            Flexible(
+              flex: 1,
+              child: DropdownButton<String>(
+                  value: _dropdownScheme,
+                  onChanged: (String newValue) {
+                    setState(() {
+                      _dropdownScheme = newValue;
+                    });
+                  },
+                  items: <String>['http', 'https']
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList()),
             ),
-          ),
+            Flexible(
+              flex: 2,
+              child: TextField(
+                controller: _txtHost,
+                decoration: InputDecoration(
+                    labelText: "Host",
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(5.0)))),
+              ),
+            ),
+            Flexible(
+              flex: 2,
+              child: TextField(
+                controller: _txtPath,
+                decoration: InputDecoration(
+                    labelText: "Pfad",
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(5.0)))),
+              ),
+            )
+          ],
         ),
         Expanded(
-          child: RaisedButton(
+          child: ElevatedButton(
             child:
                 const Text('Verbindung testen', style: TextStyle(fontSize: 16)),
             onPressed: () {
@@ -114,7 +144,7 @@ class _LoginState extends State<Login> {
                 ),
               ),
               Expanded(
-                child: RaisedButton(
+                child: ElevatedButton(
                   child:
                       const Text('DB testen', style: TextStyle(fontSize: 16)),
                   onPressed: () {
@@ -170,7 +200,7 @@ class _LoginState extends State<Login> {
           ),
         ),
         Expanded(
-          child: RaisedButton(
+          child: ElevatedButton(
             child: const Text('Login', style: TextStyle(fontSize: 16)),
             onPressed: () {
               _loginCheck();
@@ -180,7 +210,7 @@ class _LoginState extends State<Login> {
         Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-              maxLines: 6,
+              maxLines: _txtErrorLines,
               controller: _txtError,
               readOnly: true,
             )),
@@ -190,33 +220,30 @@ class _LoginState extends State<Login> {
 
   /// Verbindung zu PHP-funktionen testen
   Future _connectTest() async {
-    if (_txtUrl.text.length < 10) {
-      setState(() {
-        _txtError.text = "Eine Web-Adresse eingeben";
-      });
+    if (_txtHost.text.length < 5) {
+      setStateError("Eine Web-Adresse eingeben");
     } else {
-      localStorage.webAdress = _txtUrl.text.trim();
+      localStorage.scheme = _dropdownScheme;
+      localStorage.host = _txtHost.text.trim();
+      localStorage.path = _txtPath.text.trim();
       localStorage.saveLocalData();
 
-      var url = localStorage.webAdress + "/testConnect.php";
-      // var url = "https://nomadus.ch/tca/db/testConnect.php";
+      Uri uri = Uri(
+          scheme: localStorage.scheme,
+          host: localStorage.host,
+          port: 0,
+          path: localStorage.path + "/testConnect.php");
       try {
-        final response = await http.post(url);
+        final response = await http.post(uri);
         if (response.statusCode == 200) {
-          setState(() {
-            _txtError.text = response.body;
-          });
+          setStateError(response.body + "\n" + uri.toString());
         } else {
-          setState(() {
-            _txtError.text = "Konnte keine Verbindung aufbauen, Status: " +
-                response.statusCode.toString();
-          });
+          setStateError("Konnte keine Verbindung aufbauen, Status: " +
+              response.statusCode.toString());
         }
       } catch (e) {
         print('Fehler:  $e');
-        setState(() {
-          _txtError.text = 'Ist eine Internet-Verbindung vorhanden? \n $e';
-        });
+        setStateError('Ist eine Internet-Verbindung vorhanden? \n $e');
       }
     }
   }
@@ -224,9 +251,7 @@ class _LoginState extends State<Login> {
   /// DB-Verbindung testen, ist passwort ok?
   Future _dbTest() async {
     if (_txtDbPw.text.length < 3) {
-      setState(() {
-        _txtError.text = "DB-Passwort zu kurz";
-      });
+      setStateError("DB-Passwort zu kurz");
       return;
     } else {
       await _readDbName();
@@ -234,29 +259,25 @@ class _LoginState extends State<Login> {
       localStorage.saveLocalData();
       global.dbPass = localStorage.dbPw;
 
-      var url = localStorage.webAdress + "/testDbPost.php";
+      Uri uri = Uri(
+          scheme: localStorage.scheme,
+          host: localStorage.host,
+          path: localStorage.path + "/testDbPost.php");
       try {
-        var response = await http.post(url, body: {
+        var response = await http.post(uri, body: {
           "dbname": global.dbName,
           "dbuser": global.dbUser,
           "dbpass": global.dbPass,
         });
 
         if (response.statusCode == 200) {
-          setState(() {
-            _txtError.text = response.body;
-          });
+          setStateError(response.body);
         } else {
-          setState(() {
-            _txtError.text =
-                "Passwort falsch, Status: " + response.statusCode.toString();
-          });
+          setStateError("Passwort falsch, Status: " + response.statusCode.toString());
         }
       } catch (e) {
         print('Fehler:  $e');
-        setState(() {
-          _txtError.text = 'Ist eine Internet-Verbindung vorhanden? \n $e';
-        });
+        setStateError('Ist eine Internet-Verbindung vorhanden? \n $e');
       }
     }
   }
@@ -264,9 +285,7 @@ class _LoginState extends State<Login> {
   /// login service zum prüfen, ob erlaubt, wenn ja, ruft home auf.
   Future _loginCheck() async {
     if ((_txtUser.text.length < 1) || (_txtUserPw.text.length < 1)) {
-      setState(() {
-        _txtError.text = "Du musst schon etwas eingeben";
-      });
+      setStateError("Du musst schon etwas eingeben");
       return;
     }
     String brand = "Browser";
@@ -277,9 +296,12 @@ class _LoginState extends State<Login> {
       device = androidInfo.device;
     }
 
-    var url = localStorage.webAdress + "/userCheck.php";
+    Uri uri = Uri(
+        scheme: localStorage.scheme,
+        host: localStorage.host,
+        path: localStorage.path + "/userCheck.php");
     try {
-      final response = await http.post(url, body: {
+      final response = await http.post(uri, body: {
         "userName": _txtUser.text.trim(),
         "passwort": _txtUserPw.text.trim(),
         "dbpass": _txtDbPw.text.trim(),
@@ -289,15 +311,18 @@ class _LoginState extends State<Login> {
 
       if (response.statusCode == 200) {
         if (response.body.startsWith("OK")) {
+          localStorage.scheme = _dropdownScheme;
+          localStorage.host = _txtHost.text.trim();
+          localStorage.path = _txtPath.text.trim();
           localStorage.userName = _txtUser.text.trim();
           localStorage.userPw = _txtUserPw.text.trim();
           localStorage.dbPw = _txtDbPw.text.trim();
           localStorage.saveLocalData();
           global.userName = localStorage.userName;
           global.dbPass = localStorage.dbPw;
-          global.abDatumAnzeigen =
-              global.dateFormDb.parse(localStorage.showAbDatum);
-
+          global.scheme = localStorage.scheme;
+          global.host = localStorage.host;
+          global.path = localStorage.path;
           // weitermachen
           await _readDbName();
           if (global.dbName.length > 0) {
@@ -306,34 +331,29 @@ class _LoginState extends State<Login> {
           Navigator.pushReplacementNamed(context, '/home');
         }
         if (response.body.startsWith("NOK")) {
-          setState(() {
-            _txtError.text = "falscher Benutzer Name oder Passwort";
-          });
+          setStateError("falscher Benutzer Name oder Passwort");
           return;
-        }
-        else {
-          _txtError.text = response.body;
+        } else {
+          setStateError(response.body);
         }
       } else {
-        setState(() {
-          _txtError.text = "falscher Benutzer Name oder Passwort";
-        });
+        setStateError("falscher Benutzer Name oder Passwort");
       }
     } catch (e) {
       print('Fehler:  $e');
-      setState(() {
-        _txtError.text =
-            'Kann Login-Check nicht ausführen, ist eine Internet-Verbindung vorhanden? \n $e';
-      });
+      setStateError('Kann Login-Check nicht ausführen, ist eine Internet-Verbindung vorhanden? \n $e');
       return;
     }
   }
 
   /// den Namen der Datenbank und DB-User lesen von Text-file auf Server
   Future _readDbName() async {
-    var url = localStorage.webAdress + "/readDbName.php";
+    Uri uri = Uri(
+        scheme: localStorage.scheme,
+        host: localStorage.host,
+        path: localStorage.path + "/readDbName.php");
     try {
-      final response = await http.post(url, body: {
+      final response = await http.post(uri, body: {
         "passwort": "tcaDb4123",
       });
       if (response.statusCode == 200) {
@@ -344,18 +364,26 @@ class _LoginState extends State<Login> {
           global.dbUser = dbInfo[1];
         }
       } else {
-        setState(() {
-          _txtError.text = response.body;
-        });
+        setStateError(response.body);
         return;
       }
     } catch (e) {
       print('Fehler:  $e');
-      setState(() {
-        _txtError.text =
-            'Kann DB-Name nicht lesen, ist eine Internet-Verbindung vorhanden? \n $e';
-      });
+      setStateError('Kann DB-Name nicht lesen, ist eine Internet-Verbindung vorhanden? \n $e');
       return;
     }
   }
+
+  /// Die Error-Message anzeigen
+  void setStateError(String message) {
+    double zeilen = message.length / 40;
+    _txtErrorLines = zeilen.round();
+    if (_txtErrorLines > 6) {
+      _txtErrorLines = 6;
+    }
+    setState(() {
+      _txtError.text = message;
+    });
+  }
+
 }

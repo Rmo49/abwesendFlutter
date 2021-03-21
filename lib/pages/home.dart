@@ -27,18 +27,18 @@ class _HomeState extends State<Home> {
 
   // Tableau in der selektionsliste
   TableauList _tableauList;
-  List<Tableau> _allTableau;
-  List<DropdownMenuItem<Tableau>> _dropdownTableauItems;
+  List _allTableau;
+  List _dropdownTableauItems;
   Tableau _selectedTableau;
 
   // Spieler Listen
   SpielerList _spielerList = SpielerList();
   // alle Spieler, wird einmal eingelesen, für reset, wenn alle anzeigen
-  List<SpielerShort> _spielerAlle;
+  List _spielerAlle;
   // Spieler eines Tableau
-  List<SpielerShort> _spielerTableau;
+  List _spielerTableau;
   // Die angezeigte Liste der Spieler
-  List<SpielerShort> _spielerShow = List<SpielerShort>();
+  List _spielerShow;
 
   @override
   void initState() {
@@ -134,7 +134,7 @@ class _HomeState extends State<Home> {
           Row(
             children: [
               Text("Tableau: "),
-              DropdownButton<Tableau>(
+              DropdownButton<dynamic>(
                   value: _selectedTableau,
                   items: _dropdownTableauItems,
                   onChanged: (value) {
@@ -168,12 +168,12 @@ class _HomeState extends State<Home> {
               flex: 1,
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: FlatButton(
+                child: TextButton(
                   child: Text(
                     'alle',
 //                  style: TextStyle(fontSize: 20.0),
                   ),
-                  color: Colors.orange[400],
+
                   onPressed: _selectAll,
                 ),
               ),
@@ -182,12 +182,11 @@ class _HomeState extends State<Home> {
               flex: 1,
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: FlatButton(
+                child: TextButton(
                   child: Text(
                     'keine',
 //                  style: TextStyle(fontSize: 20.0),
                   ),
-                  color: Colors.orange[400],
                   onPressed: _unselectAll,
                 ),
               ),
@@ -226,7 +225,7 @@ class _HomeState extends State<Home> {
 
   // Den Dropdown für Tableau erstellen
   void _buildDropDownMenuItems(List listItems) {
-    List<DropdownMenuItem<Tableau>> items = List();
+    List<DropdownMenuItem> items = [];
     // erster Eintrag leer
     Tableau tabLeer = new Tableau(-1, ' ', ' ', '0');
     items.add(DropdownMenuItem(
@@ -271,7 +270,7 @@ class _HomeState extends State<Home> {
 
   /// Wenn etwas im search-feld eingegeben wurde.
   void _filterSearchResults(String query) {
-    List<SpielerShort> tempList = List<SpielerShort>();
+    List tempList;
     if (query.isNotEmpty) {
       _spielerAlle.forEach((item) {
         if (item.names.toLowerCase().contains(query.toLowerCase())) {
@@ -315,7 +314,12 @@ class _HomeState extends State<Home> {
 
   /// Die globale Liste mit den ID's füllen
   void _fillSpielerList() {
-    global.spielerIdList.clear();
+    if (global.spielerIdList.length > 0) {
+      global.spielerIdList.clear();
+    }
+    else {
+      global.spielerIdList = [];
+    }
     _spielerShow.forEach((element) {
       if (element.isSelected) {
         global.spielerIdList.add(int.parse(element.spielerID));

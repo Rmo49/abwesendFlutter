@@ -13,7 +13,7 @@ class AbwesendShow extends StatefulWidget {
 
 class _AbwesendShowState extends State<AbwesendShow> {
   // lokale Vars
-  List<Spieler> _spielerList = new List<Spieler>();
+  List<Spieler> _spielerList = [];
   double _percent = 0;
   String _percentString = "";
 
@@ -69,7 +69,7 @@ class _AbwesendShowState extends State<AbwesendShow> {
   }
 
   Future<List<Spieler>> getSpielerList(List<int> spielerIdList) async {
-    List<Spieler> spielerListDb = new List<Spieler>();
+    List<Spieler> spielerListDb = [];
     for (int i = 0; i < spielerIdList.length; i++) {
       setState(() {
         _percent = i / spielerIdList.length;

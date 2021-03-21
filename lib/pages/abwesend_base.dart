@@ -10,7 +10,7 @@ class AbwesendBase {
   static List<TableCell> getCellsDatum(DateTime startDatum, int anzahlTage) {
     // Die Zeile mit dem Datum
     DateTime datum = startDatum;
-    List<TableCell> list = new List<TableCell>();
+    List<TableCell> list = [];
 
     for (int i = 0; i < anzahlTage; i++) {
       list.add(
@@ -34,7 +34,7 @@ class AbwesendBase {
 
   /// Abwesenheitszeile
   static List<TableCell> getCellsAbwesend(List<String> abwesendList, int von, int bis) {
-    List<TableCell> list = new List<TableCell>();
+    List<TableCell> list = [];
     // list.add(TableCell(child: Text(header, overflow: TextOverflow.ellipsis,)));
     for (int i = von; i < bis; i++) {
       if (i < abwesendList.length) {
@@ -49,7 +49,7 @@ class AbwesendBase {
   /// Abwesenheiten grafisch
   static List<TableCell> getCellsGrafik(
       Spieler spieler, List abwesendList, int von, int bis) {
-    List<TableCell> list = new List<TableCell>();
+    List<TableCell> list = [];
     // list.add(TableCell(
     //     child: Text(
     //   spieler.name,
@@ -77,7 +77,7 @@ class AbwesendBase {
 
   /// Gibt für einen Tag in der Liste die Matches zurück
   static List<MatchDisplay> getMatches(Spieler spieler, int day) {
-    List<MatchDisplay> matchDispalyList = new List<MatchDisplay>();
+    List<MatchDisplay> matchDispalyList = [];
     for (int i = 0; i < spieler.matches.length; i++) {
       MatchDisplay matchDisplay;
       // wenn Spiele an diesem Tag

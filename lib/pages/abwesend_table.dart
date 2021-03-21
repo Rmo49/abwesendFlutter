@@ -29,7 +29,7 @@ class AbwesendTable extends StatelessWidget {
 
   /// alle Zeilen der Tabelle anzeigen, iteration über alle Spieler
   List<Table> getTableList() {
-    List<Table> tableList = new List<Table>();
+    List<Table> tableList = [];
     tableList.add(getTableDatum());
     // iteration über alle Spieler
     spielerList.forEach((element) {
@@ -40,7 +40,7 @@ class AbwesendTable extends StatelessWidget {
 
   /// Tabelle mit Datum
   Table getTableDatum() {
-    List<TableRow> rowList = new List<TableRow>();
+    List<TableRow> rowList = [];
     rowList.add(getRowDatum('', global.abDatumAnzeigen));
 
     return Table(
@@ -61,7 +61,7 @@ class AbwesendTable extends StatelessWidget {
   List<TableCell> getCellsDatum(String header, DateTime startDatum) {
     // Die Zeile mit dem Datum
     DateTime datum = startDatum;
-    List<TableCell> list = new List<TableCell>();
+    List<TableCell> list = [];
     list.add(TableCell(child: Text(header)));
 
     for (int i = global.arrayStart; i < global.arrayLen; i++) {
@@ -80,7 +80,7 @@ class AbwesendTable extends StatelessWidget {
   /// Die Tabelle eines Spielers
   Table getTableSpieler(Spieler spieler) {
     List abwesendList = spieler.abwesend.split(';');
-    List<TableRow> rowList = new List<TableRow>();
+    List<TableRow> rowList = [];
     if (!global.nurGrafik) {
       rowList.add(getRowAbwesend(spieler.vorname, abwesendList));
     }
@@ -102,7 +102,7 @@ class AbwesendTable extends StatelessWidget {
   }
 
   List<TableCell> getCellAbwesend(String header, List abwesendList) {
-    List<TableCell> list = new List<TableCell>();
+    List<TableCell> list = [];
     list.add(TableCell(child: Text(header, overflow: TextOverflow.ellipsis,)));
     for (int i = global.arrayStart; i < global.arrayLen; i++) {
       if (i < abwesendList.length) {
@@ -120,7 +120,7 @@ class AbwesendTable extends StatelessWidget {
   }
 
   List<TableCell> getCellGrafik(Spieler spieler, List abwesendList) {
-    List<TableCell> list = new List<TableCell>();
+    List<TableCell> list = [];
     list.add(TableCell(child: Text(spieler.name, overflow: TextOverflow.ellipsis,)));
     for (int i = global.arrayStart; i < global.arrayLen; i++) {
       if (i < abwesendList.length) {
@@ -144,7 +144,7 @@ class AbwesendTable extends StatelessWidget {
 
   /// Gibt für einen Tag in der Liste die Matches zurück
   List<MatchDisplay> getMatches(Spieler spieler, int day) {
-    List<MatchDisplay> matchDispalyList = new List<MatchDisplay>();
+    List<MatchDisplay> matchDispalyList = [];
     for (int i = 0; i < spieler.matches.length; i++) {
       MatchDisplay matchDisplay;
       // wenn Spiele an diesem Tag

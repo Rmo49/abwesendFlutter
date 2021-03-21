@@ -26,7 +26,7 @@ class _AbwesendEditState extends State<AbwesendEdit> {
 
   /// Den ersten Spieler von der DB lesen
   Future readSpieler(List<int> spielerIdList) async {
-    List<Spieler> spielerList = new List<Spieler>();
+    List<Spieler> spielerList = [];
     if (spielerIdList.length > 0) {
       Spieler spieler = await Spieler.readSpieler(spielerIdList.elementAt(0));
       spielerList.add(spieler);
@@ -50,7 +50,7 @@ class _AbwesendEditState extends State<AbwesendEdit> {
 
   /// alle TextController initialisieren mit den init-Wert
   void _initTxtController() {
-    _txtList = new List<TextEditingController>();
+    _txtList = [];
     for (int i = 0; i < global.arrayLen; i++) {
       _txtList.add(new TextEditingController());
     }
@@ -108,7 +108,7 @@ class _AbwesendEditState extends State<AbwesendEdit> {
                             borderRadius: BorderRadius.all(Radius.circular(5.0)))),
                   ),
                 ),
-                RaisedButton(
+                ElevatedButton(
                   child: const Text('Wert in alle Wochentage eintragen',
                       style: TextStyle(fontSize: 16)),
                   onPressed: () {
@@ -118,7 +118,7 @@ class _AbwesendEditState extends State<AbwesendEdit> {
               ],
             ),
 
-            RaisedButton(
+            ElevatedButton(
               child: const Text('Speichern', style: TextStyle(fontSize: 16)),
               onPressed: () {
                 _speichern();
@@ -140,7 +140,7 @@ class _AbwesendEditState extends State<AbwesendEdit> {
 
   /// Die Eingabefelder für jeden Tag
   List<TableCell> _getTxtField(int von, int bis, BuildContext context) {
-    List<TableCell> rowList = new List<TableCell>();
+    List<TableCell> rowList = [];
     for (int i = von; i < bis; i++) {
       rowList.add(
         TableCell(

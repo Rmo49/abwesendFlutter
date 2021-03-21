@@ -11,7 +11,7 @@ class TableauData extends StatefulWidget {
 class _TableauDataState extends State<TableauData> {
   final _formKey = GlobalKey<FormState>();
   // Die angezeigte Liste der Tableau
-  List<Tableau> _tableauList = List<Tableau>();
+  List<Tableau> _tableauList = [];
   int _selectedID = -1;
   TextEditingController _txtPos = TextEditingController();
   TextEditingController _txtBezeichnung = TextEditingController();
@@ -130,17 +130,20 @@ class _TableauDataState extends State<TableauData> {
             ),
           ),
           Expanded(
-            child: DataTable(
-                  columns: [
-                    DataColumn(label: Text('id'), numeric: true),
-                    DataColumn(label: Text('pos'), numeric: true),
-                    DataColumn(label: Text('bezeichnung')),
-                    DataColumn(label: Text('konkurrenz'))
-                  ],
-                  rows: _getTableauRows(),
-                  columnSpacing: 8,
-                  dataRowHeight: 30,
-                         ),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: DataTable(
+                    columns: [
+                      DataColumn(label: Text('id'), numeric: true),
+                      DataColumn(label: Text('pos'), numeric: true),
+                      DataColumn(label: Text('bezeichnung')),
+                      DataColumn(label: Text('konkurrenz'))
+                    ],
+                    rows: _getTableauRows(),
+                    columnSpacing: 8,
+                    dataRowHeight: 30,
+                           ),
+            ),
           ),
         ],
       ),
@@ -149,7 +152,7 @@ class _TableauDataState extends State<TableauData> {
 
   /// Die Liste alle Tableau
   List<DataRow> _getTableauRows() {
-    List<DataRow> rowList = new List<DataRow>();
+    List<DataRow> rowList = [];
     _tableauList.forEach((element) {
       DataRow row = DataRow(
           cells: [
@@ -200,7 +203,7 @@ class _TableauDataState extends State<TableauData> {
     if (_formKey.currentState.validate()) {
       Tableau tableau = new Tableau(
           _selectedID, _txtPos.text, _txtBezeichnung.text, _txtKonkurren.text);
-      // String message = await tableau.save();
+      await tableau.save();
       // Anzeige leeren
       _neuesTableau();
       // damit neue Liste angezeigt wird

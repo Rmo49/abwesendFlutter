@@ -20,17 +20,21 @@ class Tableau {
         isSelected = false;
 
   Map<String, dynamic> toJson() => {
-    'tableauID': tableauID,
-    'position': position,
-    'bezeichnung': bezeichnung,
-    'konkurrenz': konkurrenz
-  };
+        'tableauID': tableauID,
+        'position': position,
+        'bezeichnung': bezeichnung,
+        'konkurrenz': konkurrenz
+      };
 
   Future<String> save() async {
     Map<String, dynamic> tableauJson = toJson();
     LocalStorage localStorage = LocalStorage();
-    var url = localStorage.webAdress + "/saveTableau.php";
-    var response = await http.post(url, body: {
+    Uri uri = Uri(
+      scheme: localStorage.scheme,
+      host: localStorage.host,
+      path: localStorage.path + "/saveTableau.php",
+    );
+    var response = await http.post(uri, body: {
       "dbname": global.dbName,
       "dbuser": global.dbUser,
       "dbpass": global.dbPass,
@@ -41,8 +45,11 @@ class Tableau {
 
   Future<String> delete() async {
     LocalStorage localStorage = LocalStorage();
-    var url = localStorage.webAdress + "/deleteTableau.php";
-    var response = await http.post(url, body: {
+    Uri uri = Uri(
+        scheme: localStorage.scheme,
+        host: localStorage.host,
+        path: localStorage.path + "/deleteTableau.php");
+    var response = await http.post(uri, body: {
       "dbname": global.dbName,
       "dbuser": global.dbUser,
       "dbpass": global.dbPass,
@@ -54,13 +61,16 @@ class Tableau {
 
 // Die Liste alller Tabelaux
 class TableauList {
-  List<Tableau> allTableau;
+  List allTableau;
 
   /// Alle Tableau von der DB lesen, diese werden in json-format geliefert
-  Future<List<Tableau>> readAllTableau() async {
-    var url = LocalStorage().webAdress + "/readTableau.php";
+  Future<List> readAllTableau() async {
+    Uri uri = Uri(
+        scheme: global.scheme,
+        host: global.host,
+        path: global.path + "/readTableau.php");
     try {
-      final response = await http.post(url, body: {
+      final response = await http.post(uri, body: {
         "dbname": global.dbName,
         "dbuser": global.dbUser,
         "dbpass": global.dbPass,
@@ -71,24 +81,26 @@ class TableauList {
       }
     } catch (e) {
       print('Error:  $e');
-      allTableau = new List<Tableau>();
+      List<Tableau> tabList = [];
       Tableau tableau = new Tableau(-1, '0', 'keine Daten', '0');
-      allTableau.add(tableau);
+      tabList.add(tableau);
+      allTableau = tabList;
     }
     return allTableau;
   }
 
+  /// Die Tableau Liste mit allen Werten füllen
   void _setTableauData(List tableauFromDb) {
-    List<Tableau> list = new List<Tableau>();
+    List<Tableau> tabList = [];
     tableauFromDb.forEach((element) {
       Map<String, dynamic> map = element;
       Tableau tableau = Tableau.fromMap(map);
-      list.add(tableau);
+      tabList.add(tableau);
     });
     // Liste sortieren
     Comparator<Tableau> tableauComparator =
         (a, b) => a.position.compareTo(b.position);
-    list.sort(tableauComparator);
-    allTableau = list;
+    tabList.sort(tableauComparator);
+    allTableau = tabList;
   }
 }

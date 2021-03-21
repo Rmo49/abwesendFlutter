@@ -13,11 +13,13 @@ class Config {
   static Future<String> readConfig() async {
     LocalStorage localStorage = LocalStorage();
     String message = "";
-    var url = localStorage.webAdress + "/readConfig.php";
-
+    Uri uri = Uri(
+        scheme: localStorage.scheme,
+        host: localStorage.host,
+        path: localStorage.path + "/readConfig.php");
     try {
       // var global;
-      final response = await http.post(url, body: {
+      final response = await http.post(uri, body: {
         "dbname": global.dbName,
         "dbuser": global.dbUser,
         "dbpass": global.dbPass,
@@ -68,10 +70,13 @@ class Config {
   static Future<String> saveConfig() async {
     LocalStorage localStorage = LocalStorage();
     String message = "";
-    var url = localStorage.webAdress + "/saveConfig.php";
+    Uri uri = Uri(
+        scheme: localStorage.scheme,
+        host: localStorage.host,
+        path: localStorage.path + "/readConfig.php");
     var config = json.encode(configMap);
     try {
-      final response = await http.post(url, body: {
+      final response = await http.post(uri, body: {
         "dbname": global.dbName,
         "dbuser": global.dbUser,
         "dbpass": global.dbPass,

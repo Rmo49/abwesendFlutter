@@ -22,10 +22,7 @@ class HomeDrawer {
             'Setup',
             style: TextStyle(fontSize: 20),
           ),
-          FlatButton(
-            color: Colors.orange[500],
-            textColor: Colors.white,
-            padding: EdgeInsets.all(10.0),
+          TextButton(
             onPressed: () {
               Navigator.pushNamed(context, '/einstellungen', arguments: {});
             },
@@ -37,10 +34,7 @@ class HomeDrawer {
               ),
             ]),
           ),
-          FlatButton(
-            color: Colors.orange[500],
-            textColor: Colors.white,
-            padding: EdgeInsets.all(10.0),
+          TextButton(
             onPressed: () {
               Navigator.pushNamed(context, '/tableau_data', arguments: {
                 'tableauID': -1,
@@ -54,31 +48,24 @@ class HomeDrawer {
               ),
             ]),
           ),
-          FlatButton(
-            color: Colors.orange[500],
-            textColor: Colors.white,
-            padding: EdgeInsets.all(10.0),
+          TextButton(
             onPressed: () {
-              Navigator.pushNamed(context, '/config_data', arguments: {}
-               );
+              Navigator.pushNamed(context, '/config_data', arguments: {});
             },
             child: Row(children: <Widget>[
               Icon(Icons.person_add),
               Text(
-                '  Config verwalten',
+                ' Config verwalten',
                 style: TextStyle(fontSize: 20.0),
               ),
             ]),
           ),
-          FlatButton(
-            color: Colors.orange[500],
-            textColor: Colors.white,
-            padding: EdgeInsets.all(10.0),
+          TextButton(
             onPressed: () => _passwortAendern(context),
             child: Row(children: <Widget>[
               Icon(Icons.person_add),
               Text(
-                '  Passwort ändern',
+                ' Passwort ändern',
                 style: TextStyle(fontSize: 20.0),
               ),
             ]),
@@ -136,7 +123,7 @@ class HomeDrawer {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: RaisedButton(
+              child: ElevatedButton(
                 child: Text("Speichern"),
                 onPressed: _setNewPassword,
               ),
@@ -153,7 +140,7 @@ class HomeDrawer {
             // usually buttons at the bottom of the dialog
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: RaisedButton(
+              child: ElevatedButton(
                 child: new Text("Schliessen"),
                 onPressed: () {
                   Navigator.of(context).pop();
@@ -176,9 +163,12 @@ class HomeDrawer {
 
   void _savePassword() async {
     LocalStorage localStorage = LocalStorage();
-    var url = localStorage.webAdress + "/userSet.php";
+    Uri uri = Uri(
+        scheme: localStorage.scheme,
+        host: localStorage.host,
+        path: localStorage.path + "/userSet.php");
     try {
-      final response = await http.post(url, body: {
+      final response = await http.post(uri, body: {
         "userName": global.userName,
         "passwort": txtPasswort.text,
       });

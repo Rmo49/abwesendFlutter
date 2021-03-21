@@ -11,7 +11,7 @@ description: Absence of player for a tennis tournament
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.14.0
+version: 1.15.0
 
 environment:
   sdk: ">=2.2.0 <3.0.0"
@@ -20,17 +20,17 @@ dependencies:
   flutter:
     sdk: flutter
 
-  http: 0.12.2
-  json_annotation: 3.0.1
-  intl: 0.16.1
-  path_provider: ^1.6.11
-  package_info: ^0.4.1
-  device_info: 0.4.2+4
+  http: ^0.13.1
+  json_annotation: ^4.0.1
+  intl: ^0.17.0
+  path_provider: ^2.0.1
+  package_info: ^2.0.0
+  device_info: ^2.0.0
   percent_indicator: ^2.1.5
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^0.1.2
+  cupertino_icons: ^1.0.2
   # Add the dependency for the Firebase Core Flutter SDK
 #  firebase_core: ^0.4.4+3
   # Add the dependency for the FlutterFire plugin for Google Analytics
@@ -42,8 +42,8 @@ dependencies:
 #  cloud_firestore: ^0.13.5
 
 dev_dependencies:
-  build_runner: 1.10.0
-  json_serializable: 3.3.0
+  build_runner: ^1.12.2
+  json_serializable: ^4.1.0
 
   flutter_test:
     sdk: flutter

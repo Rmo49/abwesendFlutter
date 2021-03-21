@@ -35,7 +35,7 @@ class Spieler {
       };
 
   setMatches(List<dynamic> matchList) {
-    matches = new List<Match>();
+    matches = [];
     matchList.forEach((element) {
       Match match = Match.fromMap(element);
       matches.add(match);
@@ -44,7 +44,7 @@ class Spieler {
 
   /// Die Liste der Tableau setzen, falls gelesen
   setTableaux(List<dynamic> data) {
-    tableauList = List<int>();
+    tableauList = [];
     for (int i = 0; i < data.length; i++) {
       String tabStr = data[i];
       tableauList.add(int.parse(tabStr));
@@ -60,8 +60,11 @@ class Spieler {
   /// Einen Spieler von der DB lesen.
   static Future<Spieler> readSpieler(int spielerID) async {
     LocalStorage localStorage = LocalStorage();
-    var url = localStorage.webAdress + "/readSpieler.php";
-    var response = await http.post(url, body: {
+    Uri uri = Uri(
+        scheme: localStorage.scheme,
+        host: localStorage.host,
+        path: localStorage.path + "/readSpieler.php");
+    var response = await http.post(uri, body: {
       "dbname": global.dbName,
       "dbuser": global.dbUser,
       "dbpass": global.dbPass,
@@ -81,8 +84,11 @@ class Spieler {
   Future<String> saveSpieler() async {
     Map<String, dynamic> spielerJson = toJson();
     LocalStorage localStorage = LocalStorage();
-    var url = localStorage.webAdress + "/saveSpieler.php";
-    var response = await http.post(url, body: {
+    Uri uri = Uri(
+        scheme: localStorage.scheme,
+        host: localStorage.host,
+        path: localStorage.path + "/saveSpieler.php");
+    var response = await http.post(uri, body: {
       "dbname": global.dbName,
       "dbuser": global.dbUser,
       "dbpass": global.dbPass,
@@ -95,8 +101,11 @@ class Spieler {
   /// der Liste beim spieler gesetzt
   Future readTableau() async {
     LocalStorage localStorage = LocalStorage();
-    var url = localStorage.webAdress + "/readSpielerTableau.php";
-    var response = await http.post(url, body: {
+    Uri uri = Uri(
+        scheme: localStorage.scheme,
+        host: localStorage.host,
+        path: localStorage.path + "/readSpielerTableau.php");
+    var response = await http.post(uri, body: {
       "dbname": global.dbName,
       "dbuser": global.dbUser,
       "dbpass": global.dbPass,
@@ -111,11 +120,14 @@ class Spieler {
   /// Beziehungen Spieler / Tableau speichern.
   Future saveSpielerTableau() async {
     LocalStorage localStorage = LocalStorage();
-    var url = localStorage.webAdress + "/saveSpielerTableau.php";
+    Uri uri = Uri(
+        scheme: localStorage.scheme,
+        host: localStorage.host,
+        path: localStorage.path + "/saveSpielerTableau.php");
     StringBuffer tabString = new StringBuffer();
     tabString.write(tableauList);
 
-    var response = await http.post(url, body: {
+    var response = await http.post(uri, body: {
       "dbname": global.dbName,
       "dbuser": global.dbUser,
       "dbpass": global.dbPass,
@@ -130,8 +142,11 @@ class Spieler {
   /// Den Spieler in der DB speichern
   Future<String> deleteSpieler() async {
     LocalStorage localStorage = LocalStorage();
-    var url = localStorage.webAdress + "/deleteSpieler.php";
-    var response = await http.post(url, body: {
+    Uri uri = Uri(
+        scheme: localStorage.scheme,
+        host: localStorage.host,
+        path: localStorage.path + "/deleteSpieler.php");
+    var response = await http.post(uri, body: {
       "dbname": global.dbName,
       "dbuser": global.dbUser,
       "dbpass": global.dbPass,
@@ -172,15 +187,18 @@ class MatchDisplay {
 /// Die Liste aller Spieler
 class SpielerList {
   // alle Spieler ohne Einschränkung
-  List<SpielerShort> spielerAlle;
+  List spielerAlle;
   // Spieler eines Tableau
-  List<SpielerShort> spielerTableau;
+  List spielerTableau;
 
   /// Kruzform aller Spieler von der DB lesen, diese werden in json-format geliefert
-  Future<List<SpielerShort>> readAllSpielerShort() async {
-    var url = LocalStorage().webAdress + "/readSpielerAll.php";
+  Future<List> readAllSpielerShort() async {
+    Uri uri = Uri(
+        scheme: global.scheme,
+        host: global.host,
+        path: global.path + "/readSpielerAll.php");
     try {
-      final response = await http.post(url, body: {
+      final response = await http.post(uri, body: {
         "dbname": global.dbName,
         "dbuser": global.dbUser,
         "dbpass": global.dbPass,
@@ -205,10 +223,13 @@ class SpielerList {
   }
 
   /// Alle Spieler eines Tableau lesen.
-  Future<List<SpielerShort>> readTableauSpielerShort(int tableauID) async {
-    var url = LocalStorage().webAdress + "/readTableauSpieler.php";
+  Future<List> readTableauSpielerShort(int tableauID) async {
+    Uri uri = Uri(
+        scheme: global.scheme,
+        host: global.host,
+        path: global.path + "/readTableauSpieler.php");
     try {
-      final response = await http.post(url, body: {
+      final response = await http.post(uri, body: {
         "dbname": global.dbName,
         "dbuser": global.dbUser,
         "dbpass": global.dbPass,
@@ -233,8 +254,8 @@ class SpielerList {
   }
 
   /// Die Listen mi den entsprechenden Spielern füllen
-  List<SpielerShort> setSpielerData(List spielerFromDb) {
-    List<SpielerShort> spielerList = new List<SpielerShort>();
+  List setSpielerData(List spielerFromDb) {
+    List<SpielerShort> spielerList = [];
     spielerFromDb.forEach((element) {
       Map<String, dynamic> map = element;
       // Name und Vorname zusammen in einem Feld
@@ -251,9 +272,9 @@ class SpielerList {
 
   /// Die SpielerListe setzen, wenn keine Spieler gefunden,
   /// oder sonstige Fehler
-  List<SpielerShort> setSpielerError(String errorMessage) {
+  List setSpielerError(String errorMessage) {
     SpielerShort spielerErr = new SpielerShort('-1', errorMessage, false);
-    List<SpielerShort> spielerListe = new List<SpielerShort>();
+    var spielerListe =  [];
     spielerListe.add(spielerErr);
     return spielerListe;
   }

@@ -12,6 +12,12 @@ String dbName;
 String dbUser;
 // das DB-Passwort ist immer gleich
 String dbPass;
+// Das Schema für Web (http / https)
+String scheme;
+// Der Host-name für Web
+String host;
+// Der Pfad, der erweitert wird
+String path;
 // Start- und Edd-Datum des Turniers
 DateTime startDatum;
 DateTime endDatum;
@@ -25,7 +31,7 @@ int arrayLen = 0;
 // Ersatz für modale transformation, da im build zu spät
 int tableauID = -1;
 // Die Liste der Spieler für die Anzeige der Abwesenheiten
-List<int> spielerIdList = new List<int>();
+List<int> spielerIdList = [];
 // wenn nur die Grafik in der Abwesend-Tabelle angezeigt werden soll
 bool nurGrafik = false;
 // Anfang und End-Zeiten für die Anzeige

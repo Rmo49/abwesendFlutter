@@ -82,7 +82,7 @@ class _ConfigDataState extends State<ConfigData> {
 
   // Die Liste alle Tableau
   List<DataRow> _getConfigRows() {
-    List<DataRow> rowList = new List<DataRow>();
+    List<DataRow> rowList = [];
     Config.configMap.forEach((key, value) {
       DataRow row = DataRow(
           cells: [
