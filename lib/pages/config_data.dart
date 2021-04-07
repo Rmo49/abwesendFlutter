@@ -1,6 +1,5 @@
 import 'package:abwesend/model/config.dart';
 import 'package:flutter/material.dart';
-import 'package:abwesend/model/globals.dart' as global;
 
 class ConfigData extends StatefulWidget {
   @override
@@ -27,63 +26,57 @@ class _ConfigDataState extends State<ConfigData> {
 
   @override
   Widget build(BuildContext context) {
-    if (global.userName.compareTo("ruedi") == 0) {
-      return new Scaffold(
-          appBar: AppBar(
-            title: Text('Config data'),
-            actions: <Widget>[
-              IconButton(
-                icon: const Icon(Icons.save),
-                iconSize: 30.0,
-                tooltip: 'Speichern',
-                onPressed: () {
-                  _speichern();
-                },
-              ),
-            ],
-          ),
-          body: Column(children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextFormField(
-                controller: _txtValue,
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return 'Wert eingeben';
-                  }
-                  return null;
-                },
-                keyboardType: TextInputType.text,
-                textInputAction: TextInputAction.next,
-                decoration: InputDecoration(
-                    labelText: "neuer Wert",
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(5.0)))),
-              ),
-            ),
-            Expanded(
-              child: DataTable(
-                columns: [
-                  DataColumn(label: Text('key')),
-                  DataColumn(label: Text('value')),
-                ],
-                rows: _getConfigRows(),
-                columnSpacing: 8,
-                dataRowHeight: 30,
-              ),
-            ),
-          ]));
-    }
     return new Scaffold(
         appBar: AppBar(
-      title: Text('Du darfst das nicht'),
-    ));
+          title: Text('Config data'),
+          actions: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.save),
+              iconSize: 30.0,
+              tooltip: 'Speichern',
+              onPressed: () {
+                _speichern();
+              },
+            ),
+          ],
+        ),
+        body: Column(children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextFormField(
+              controller: _txtValue,
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return 'Wert eingeben';
+                }
+                return null;
+              },
+              keyboardType: TextInputType.text,
+              textInputAction: TextInputAction.next,
+              decoration: InputDecoration(
+                  labelText: "neuer Wert",
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(5.0)))),
+            ),
+          ),
+          Expanded(
+            child: DataTable(
+              columns: [
+                DataColumn(label: Text('key')),
+                DataColumn(label: Text('value')),
+              ],
+              rows: _getConfigRows(),
+              columnSpacing: 8,
+              dataRowHeight: 30,
+            ),
+          ),
+        ]));
   }
 
   // Die Liste alle Tableau
   List<DataRow> _getConfigRows() {
     List<DataRow> rowList = [];
-    Config.configMap.forEach((key, value) {
+    Config.configMap!.forEach((key, value) {
       DataRow row = DataRow(
           cells: [
             DataCell(Text(key)),
@@ -98,22 +91,23 @@ class _ConfigDataState extends State<ConfigData> {
     return rowList;
   }
 
-  /// Die Eingabe füllen
+  /// Die Eingabe füllen, damit editiert werden kann
   void _fillEditTxt(String key) {
-    _txtValue.text = Config.configMap[key];
+    _txtValue.text = Config.configMap![key];
     setState(() {
       _selectedKey = key;
     });
   }
 
   /// Speichern, wenn was geändert
-  void _speichern() {
-    // TODO noch Berechtigung abfragen
-    Config.updateConfig(_selectedKey, _txtValue.text);
-    Config.saveConfig();
+  Future _speichern() async {
+    String message = await Config.saveConfig(_selectedKey, _txtValue.text);
+    if (message.startsWith('OK')) {
+      Config.updateConfig(_selectedKey, _txtValue.text);
+    }
+    _txtValue.text = message;
     setState(() {
       _selectedKey = " ";
-      _txtValue.text = "";
     });
   }
 }

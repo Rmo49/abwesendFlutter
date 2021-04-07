@@ -1,3 +1,4 @@
+import 'package:abwesend/model/my_uri.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -15,17 +16,17 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   LocalStorage localStorage = LocalStorage();
 
-  String _dropdownScheme = 'http';
+  String? _dropdownScheme = 'http';
   TextEditingController _txtHost = TextEditingController();
+  TextEditingController _txtPort = TextEditingController();
   TextEditingController _txtPath = TextEditingController();
   TextEditingController _txtDbPw = TextEditingController();
   TextEditingController _txtUser = TextEditingController();
   TextEditingController _txtUserPw = TextEditingController();
   TextEditingController _txtError = TextEditingController();
 
-  bool _showDbPw = false;
   bool _showUserPw = false;
-  int _txtErrorLines = 2;
+  int _txtErrorLines = 0;
 
   @override
   void initState() {
@@ -45,34 +46,41 @@ class _LoginState extends State<Login> {
     if (error.length > 0) {
       setStateError(error);
     }
-    global.abDatumAnzeigen = global.dateFormDb.parse(localStorage.showAbDatum);
+    global.abDatumAnzeigen = global.dateFormDb.parse(localStorage.showAbDatum!);
   }
 
   _setVars() async {
+    _txtErrorLines = 2;
     _dropdownScheme = localStorage.scheme;
-    _txtHost.text = localStorage.host;
-    _txtPath.text = localStorage.path;
-    _txtDbPw.text = localStorage.dbPw;
-    _txtUser.text = localStorage.userName;
-    _txtUserPw.text = localStorage.userPw;
+    _txtHost.text = localStorage.host!;
+    _txtPort.text = localStorage.port.toString();
+    _txtPath.text = localStorage.path!;
+    _txtDbPw.text = localStorage.dbPw!;
+    _txtUser.text = localStorage.userName!;
+    _txtUserPw.text = localStorage.userPw!;
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_txtErrorLines <= 0) {
+      _txtErrorLines = 2;
+    }
     return new Scaffold(
       appBar: new AppBar(
         title: new Text("TCA CM abwesend"),
       ),
       body: Container(
           child: Column(children: <Widget>[
+            Text('Verbindung zum Server',
+                style: Theme.of(context).textTheme.bodyText1),
         Row(
           children: [
             Flexible(
               flex: 1,
               child: DropdownButton<String>(
                   value: _dropdownScheme,
-                  onChanged: (String newValue) {
+                  onChanged: (String? newValue) {
                     setState(() {
                       _dropdownScheme = newValue;
                     });
@@ -91,6 +99,16 @@ class _LoginState extends State<Login> {
                 controller: _txtHost,
                 decoration: InputDecoration(
                     labelText: "Host",
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(5.0)))),
+              ),
+            ),
+            Flexible(
+              flex: 1,
+              child: TextField(
+                controller: _txtPort,
+                decoration: InputDecoration(
+                    labelText: "Port",
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(5.0)))),
               ),
@@ -128,18 +146,8 @@ class _LoginState extends State<Login> {
                       labelText: "DB Passwort",
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(5.0))),
-                      suffixIcon: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _showDbPw = !_showDbPw;
-                          });
-                        },
-                        child: Icon(
-                          _showDbPw ? Icons.visibility : Icons.visibility_off,
-                        ),
-                      ),
                     ),
-                    obscureText: !_showDbPw,
+                    obscureText: true,
                   ),
                 ),
               ),
@@ -225,18 +233,14 @@ class _LoginState extends State<Login> {
     } else {
       localStorage.scheme = _dropdownScheme;
       localStorage.host = _txtHost.text.trim();
+      localStorage.port = int.parse(_txtPort.text.trim());
       localStorage.path = _txtPath.text.trim();
       localStorage.saveLocalData();
 
-      Uri uri = Uri(
-          scheme: localStorage.scheme,
-          host: localStorage.host,
-          port: 0,
-          path: localStorage.path + "/testConnect.php");
       try {
-        final response = await http.post(uri);
+        final response = await http.post(MyUri.getUri("/testConnect.php"));
         if (response.statusCode == 200) {
-          setStateError(response.body + "\n" + uri.toString());
+          setStateError(response.body);
         } else {
           setStateError("Konnte keine Verbindung aufbauen, Status: " +
               response.statusCode.toString());
@@ -259,12 +263,9 @@ class _LoginState extends State<Login> {
       localStorage.saveLocalData();
       global.dbPass = localStorage.dbPw;
 
-      Uri uri = Uri(
-          scheme: localStorage.scheme,
-          host: localStorage.host,
-          path: localStorage.path + "/testDbPost.php");
       try {
-        var response = await http.post(uri, body: {
+        final response =
+            await http.post(MyUri.getUri("/testDbPost.php"), body: {
           "dbname": global.dbName,
           "dbuser": global.dbUser,
           "dbpass": global.dbPass,
@@ -273,7 +274,8 @@ class _LoginState extends State<Login> {
         if (response.statusCode == 200) {
           setStateError(response.body);
         } else {
-          setStateError("Passwort falsch, Status: " + response.statusCode.toString());
+          setStateError(
+              "Passwort falsch, Status: " + response.statusCode.toString());
         }
       } catch (e) {
         print('Fehler:  $e');
@@ -296,12 +298,8 @@ class _LoginState extends State<Login> {
       device = androidInfo.device;
     }
 
-    Uri uri = Uri(
-        scheme: localStorage.scheme,
-        host: localStorage.host,
-        path: localStorage.path + "/userCheck.php");
     try {
-      final response = await http.post(uri, body: {
+      final response = await http.post(MyUri.getUri("/userCheck.php"), body: {
         "userName": _txtUser.text.trim(),
         "passwort": _txtUserPw.text.trim(),
         "dbpass": _txtDbPw.text.trim(),
@@ -311,21 +309,10 @@ class _LoginState extends State<Login> {
 
       if (response.statusCode == 200) {
         if (response.body.startsWith("OK")) {
-          localStorage.scheme = _dropdownScheme;
-          localStorage.host = _txtHost.text.trim();
-          localStorage.path = _txtPath.text.trim();
-          localStorage.userName = _txtUser.text.trim();
-          localStorage.userPw = _txtUserPw.text.trim();
-          localStorage.dbPw = _txtDbPw.text.trim();
-          localStorage.saveLocalData();
-          global.userName = localStorage.userName;
-          global.dbPass = localStorage.dbPw;
-          global.scheme = localStorage.scheme;
-          global.host = localStorage.host;
-          global.path = localStorage.path;
+          await _setAllData();
           // weitermachen
           await _readDbName();
-          if (global.dbName.length > 0) {
+          if (global.dbName!.length > 0) {
             // await Config.readConfig();
           }
           Navigator.pushReplacementNamed(context, '/home');
@@ -341,19 +328,33 @@ class _LoginState extends State<Login> {
       }
     } catch (e) {
       print('Fehler:  $e');
-      setStateError('Kann Login-Check nicht ausführen, ist eine Internet-Verbindung vorhanden? \n $e');
+      setStateError(
+          'Kann Login-Check nicht ausführen, ist eine Internet-Verbindung vorhanden? \n $e');
       return;
     }
   }
 
+  Future _setAllData() async {
+    localStorage.scheme = _dropdownScheme;
+    localStorage.host = _txtHost.text.trim();
+    localStorage.port = int.parse(_txtPort.text.trim());
+    localStorage.path = _txtPath.text.trim();
+    localStorage.userName = _txtUser.text.trim();
+    localStorage.userPw = _txtUserPw.text.trim();
+    localStorage.dbPw = _txtDbPw.text.trim();
+    localStorage.saveLocalData();
+    global.userName = localStorage.userName!;
+    global.dbPass = localStorage.dbPw;
+    global.scheme = localStorage.scheme;
+    global.host = localStorage.host;
+    global.port = localStorage.port;
+    global.path = localStorage.path;
+  }
+
   /// den Namen der Datenbank und DB-User lesen von Text-file auf Server
   Future _readDbName() async {
-    Uri uri = Uri(
-        scheme: localStorage.scheme,
-        host: localStorage.host,
-        path: localStorage.path + "/readDbName.php");
     try {
-      final response = await http.post(uri, body: {
+      final response = await http.post(MyUri.getUri("/readDbName.php"), body: {
         "passwort": "tcaDb4123",
       });
       if (response.statusCode == 200) {
@@ -369,7 +370,8 @@ class _LoginState extends State<Login> {
       }
     } catch (e) {
       print('Fehler:  $e');
-      setStateError('Kann DB-Name nicht lesen, ist eine Internet-Verbindung vorhanden? \n $e');
+      setStateError(
+          'Kann DB-Name nicht lesen, ist eine Internet-Verbindung vorhanden? \n $e');
       return;
     }
   }
@@ -385,5 +387,4 @@ class _LoginState extends State<Login> {
       _txtError.text = message;
     });
   }
-
 }

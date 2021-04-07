@@ -3,26 +3,30 @@ import 'package:intl/intl.dart';
 
 // das Datenformat in der DB
 final DateFormat dateFormDb = new DateFormat('yyyy-MM-dd');
+// Werte initialisieren 0=Internet, 1=lokal
+final int initWerte = 1;
 
 // der Name des Benutzers
-String userName;
+String userName = '';
 // der Name der DB, wird von login gelesen
-String dbName;
+String? dbName;
 // der DB-User, muss bei der DB gesetzt sein
-String dbUser;
+String? dbUser;
 // das DB-Passwort ist immer gleich
-String dbPass;
+String? dbPass;
 // Das Schema für Web (http / https)
-String scheme;
+String? scheme;
 // Der Host-name für Web
-String host;
+String? host;
+// Der Port für Web
+int? port;
 // Der Pfad, der erweitert wird
-String path;
+String? path;
 // Start- und Edd-Datum des Turniers
-DateTime startDatum;
-DateTime endDatum;
+DateTime startDatum = new DateTime(2020,1,1);
+late DateTime endDatum;
 // ab diesem Datum anzeigen
-DateTime abDatumAnzeigen;
+DateTime abDatumAnzeigen = new DateTime(2020,1,1);
 // ab dieser Position anzeigen
 int arrayStart = 0;
 // die max. Länge des Arrays für alle Tage
@@ -32,8 +36,10 @@ int arrayLen = 0;
 int tableauID = -1;
 // Die Liste der Spieler für die Anzeige der Abwesenheiten
 List<int> spielerIdList = [];
+// Berechtigung um Config-Daten zu ändern, Komma getrennt
+String canChangeConfig = 'ruedi';
 // wenn nur die Grafik in der Abwesend-Tabelle angezeigt werden soll
-bool nurGrafik = false;
+bool? nurGrafik = false;
 // Anfang und End-Zeiten für die Anzeige
 double zeitWeekBegin = 17.0;
 double zeitWeekEnd = 22.0;

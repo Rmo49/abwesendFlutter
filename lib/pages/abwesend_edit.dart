@@ -10,11 +10,10 @@ class AbwesendEdit extends StatefulWidget {
 }
 
 class _AbwesendEditState extends State<AbwesendEdit> {
-
-  Spieler _spieler;
-  List<String> _abwesendList;
+  Spieler? _spieler;
+  List<String>? _abwesendList;
   int _anzCol = global.arrayLen;
-  List<TextEditingController> _txtList;
+  late List<TextEditingController> _txtList;
   TextEditingController txtWochenwert = TextEditingController();
   TextEditingController txtMeldung = TextEditingController();
 
@@ -26,9 +25,9 @@ class _AbwesendEditState extends State<AbwesendEdit> {
 
   /// Den ersten Spieler von der DB lesen
   Future readSpieler(List<int> spielerIdList) async {
-    List<Spieler> spielerList = [];
+    List<Spieler?> spielerList = [];
     if (spielerIdList.length > 0) {
-      Spieler spieler = await Spieler.readSpieler(spielerIdList.elementAt(0));
+      Spieler? spieler = await Spieler.readSpieler(spielerIdList.elementAt(0));
       spielerList.add(spieler);
     } else {
       spielerList.clear();
@@ -37,10 +36,10 @@ class _AbwesendEditState extends State<AbwesendEdit> {
   }
 
   /// nachedem alles eingelesen wurde
-  void doSetState(List<Spieler> spielerList) {
+  void doSetState(List<Spieler?> spielerList) {
     _spieler = spielerList.first;
     if (_spieler != null) {
-      _abwesendList = _spieler.abwesend.split(';');
+      _abwesendList = _spieler!.abwesend!.split(';');
       _initTxtController();
     }
     setState(() {
@@ -65,10 +64,22 @@ class _AbwesendEditState extends State<AbwesendEdit> {
     return new Scaffold(
         appBar: AppBar(
           title: Text('Abwesenheiten eintragen'),
+          actions: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.save),
+              iconSize: 30.0,
+              tooltip: 'Speichern',
+              onPressed: () {
+                _speichern();
+              },
+            ),
+          ],
         ),
         body: Column(
           children: [
-            Text(_spieler.vorname + ' ' + _spieler.name),
+            Text(_spieler!.vorname! + ' ' + _spieler!.name!,
+              style: Theme.of(context).textTheme.bodyText1,
+            ),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Table(
@@ -93,36 +104,34 @@ class _AbwesendEditState extends State<AbwesendEdit> {
                     )
                   ]),
             ),
-            SizedBox(height: 30,),
+            SizedBox(
+              height: 30,
+            ),
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SizedBox(
-                  width: 60,
+                  width: 100,
                   child: TextField(
                     controller: txtWochenwert,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                         labelText: "Wochenwert",
-                        hintText: "-18",
                         border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(5.0)))),
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(5.0)))),
                   ),
                 ),
-                ElevatedButton(
-                  child: const Text('Wert in alle Wochentage eintragen',
-                      style: TextStyle(fontSize: 16)),
-                  onPressed: () {
-                    _setWochenwert();
-                  },
+                Container(
+                  padding: EdgeInsets.only(left: 10),
+                  child: ElevatedButton(
+                    child: const Text('Wert in alle Wochentage eintragen'),
+                    onPressed: () {
+                      _setWochenwert();
+                    },
+                  ),
                 ),
               ],
-            ),
-
-            ElevatedButton(
-              child: const Text('Speichern', style: TextStyle(fontSize: 16)),
-              onPressed: () {
-                _speichern();
-              },
             ),
             Expanded(
               child: Padding(
@@ -151,7 +160,7 @@ class _AbwesendEditState extends State<AbwesendEdit> {
           onEditingComplete: () => FocusScope.of(context).nextFocus(),
         )),
       );
-      _txtList[i].text = _abwesendList[i];
+      _txtList[i].text = _abwesendList![i];
     }
     return rowList;
   }
@@ -168,10 +177,10 @@ class _AbwesendEditState extends State<AbwesendEdit> {
   /// Speichern des geänderten Spieler in DB
   void _speichern() async {
     for (int i = 0; i < _anzCol; i++) {
-      _abwesendList[i] = _txtList[i].text;
+      _abwesendList![i] = _txtList[i].text;
     }
-    _spieler.abwesend = _abwesendList.join(';');
-    String result = await _spieler.saveSpieler();
+    _spieler!.abwesend = _abwesendList!.join(';');
+    String result = await _spieler!.saveSpieler();
     setState(() {
       txtMeldung.text = result;
     });

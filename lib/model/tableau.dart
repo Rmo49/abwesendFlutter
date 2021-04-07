@@ -1,14 +1,15 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:abwesend/model/local_storage.dart';
 import 'package:abwesend/model/globals.dart' as global;
+
+import 'my_uri.dart';
 
 class Tableau {
   int tableauID;
-  String bezeichnung;
-  String konkurrenz;
-  String position;
-  bool isSelected;
+  String? bezeichnung;
+  String? konkurrenz;
+  String? position;
+  late bool isSelected;
 
   Tableau(this.tableauID, this.position, this.bezeichnung, this.konkurrenz);
 
@@ -28,13 +29,7 @@ class Tableau {
 
   Future<String> save() async {
     Map<String, dynamic> tableauJson = toJson();
-    LocalStorage localStorage = LocalStorage();
-    Uri uri = Uri(
-      scheme: localStorage.scheme,
-      host: localStorage.host,
-      path: localStorage.path + "/saveTableau.php",
-    );
-    var response = await http.post(uri, body: {
+    final response = await http.post(MyUri.getUri("/saveTableau.php"), body: {
       "dbname": global.dbName,
       "dbuser": global.dbUser,
       "dbpass": global.dbPass,
@@ -44,12 +39,7 @@ class Tableau {
   }
 
   Future<String> delete() async {
-    LocalStorage localStorage = LocalStorage();
-    Uri uri = Uri(
-        scheme: localStorage.scheme,
-        host: localStorage.host,
-        path: localStorage.path + "/deleteTableau.php");
-    var response = await http.post(uri, body: {
+    final response = await http.post(MyUri.getUri("/deleteTableau.php"), body: {
       "dbname": global.dbName,
       "dbuser": global.dbUser,
       "dbpass": global.dbPass,
@@ -61,16 +51,12 @@ class Tableau {
 
 // Die Liste alller Tabelaux
 class TableauList {
-  List allTableau;
+  List? allTableau;
 
   /// Alle Tableau von der DB lesen, diese werden in json-format geliefert
-  Future<List> readAllTableau() async {
-    Uri uri = Uri(
-        scheme: global.scheme,
-        host: global.host,
-        path: global.path + "/readTableau.php");
+  Future<List?> readAllTableau() async {
     try {
-      final response = await http.post(uri, body: {
+      final response = await http.post(MyUri.getUri("/readTableau.php"), body: {
         "dbname": global.dbName,
         "dbuser": global.dbUser,
         "dbpass": global.dbPass,
@@ -99,7 +85,7 @@ class TableauList {
     });
     // Liste sortieren
     Comparator<Tableau> tableauComparator =
-        (a, b) => a.position.compareTo(b.position);
+        (a, b) => a.position!.compareTo(b.position!);
     tabList.sort(tableauComparator);
     allTableau = tabList;
   }

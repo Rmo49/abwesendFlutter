@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
 class AlertPopup {
-  String _title;
-  TextEditingController _textContr;
+  late String _title;
+  TextEditingController? _textContr;
   int zeilen = 1;
 
-  BuildContext _context;
+  late BuildContext _context;
 
   AlertPopup(String title, String meldung, BuildContext context) {
     _title = title;
     _textContr = TextEditingController();
-    _textContr.text = meldung;
+    _textContr!.text = meldung;
     _context = context;
     double len = meldung.length / 20;
     zeilen = len.round();

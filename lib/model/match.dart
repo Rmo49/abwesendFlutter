@@ -1,18 +1,18 @@
 /// Alle Matches eines Spielers
 class Matches {
-  List<Match> matches;
+  List<Match>? matches;
 
   Matches.fromList(List<dynamic> matchList) {
     matches = [];
     matchList.forEach((element) {
       Match match = Match.fromMap(element);
-      matches.add(match);
+      matches!.add(match);
     });
   }
 
-  Match elementAt(int i) {
+  Match? elementAt(int i) {
     if (matches != null) {
-      return matches.elementAt(i);
+      return matches!.elementAt(i);
     }
     return null;
   }
@@ -21,8 +21,8 @@ class Matches {
 /// Attribute von einem Match
 class Match {
   final int day;
-  final String time;
-  final String type;
+  final String? time;
+  final String? type;
 
   Match(this.day, this.time, this.type);
 

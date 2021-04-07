@@ -13,7 +13,7 @@ class AbwesendShow extends StatefulWidget {
 
 class _AbwesendShowState extends State<AbwesendShow> {
   // lokale Vars
-  List<Spieler> _spielerList = [];
+  List<Spieler?> _spielerList = [];
   double _percent = 0;
   String _percentString = "";
 
@@ -64,12 +64,12 @@ class _AbwesendShowState extends State<AbwesendShow> {
 
   /// Spieler von der DB lesen, dieser werden in json-format geliefert
   Future readAllSpieler(List<int> spielerIdList) async {
-    List<Spieler> spielerAllDb = await getSpielerList(spielerIdList);
+    List<Spieler?> spielerAllDb = await getSpielerList(spielerIdList);
     doSetState(spielerAllDb);
   }
 
-  Future<List<Spieler>> getSpielerList(List<int> spielerIdList) async {
-    List<Spieler> spielerListDb = [];
+  Future<List<Spieler?>> getSpielerList(List<int> spielerIdList) async {
+    List<Spieler?> spielerListDb = [];
     for (int i = 0; i < spielerIdList.length; i++) {
       setState(() {
         _percent = i / spielerIdList.length;
@@ -82,7 +82,7 @@ class _AbwesendShowState extends State<AbwesendShow> {
     return spielerListDb;
   }
 
-  void doSetState(List<Spieler> spielerAllDb) {
+  void doSetState(List<Spieler?> spielerAllDb) {
     setState(() {
       _spielerList = spielerAllDb;
     });

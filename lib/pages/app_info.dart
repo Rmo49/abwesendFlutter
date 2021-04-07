@@ -8,12 +8,12 @@ class AppInfo {
   String packageName = "";
   String version = "";
   String buildNumber = "";
-  String datenbank = global.dbName;
+  String? datenbank = global.dbName;
 
   void showAppInfo(BuildContext context) async {
     if (kIsWeb) {
-      version = "1.15.0";
-      buildNumber = "15";
+      version = "1.16.0";
+      buildNumber = "16";
     } else {
       PackageInfo packageInfo = await PackageInfo.fromPlatform();
 

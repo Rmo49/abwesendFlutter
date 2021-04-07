@@ -39,7 +39,7 @@ class _EinstellungenState extends State<Einstellungen> {
             ),
             controlAffinity: ListTileControlAffinity.leading,
             value: global.nurGrafik,
-            onChanged: (bool value) {
+            onChanged: (bool? value) {
               setState(() {
                 global.nurGrafik = value;
               });

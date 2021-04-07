@@ -1,4 +1,5 @@
 import 'package:abwesend/model/local_storage.dart';
+import 'package:abwesend/model/my_uri.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:abwesend/model/globals.dart' as global;
@@ -18,9 +19,9 @@ class HomeDrawer {
           Container(
             margin: EdgeInsets.only(top: 30),
           ),
-          const Text(
+          Text(
             'Setup',
-            style: TextStyle(fontSize: 20),
+            style: Theme.of(context).textTheme.bodyText1,
           ),
           TextButton(
             onPressed: () {
@@ -41,7 +42,7 @@ class HomeDrawer {
               });
             },
             child: Row(children: <Widget>[
-              Icon(Icons.person_add),
+              Icon(Icons.article_outlined),
               Text(
                 '  Tableau verwalten',
                 style: TextStyle(fontSize: 20.0),
@@ -53,7 +54,7 @@ class HomeDrawer {
               Navigator.pushNamed(context, '/config_data', arguments: {});
             },
             child: Row(children: <Widget>[
-              Icon(Icons.person_add),
+              Icon(Icons.apps),
               Text(
                 ' Config verwalten',
                 style: TextStyle(fontSize: 20.0),
@@ -63,25 +64,34 @@ class HomeDrawer {
           TextButton(
             onPressed: () => _passwortAendern(context),
             child: Row(children: <Widget>[
-              Icon(Icons.person_add),
+              Icon(Icons.accessibility),
               Text(
                 ' Passwort ändern',
                 style: TextStyle(fontSize: 20.0),
               ),
             ]),
           ),
-          ElevatedButton(
-            child: const Text('App Info'),
-            onPressed: () => _showAppInfo(context),
+          Container(
+            padding: EdgeInsets.all(5),
+            child: ElevatedButton(
+              child: const Text('App Info'),
+              onPressed: () => _showAppInfo(context),
+            ),
           ),
-          ElevatedButton(
-            onPressed: () => _logout(context),
-            child: const Text('Logout'),
+          Container(
+            padding: EdgeInsets.all(5),
+            child: ElevatedButton(
+              onPressed: () => _logout(context),
+              child: const Text('Logout'),
+            ),
           ),
-          // ElevatedButton(
-          // onPressed: _closeDrawer,
-          // child: const Text('Close Drawer'),
-          // ),
+          Container(
+            padding: EdgeInsets.all(5),
+            child: ElevatedButton(
+            onPressed: () => _closeDrawer(context),
+            child: const Text('Close'),
+            ),
+          ),
         ],
       ),
     );
@@ -94,6 +104,10 @@ class HomeDrawer {
 
   void _logout(BuildContext context) {
     Navigator.pushReplacementNamed(context, '/login');
+  }
+
+  void _closeDrawer(BuildContext context) {
+    Navigator.pop(context);
   }
 
   //---- Popup Paswort ändern --------------------
@@ -162,18 +176,14 @@ class HomeDrawer {
   }
 
   void _savePassword() async {
-    LocalStorage localStorage = LocalStorage();
-    Uri uri = Uri(
-        scheme: localStorage.scheme,
-        host: localStorage.host,
-        path: localStorage.path + "/userSet.php");
     try {
-      final response = await http.post(uri, body: {
+      final response = await http.post(MyUri.getUri("/userSet.php"), body: {
         "userName": global.userName,
         "passwort": txtPasswort.text,
       });
 
       if (response.statusCode == 200) {
+        LocalStorage localStorage = LocalStorage();
         if (response.body.startsWith("OK")) {
           localStorage.userPw = txtPasswort.text;
           localStorage.saveLocalData();

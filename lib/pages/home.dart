@@ -17,7 +17,6 @@ class Home extends StatefulWidget {
 
 /// Der Hauptscreen
 class _HomeState extends State<Home> {
-
   final DateFormat _dateForm = new DateFormat('d.M.yyyy');
   TextEditingController _txtDatumStart = TextEditingController();
 
@@ -26,19 +25,19 @@ class _HomeState extends State<Home> {
   HomeDrawer _homeDrawer = new HomeDrawer();
 
   // Tableau in der selektionsliste
-  TableauList _tableauList;
-  List _allTableau;
-  List _dropdownTableauItems;
-  Tableau _selectedTableau;
+  late TableauList _tableauList;
+  List? _allTableau;
+  List? _dropdownTableauItems;
+  Tableau? _selectedTableau;
 
   // Spieler Listen
   SpielerList _spielerList = SpielerList();
   // alle Spieler, wird einmal eingelesen, für reset, wenn alle anzeigen
-  List _spielerAlle;
+  List? _spielerAlle;
   // Spieler eines Tableau
-  List _spielerTableau;
+  List? _spielerTableau;
   // Die angezeigte Liste der Spieler
-  List _spielerShow;
+  List? _spielerShow;
 
   @override
   void initState() {
@@ -57,10 +56,19 @@ class _HomeState extends State<Home> {
   Future _initConfig() async {
     String message = await Config.readConfig();
     if (message.length > 0) {
-      AlertPopup alert = AlertPopup(
-          'Config', 'kann Config nicht lesen', context);
+      AlertPopup alert =
+          AlertPopup('Config', message, context);
       await alert.showMyDialog();
+      return;
     }
+    // wenn abDatumAnzeigen noch nicht gesetzt, dann wurde locals nicht
+    // richtig eingelesen
+    if ((global.abDatumAnzeigen.compareTo(global.startDatum) < 0) ||
+            (global.abDatumAnzeigen.compareTo(global.endDatum) > 0))
+    {
+      global.abDatumAnzeigen = global.startDatum;
+    }
+
   }
 
   Future _initSpieler() async {
@@ -76,7 +84,7 @@ class _HomeState extends State<Home> {
     _tableauList = new TableauList();
     _allTableau = await _tableauList.readAllTableau();
     setState(() {
-      _buildDropDownMenuItems(_allTableau);
+      _buildDropDownMenuItems(_allTableau!);
     });
   }
 
@@ -136,7 +144,7 @@ class _HomeState extends State<Home> {
               Text("Tableau: "),
               DropdownButton<dynamic>(
                   value: _selectedTableau,
-                  items: _dropdownTableauItems,
+                  items: _dropdownTableauItems as List<DropdownMenuItem<dynamic>>?,
                   onChanged: (value) {
                     _selectedTableau = value;
                     _readSpielerTableau(value.tableauID);
@@ -160,7 +168,7 @@ class _HomeState extends State<Home> {
                       prefixIcon: Icon(Icons.search),
                       border: OutlineInputBorder(
                           borderRadius:
-                          BorderRadius.all(Radius.circular(10.0)))),
+                              BorderRadius.all(Radius.circular(10.0)))),
                 ),
               ),
             ),
@@ -173,7 +181,6 @@ class _HomeState extends State<Home> {
                     'alle',
 //                  style: TextStyle(fontSize: 20.0),
                   ),
-
                   onPressed: _selectAll,
                 ),
               ),
@@ -195,10 +202,10 @@ class _HomeState extends State<Home> {
 
           Expanded(
               child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: _spielerShow == null ? 0 : _spielerShow.length,
-                itemBuilder: _getListOfSpieler,
-              )),
+            shrinkWrap: true,
+            itemCount: _spielerShow == null ? 0 : _spielerShow!.length,
+            itemBuilder: _getListOfSpieler,
+          )),
         ]),
       ),
 
@@ -209,7 +216,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-   // Wenn ein Tableau selektiert wurde
+  // Wenn ein Tableau selektiert wurde
   void _readSpielerTableau(int tableauID) async {
     if (tableauID < 0) {
       setState(() {
@@ -229,13 +236,13 @@ class _HomeState extends State<Home> {
     // erster Eintrag leer
     Tableau tabLeer = new Tableau(-1, ' ', ' ', '0');
     items.add(DropdownMenuItem(
-      child: Text(tabLeer.bezeichnung),
+      child: Text(tabLeer.bezeichnung!),
       value: tabLeer,
     ));
-    for (Tableau tableau in listItems) {
+    for (Tableau tableau in listItems as Iterable<Tableau>) {
       items.add(
         DropdownMenuItem(
-          child: Text(tableau.bezeichnung),
+          child: Text(tableau.bezeichnung!),
           value: tableau,
         ),
       );
@@ -247,18 +254,18 @@ class _HomeState extends State<Home> {
   Widget _getListOfSpieler(BuildContext context, int index) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 2),
-      color: _spielerShow[index].isSelected ? Colors.orange[300] : Colors.white,
+      color: _spielerShow![index].isSelected ? Colors.orange[300] : Colors.white,
       // height: 30.0,
       child: ListTile(
         title: Text(
-          '${_spielerShow.elementAt(index).names}',
+          '${_spielerShow!.elementAt(index).names}',
           style: TextStyle(fontSize: 18.0),
 //          style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 1.2),
         ),
         dense: true,
         onTap: () {
           setState(() {
-            _spielerShow[index].isSelected = !_spielerShow[index].isSelected;
+            _spielerShow![index].isSelected = !_spielerShow![index].isSelected;
           });
         },
         onLongPress: () {
@@ -270,35 +277,36 @@ class _HomeState extends State<Home> {
 
   /// Wenn etwas im search-feld eingegeben wurde.
   void _filterSearchResults(String query) {
-    List tempList;
+    late List tempList = [];
     if (query.isNotEmpty) {
-      _spielerAlle.forEach((item) {
+      _spielerAlle!.forEach((item) {
         if (item.names.toLowerCase().contains(query.toLowerCase())) {
           tempList.add(item);
         }
       });
       setState(() {
-        _spielerShow.clear();
-        _spielerShow.addAll(tempList);
+        _spielerShow!.clear();
+        _spielerShow!.addAll(tempList);
       });
       return;
     } else {
       setState(() {
         // zurücksetzen auf Ausgang: alle oder Tableau
-        _spielerShow.clear();
-        _spielerShow.addAll(_spielerAlle);
+        _spielerShow!.clear();
+        _spielerShow!.addAll(_spielerAlle!);
       });
     }
   }
 
   // alle Spieler selektieren,
   void _selectAll() {
-    if (_spielerShow.length > 20) {
-      AlertPopup popup = AlertPopup("Spieler anzeigen", "das wären zuviele Spieler", context);
+    if (_spielerShow!.length > 20) {
+      AlertPopup popup =
+          AlertPopup("Spieler anzeigen", "das wären zuviele Spieler", context);
       popup.showMyDialog();
       return;
     }
-    _spielerShow.forEach((element) {
+    _spielerShow!.forEach((element) {
       element.isSelected = true;
     });
     setState(() {});
@@ -306,7 +314,7 @@ class _HomeState extends State<Home> {
 
   /// keine selektieren
   void _unselectAll() {
-    _spielerShow.forEach((element) {
+    _spielerShow!.forEach((element) {
       element.isSelected = false;
     });
     setState(() {});
@@ -316,11 +324,10 @@ class _HomeState extends State<Home> {
   void _fillSpielerList() {
     if (global.spielerIdList.length > 0) {
       global.spielerIdList.clear();
-    }
-    else {
+    } else {
       global.spielerIdList = [];
     }
-    _spielerShow.forEach((element) {
+    _spielerShow!.forEach((element) {
       if (element.isSelected) {
         global.spielerIdList.add(int.parse(element.spielerID));
       }

@@ -1,16 +1,11 @@
-URI noch port aufnehmen
+
 Spieler wirklich löschen, zuert fragen, vor delete
 Spieler ändern, mit Form
-
-Einstell-Werte lokal speichern: "nur Grafik"
-
-Tableau, Config Liste wenn nochmals selektiert, dann ausblenden
-
+Icons inaktiv, wenn noch nicht verwendet werden kann
 
 Design anschauen mit Theme
-für Orientation siehe: Flutter > Cookbook > Design / UI based on orientation
+
 Check Start wenn keine Internet Verbindung, wie kann ich das anzeigen?
-Config ändern mehrere Namen eintragen für Berechtigung
 
 Spiele einlesen mit sep. Java App
 Mail versenden

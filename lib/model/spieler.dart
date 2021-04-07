@@ -1,18 +1,18 @@
 import 'dart:convert';
+import 'package:abwesend/model/my_uri.dart';
 import 'package:http/http.dart' as http;
 import 'package:abwesend/model/globals.dart' as global;
-import 'package:abwesend/model/local_storage.dart';
 import 'package:abwesend/model/match.dart';
 
 class Spieler {
-  int spielerID;
-  String name;
-  String vorname;
-  String email;
-  String abwesend;
-  String begin; // Begin datum des Truniers
-  List<Match> matches;
-  List<int> tableauList;
+  int? spielerID;
+  String? name;
+  String? vorname;
+  String? email;
+  String? abwesend;
+  String? begin; // Begin datum des Truniers
+  late List<Match> matches;
+  List<int>? tableauList;
 
   Spieler(this.name, this.vorname, this.email);
 
@@ -47,24 +47,19 @@ class Spieler {
     tableauList = [];
     for (int i = 0; i < data.length; i++) {
       String tabStr = data[i];
-      tableauList.add(int.parse(tabStr));
+      tableauList!.add(int.parse(tabStr));
     }
   }
 
   // Die Liste der Tableau wieder setzen (falls geändert)
   void resetTableauList(List<int> newList) {
-    tableauList.clear();
+    tableauList!.clear();
     tableauList = newList;
   }
 
   /// Einen Spieler von der DB lesen.
-  static Future<Spieler> readSpieler(int spielerID) async {
-    LocalStorage localStorage = LocalStorage();
-    Uri uri = Uri(
-        scheme: localStorage.scheme,
-        host: localStorage.host,
-        path: localStorage.path + "/readSpieler.php");
-    var response = await http.post(uri, body: {
+  static Future<Spieler?> readSpieler(int spielerID) async {
+    final response = await http.post(MyUri.getUri("/readSpieler.php"), body: {
       "dbname": global.dbName,
       "dbuser": global.dbUser,
       "dbpass": global.dbPass,
@@ -83,12 +78,7 @@ class Spieler {
   /// Den Spieler in der DB speichern
   Future<String> saveSpieler() async {
     Map<String, dynamic> spielerJson = toJson();
-    LocalStorage localStorage = LocalStorage();
-    Uri uri = Uri(
-        scheme: localStorage.scheme,
-        host: localStorage.host,
-        path: localStorage.path + "/saveSpieler.php");
-    var response = await http.post(uri, body: {
+    final response = await http.post(MyUri.getUri("/saveSpieler.php"), body: {
       "dbname": global.dbName,
       "dbuser": global.dbUser,
       "dbpass": global.dbPass,
@@ -100,12 +90,8 @@ class Spieler {
   /// Alle Tableau zum Spieler von der DB lesen, diese werden
   /// der Liste beim spieler gesetzt
   Future readTableau() async {
-    LocalStorage localStorage = LocalStorage();
-    Uri uri = Uri(
-        scheme: localStorage.scheme,
-        host: localStorage.host,
-        path: localStorage.path + "/readSpielerTableau.php");
-    var response = await http.post(uri, body: {
+    final response =
+        await http.post(MyUri.getUri("/readSpielerTableau.php"), body: {
       "dbname": global.dbName,
       "dbuser": global.dbUser,
       "dbpass": global.dbPass,
@@ -119,15 +105,10 @@ class Spieler {
 
   /// Beziehungen Spieler / Tableau speichern.
   Future saveSpielerTableau() async {
-    LocalStorage localStorage = LocalStorage();
-    Uri uri = Uri(
-        scheme: localStorage.scheme,
-        host: localStorage.host,
-        path: localStorage.path + "/saveSpielerTableau.php");
     StringBuffer tabString = new StringBuffer();
     tabString.write(tableauList);
-
-    var response = await http.post(uri, body: {
+    final response =
+        await http.post(MyUri.getUri("/saveSpielerTableau.php"), body: {
       "dbname": global.dbName,
       "dbuser": global.dbUser,
       "dbpass": global.dbPass,
@@ -141,12 +122,7 @@ class Spieler {
 
   /// Den Spieler in der DB speichern
   Future<String> deleteSpieler() async {
-    LocalStorage localStorage = LocalStorage();
-    Uri uri = Uri(
-        scheme: localStorage.scheme,
-        host: localStorage.host,
-        path: localStorage.path + "/deleteSpieler.php");
-    var response = await http.post(uri, body: {
+    final response = await http.post(MyUri.getUri("/deleteSpieler.php"), body: {
       "dbname": global.dbName,
       "dbuser": global.dbUser,
       "dbpass": global.dbPass,
@@ -154,13 +130,12 @@ class Spieler {
     });
     return response.body;
   }
-
 }
 
 /// Spieler kurzform, um in einer Liste anzuzeigen
 class SpielerShort {
-  final String spielerID;
-  final String names;
+  final String? spielerID;
+  final String? names;
   bool isSelected;
 
   SpielerShort(this.spielerID, this.names, this.isSelected);
@@ -174,7 +149,7 @@ class SpielerShort {
 /// Attribute von einem Match zur Darstellung
 class MatchDisplay {
   final double pos;
-  final String type;
+  final String? type;
 
   MatchDisplay(this.pos, this.type);
 
@@ -187,18 +162,15 @@ class MatchDisplay {
 /// Die Liste aller Spieler
 class SpielerList {
   // alle Spieler ohne Einschränkung
-  List spielerAlle;
+  List<SpielerShort> spielerAlle = [];
   // Spieler eines Tableau
-  List spielerTableau;
+  List? spielerTableau;
 
   /// Kruzform aller Spieler von der DB lesen, diese werden in json-format geliefert
-  Future<List> readAllSpielerShort() async {
-    Uri uri = Uri(
-        scheme: global.scheme,
-        host: global.host,
-        path: global.path + "/readSpielerAll.php");
+  Future<List?> readAllSpielerShort() async {
     try {
-      final response = await http.post(uri, body: {
+      final response =
+          await http.post(MyUri.getUri("/readSpielerAll.php"), body: {
         "dbname": global.dbName,
         "dbuser": global.dbUser,
         "dbpass": global.dbPass,
@@ -223,13 +195,10 @@ class SpielerList {
   }
 
   /// Alle Spieler eines Tableau lesen.
-  Future<List> readTableauSpielerShort(int tableauID) async {
-    Uri uri = Uri(
-        scheme: global.scheme,
-        host: global.host,
-        path: global.path + "/readTableauSpieler.php");
+  Future<List?> readTableauSpielerShort(int tableauID) async {
     try {
-      final response = await http.post(uri, body: {
+      final response =
+          await http.post(MyUri.getUri("/readTableauSpieler.php"), body: {
         "dbname": global.dbName,
         "dbuser": global.dbUser,
         "dbpass": global.dbPass,
@@ -254,7 +223,7 @@ class SpielerList {
   }
 
   /// Die Listen mi den entsprechenden Spielern füllen
-  List setSpielerData(List spielerFromDb) {
+  List<SpielerShort> setSpielerData(List spielerFromDb) {
     List<SpielerShort> spielerList = [];
     spielerFromDb.forEach((element) {
       Map<String, dynamic> map = element;
@@ -265,16 +234,16 @@ class SpielerList {
     });
     // Liste sortieren
     Comparator<SpielerShort> spielerComparator =
-        (a, b) => a.names.compareTo(b.names);
+        (a, b) => a.names!.compareTo(b.names!);
     spielerList.sort(spielerComparator);
     return spielerList;
   }
 
   /// Die SpielerListe setzen, wenn keine Spieler gefunden,
   /// oder sonstige Fehler
-  List setSpielerError(String errorMessage) {
+  List<SpielerShort> setSpielerError(String errorMessage) {
     SpielerShort spielerErr = new SpielerShort('-1', errorMessage, false);
-    var spielerListe =  [];
+    List<SpielerShort> spielerListe = [];
     spielerListe.add(spielerErr);
     return spielerListe;
   }

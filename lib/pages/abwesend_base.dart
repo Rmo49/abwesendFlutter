@@ -7,16 +7,16 @@ import 'package:abwesend/model/spieler.dart';
 class AbwesendBase {
   static final DateFormat dateFormList = new DateFormat('d.M.');
 
-  static List<TableCell> getCellsDatum(DateTime startDatum, int anzahlTage) {
+  static List<TableCell> getCellsDatum(DateTime? startDatum, int anzahlTage) {
     // Die Zeile mit dem Datum
-    DateTime datum = startDatum;
+    DateTime? datum = startDatum;
     List<TableCell> list = [];
 
     for (int i = 0; i < anzahlTage; i++) {
       list.add(
         TableCell(
             child: Container(
-          child: Text(dateFormList.format(datum)),
+          child: Text(dateFormList.format(datum!)),
           color: isWeekend(i) ? Colors.grey : Colors.white,
         )),
       );
@@ -27,17 +27,17 @@ class AbwesendBase {
 
   /// Ist die Position im Array ein Weekend?
   static bool isWeekend(int pos) {
-    DateTime datum = global.startDatum;
+    DateTime? datum = global.startDatum;
     datum = global.startDatum.add(Duration(days: pos));
     return (datum.weekday >= 6);
   }
 
   /// Abwesenheitszeile
-  static List<TableCell> getCellsAbwesend(List<String> abwesendList, int von, int bis) {
+  static List<TableCell> getCellsAbwesend(List<String>? abwesendList, int von, int bis) {
     List<TableCell> list = [];
     // list.add(TableCell(child: Text(header, overflow: TextOverflow.ellipsis,)));
     for (int i = von; i < bis; i++) {
-      if (i < abwesendList.length) {
+      if (i < abwesendList!.length) {
         list.add(
           TableCell(child: Text(abwesendList[i])),
         );
@@ -48,7 +48,7 @@ class AbwesendBase {
 
   /// Abwesenheiten grafisch
   static List<TableCell> getCellsGrafik(
-      Spieler spieler, List abwesendList, int von, int bis) {
+      Spieler? spieler, List? abwesendList, int von, int bis) {
     List<TableCell> list = [];
     // list.add(TableCell(
     //     child: Text(
@@ -56,12 +56,12 @@ class AbwesendBase {
     //   overflow: TextOverflow.ellipsis,
     // )));
     for (int i = von; i < bis; i++) {
-      if (i < abwesendList.length) {
+      if (i < abwesendList!.length) {
         String abwTag = abwesendList[i];
         double abwStart = getPosStart(abwTag, isWeekend(i));
         double abwEnd = getPosEnd(abwTag, isWeekend(i), abwStart);
         // matches, wenn von diesem Tag
-        List<MatchDisplay> matchDisplayList = getMatches(spieler, i);
+        List<MatchDisplay> matchDisplayList = getMatches(spieler!, i);
         MyPainter painter = MyPainter(abwStart, abwEnd, matchDisplayList);
         list.add(
           TableCell(
@@ -82,7 +82,7 @@ class AbwesendBase {
       MatchDisplay matchDisplay;
       // wenn Spiele an diesem Tag
       if (spieler.matches.elementAt(i).day == day) {
-        double pos = getPosTime(spieler.matches[i].time, isWeekend(day));
+        double pos = getPosTime(spieler.matches[i].time!, isWeekend(day));
         if (pos >= 0.8) {
           pos = 0.8;
         }
@@ -96,7 +96,7 @@ class AbwesendBase {
   /// Berechnet die Start Position, 0..1 innerhalb der Zeitspannen
   /// von Start-Zeit und Ende
   static double getPosStart(String abwTag, bool isWeekend) {
-    if ((abwTag == null) || (abwTag.length <= 0)) {
+    if (abwTag.length <= 0) {
       // nichts zeichnen
       return 1;
     }
@@ -174,8 +174,8 @@ class MyPainter extends CustomPainter {
   MyPainter(this.posStart, this.posEnd, this.matchDisplayList);
 
   final painterAbw = Paint()..color = Colors.deepOrangeAccent;
-  final painterEinzel = Paint()..color = Colors.blue[700];
-  final painterDoppel = Paint()..color = Colors.green[700];
+  final painterEinzel = Paint()..color = Colors.blue[700]!;
+  final painterDoppel = Paint()..color = Colors.green[700]!;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -184,11 +184,11 @@ class MyPainter extends CustomPainter {
       double width = (posEnd * size.width) - left;
       canvas.drawRect(Rect.fromLTWH(left, 0.0, width, size.height), painterAbw);
     }
-    if (matchDisplayList != null) {
+    if (matchDisplayList.isNotEmpty) {
       matchDisplayList.forEach((match) {
         if (match.pos < 1) {
           double left = match.pos * size.width;
-          if (match.type.contains('E')) {
+          if (match.type!.contains('E')) {
             canvas.drawRect(
                 Rect.fromLTWH(left, 0.0, 8, size.height), painterEinzel);
           } else {

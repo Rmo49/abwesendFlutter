@@ -11,7 +11,7 @@ class TableauData extends StatefulWidget {
 class _TableauDataState extends State<TableauData> {
   final _formKey = GlobalKey<FormState>();
   // Die angezeigte Liste der Tableau
-  List<Tableau> _tableauList = [];
+  List<Tableau>? _tableauList = [];
   int _selectedID = -1;
   TextEditingController _txtPos = TextEditingController();
   TextEditingController _txtBezeichnung = TextEditingController();
@@ -27,7 +27,7 @@ class _TableauDataState extends State<TableauData> {
     TableauList tList = TableauList();
     await tList.readAllTableau();
     setState(() {
-      _tableauList = tList.allTableau;
+      _tableauList = tList.allTableau as List<Tableau>?;
     });
   }
 
@@ -35,7 +35,7 @@ class _TableauDataState extends State<TableauData> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: AppBar(
-        title: Text('Neues Tableau'),
+        title: Text('Tableau verwalten'),
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.add),
@@ -74,7 +74,7 @@ class _TableauDataState extends State<TableauData> {
                   child: TextFormField(
                     controller: _txtPos,
                     validator: (value) {
-                      if (value.isEmpty) {
+                      if (value!.isEmpty) {
                         return 'Wert eingeben';
                       }
                       return null;
@@ -94,7 +94,7 @@ class _TableauDataState extends State<TableauData> {
                   child: TextFormField(
                     controller: _txtBezeichnung,
                     validator: (value) {
-                      if (value.isEmpty) {
+                      if (value!.isEmpty) {
                         return 'Wert eingeben';
                       }
                       return null;
@@ -113,7 +113,7 @@ class _TableauDataState extends State<TableauData> {
                   child: TextFormField(
                     controller: _txtKonkurren,
                     validator: (value) {
-                      if (value.isEmpty) {
+                      if (value!.isEmpty) {
                         return 'Wert eingeben';
                       }
                       return null;
@@ -153,7 +153,7 @@ class _TableauDataState extends State<TableauData> {
   /// Die Liste alle Tableau
   List<DataRow> _getTableauRows() {
     List<DataRow> rowList = [];
-    _tableauList.forEach((element) {
+    _tableauList!.forEach((element) {
       DataRow row = DataRow(
           cells: [
             DataCell(Text(element.tableauID.toString())),
@@ -172,11 +172,11 @@ class _TableauDataState extends State<TableauData> {
 
   /// Die Anzeige mit selektierte füllen
   void _fillEditTxt(int selectedID) {
-    _tableauList.forEach((element) {
+    _tableauList!.forEach((element) {
       if (element.tableauID == selectedID) {
         _txtPos.text = element.position.toString();
-        _txtBezeichnung.text = element.bezeichnung;
-        _txtKonkurren.text = element.konkurrenz;
+        _txtBezeichnung.text = element.bezeichnung!;
+        _txtKonkurren.text = element.konkurrenz!;
       }
     });
     setState(() {
@@ -200,14 +200,14 @@ class _TableauDataState extends State<TableauData> {
     if (_selectedID >= 0) {
       // TODO: zuerst vergleichen mit dem bestehenden Eintrag
     }
-    if (_formKey.currentState.validate()) {
+    if (_formKey.currentState!.validate()) {
       Tableau tableau = new Tableau(
           _selectedID, _txtPos.text, _txtBezeichnung.text, _txtKonkurren.text);
       await tableau.save();
       // Anzeige leeren
       _neuesTableau();
       // damit neue Liste angezeigt wird
-      _tableauList.clear();
+      _tableauList!.clear();
       _readData();
     }
   }
@@ -221,7 +221,7 @@ class _TableauDataState extends State<TableauData> {
     }
     _neuesTableau();
     // damit neue Liste angezeigt wird
-    _tableauList.clear();
+    _tableauList!.clear();
     _readData();
   }
 }

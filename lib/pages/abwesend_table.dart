@@ -12,7 +12,7 @@ class AbwesendTable extends StatelessWidget {
   final BorderSide borderSide = BorderSide(color: Colors.blueGrey, width: 1.0, style: BorderStyle.solid);
 
 //  final Spieler spieler;
-  final List<Spieler> spielerList;
+  final List<Spieler?>? spielerList;
 
   // Konstruktor
   AbwesendTable({this.spielerList});
@@ -32,8 +32,8 @@ class AbwesendTable extends StatelessWidget {
     List<Table> tableList = [];
     tableList.add(getTableDatum());
     // iteration über alle Spieler
-    spielerList.forEach((element) {
-      tableList.add(getTableSpieler(element));
+    spielerList!.forEach((element) {
+      tableList.add(getTableSpieler(element!));
     });
     return tableList;
   }
@@ -54,13 +54,13 @@ class AbwesendTable extends StatelessWidget {
   }
 
   /// Zeile Datum
-  TableRow getRowDatum(String header, DateTime startDatum) {
+  TableRow getRowDatum(String header, DateTime? startDatum) {
     return TableRow(children: getCellsDatum(header, startDatum));
   }
 
-  List<TableCell> getCellsDatum(String header, DateTime startDatum) {
+  List<TableCell> getCellsDatum(String header, DateTime? startDatum) {
     // Die Zeile mit dem Datum
-    DateTime datum = startDatum;
+    DateTime? datum = startDatum;
     List<TableCell> list = [];
     list.add(TableCell(child: Text(header)));
 
@@ -68,7 +68,7 @@ class AbwesendTable extends StatelessWidget {
       list.add(
         TableCell(
             child: Container(
-              child: Text(dateFormList.format(datum)),
+              child: Text(dateFormList.format(datum!)),
               color: isWeekend(i) ? Colors.grey : Colors.white,
             )),
       );
@@ -79,10 +79,10 @@ class AbwesendTable extends StatelessWidget {
 
   /// Die Tabelle eines Spielers
   Table getTableSpieler(Spieler spieler) {
-    List abwesendList = spieler.abwesend.split(';');
+    List abwesendList = spieler.abwesend!.split(';');
     List<TableRow> rowList = [];
-    if (!global.nurGrafik) {
-      rowList.add(getRowAbwesend(spieler.vorname, abwesendList));
+    if (!global.nurGrafik!) {
+      rowList.add(getRowAbwesend(spieler.vorname!, abwesendList));
     }
     rowList.add(getRowGrafik(spieler, abwesendList));
 
@@ -121,7 +121,7 @@ class AbwesendTable extends StatelessWidget {
 
   List<TableCell> getCellGrafik(Spieler spieler, List abwesendList) {
     List<TableCell> list = [];
-    list.add(TableCell(child: Text(spieler.name, overflow: TextOverflow.ellipsis,)));
+    list.add(TableCell(child: Text(spieler.name!, overflow: TextOverflow.ellipsis,)));
     for (int i = global.arrayStart; i < global.arrayLen; i++) {
       if (i < abwesendList.length) {
         String abwTag = abwesendList[i];
@@ -149,7 +149,7 @@ class AbwesendTable extends StatelessWidget {
       MatchDisplay matchDisplay;
       // wenn Spiele an diesem Tag
       if (spieler.matches.elementAt(i).day == day) {
-        double pos = getPosTime(spieler.matches[i].time, isWeekend(day));
+        double pos = getPosTime(spieler.matches[i].time!, isWeekend(day));
         if (pos >= 0.8) {
           pos = 0.8;
         }
@@ -165,7 +165,7 @@ class AbwesendTable extends StatelessWidget {
   /// Berechnet die Start Position, 0..1 innerhalb der Zeitspannen
   /// von Start-Zeit und Ende
   double getPosStart(String abwTag, bool isWeekend) {
-    if ((abwTag == null) || (abwTag.length <= 0)) {
+    if (abwTag.length <= 0) {
       // nichts zeichnen
       return 1;
     }
@@ -233,7 +233,7 @@ class AbwesendTable extends StatelessWidget {
 
   /// Ist die Position im Array ein Weekend?
   bool isWeekend(int pos) {
-    DateTime datum = global.startDatum;
+    DateTime? datum = global.startDatum;
     datum = global.startDatum.add(Duration(days: pos));
 //    for (int i = 0; i < global.arrayLen; i++) {
     return (datum.weekday >= 6);
@@ -251,8 +251,8 @@ class MyPainter extends CustomPainter {
   MyPainter(this.posStart, this.posEnd, this.matchDisplayList);
 
   final painterAbw = Paint()..color = Colors.deepOrangeAccent;
-  final painterEinzel = Paint()..color = Colors.blue[700];
-  final painterDoppel = Paint()..color = Colors.green[700];
+  final painterEinzel = Paint()..color = Colors.blue[700]!;
+  final painterDoppel = Paint()..color = Colors.green[700]!;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -261,11 +261,11 @@ class MyPainter extends CustomPainter {
       double width = (posEnd * size.width) - left;
       canvas.drawRect(Rect.fromLTWH(left, 0.0, width, size.height), painterAbw);
     }
-    if (matchDisplayList != null) {
+    if (matchDisplayList.isNotEmpty) {
       matchDisplayList.forEach((match) {
         if (match.pos < 1) {
           double left = match.pos * size.width;
-          if (match.type.contains('E')) {
+          if (match.type!.contains('E')) {
             canvas.drawRect(
                 Rect.fromLTWH(left, 0.0, 8, size.height), painterEinzel);
           } else {
