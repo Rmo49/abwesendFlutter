@@ -53,7 +53,7 @@ class _SpielerAdminState extends State<SpielerAdmin> {
   Future _readTableau() async {
     TableauList tableau = TableauList();
     await tableau.readAllTableau();
-    _tableauList = tableau.allTableau as List<Tableau>?;
+    _tableauList = tableau.allTableau;
   }
 
   /// Einlesen der Tableaux eines Spielers
@@ -118,7 +118,7 @@ class _SpielerAdminState extends State<SpielerAdmin> {
             iconSize: 30.0,
             tooltip: 'Spieler löschen',
             onPressed: () {
-              _spielerLoeschen();
+              _showDeleteDialog(context);
             },
           ),
         ],
@@ -305,10 +305,44 @@ class _SpielerAdminState extends State<SpielerAdmin> {
     setState(() {});
   }
 
+  void _showDeleteDialog(BuildContext context) {
+    // set up the buttons
+    Widget cancelButton = ElevatedButton(
+        child: Text("Abbrechen"),
+      onPressed: () => Navigator.pop(context)
+    );
+    Widget deleteButton = ElevatedButton(
+      child: Text("Löschen"),
+      onPressed: () => _spielerLoeschen(),
+
+    );
+        // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Spieler löschen"),
+      content: Text("Soll Spieler gelöscht werden?"),
+      actions: [
+        cancelButton,
+        deleteButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
   void _spielerLoeschen() async {
     String result = await _spieler!.deleteSpieler();
-    AlertPopup alert = AlertPopup('Spieler löschen', result, context);
-    await alert.showMyDialog();
-    Navigator.pushReplacementNamed(context, '/home');
+    if (result.startsWith('SQL')) {
+      AlertPopup alert = AlertPopup('Spieler löschen', result, context);
+      await alert.showMyDialog();
+    }
+    else {
+      Navigator.pushReplacementNamed(context, '/home');
+    }
   }
 }

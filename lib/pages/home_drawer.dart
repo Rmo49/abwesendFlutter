@@ -81,15 +81,15 @@ class HomeDrawer {
           Container(
             padding: EdgeInsets.all(5),
             child: ElevatedButton(
-              onPressed: () => _logout(context),
-              child: const Text('Logout'),
+            onPressed: () => _closeDrawer(context),
+            child: const Text('Close'),
             ),
           ),
           Container(
             padding: EdgeInsets.all(5),
             child: ElevatedButton(
-            onPressed: () => _closeDrawer(context),
-            child: const Text('Close'),
+              onPressed: () => _logout(context),
+              child: const Text('Logout'),
             ),
           ),
         ],

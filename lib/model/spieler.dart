@@ -43,7 +43,7 @@ class Spieler {
   }
 
   /// Die Liste der Tableau setzen, falls gelesen
-  setTableaux(List<dynamic> data) {
+  _setTableaux(List<dynamic> data) {
     tableauList = [];
     for (int i = 0; i < data.length; i++) {
       String tabStr = data[i];
@@ -99,7 +99,7 @@ class Spieler {
     });
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
-      setTableaux(data);
+      _setTableaux(data);
     }
   }
 
@@ -164,10 +164,10 @@ class SpielerList {
   // alle Spieler ohne Einschränkung
   List<SpielerShort> spielerAlle = [];
   // Spieler eines Tableau
-  List? spielerTableau;
+  List<SpielerShort> spielerTableau = [];
 
   /// Kruzform aller Spieler von der DB lesen, diese werden in json-format geliefert
-  Future<List?> readAllSpielerShort() async {
+  Future<List<SpielerShort>> readAllSpielerShort() async {
     try {
       final response =
           await http.post(MyUri.getUri("/readSpielerAll.php"), body: {
@@ -195,7 +195,7 @@ class SpielerList {
   }
 
   /// Alle Spieler eines Tableau lesen.
-  Future<List?> readTableauSpielerShort(int tableauID) async {
+  Future<List<SpielerShort>> readTableauSpielerShort(int tableauID) async {
     try {
       final response =
           await http.post(MyUri.getUri("/readTableauSpieler.php"), body: {

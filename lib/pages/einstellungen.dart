@@ -18,7 +18,6 @@ class _EinstellungenState extends State<Einstellungen> {
   void initState() {
     super.initState();
     _abDatum = _dateLong.format(global.abDatumAnzeigen);
-
   }
 
   @override
@@ -85,14 +84,20 @@ class _EinstellungenState extends State<Einstellungen> {
 
   /// Die Liste mit allen möglichen Datum
   List<Widget> _getDatumButtons() {
-    List<ElevatedButton> list = [];
+    List<GestureDetector> list = [];
     DateTime datum = global.startDatum;
     while (datum.compareTo(global.endDatum) < 0) {
       DateTime datumButton = datum;
       list.add(
-        ElevatedButton(
-                    child: Text(_dateShort.format(datumButton)),
-          onPressed: () {
+        GestureDetector(
+          child: Container(
+              padding: EdgeInsets.all(10),
+              color: Colors.orange,
+              child: Text(
+                _dateShort.format(datumButton),
+                style: TextStyle(fontSize: 16),
+              )),
+          onTap: () {
             _getSelectedDatum(datumButton);
           },
         ),

@@ -1,6 +1,5 @@
+Wie Daten im Login speichern, von homepage?
 
-Spieler wirklich löschen, zuert fragen, vor delete
-Spieler ändern, mit Form
 Icons inaktiv, wenn noch nicht verwendet werden kann
 
 Design anschauen mit Theme

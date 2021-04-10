@@ -20,24 +20,26 @@ class _HomeState extends State<Home> {
   final DateFormat _dateForm = new DateFormat('d.M.yyyy');
   TextEditingController _txtDatumStart = TextEditingController();
 
-  TextEditingController txtNameSuchen = TextEditingController();
+  TextEditingController _txtNameSuchen = TextEditingController();
 
   HomeDrawer _homeDrawer = new HomeDrawer();
 
-  // Tableau in der selektionsliste
+  // Zugriff auf die Tableau-Date
   late TableauList _tableauList;
-  List? _allTableau;
-  List? _dropdownTableauItems;
+  // Tableau in der selektionsliste
+  List<Tableau> _allTableau = [];
+  List<DropdownMenuItem<Tableau>> _dropdownTableauItems = [];
+  Tableau tableauAlle = new Tableau(-1, ' ', 'Alle Spieler', '0');
   Tableau? _selectedTableau;
 
-  // Spieler Listen
+  // Spieler Listen, Zugriff auf Date
   SpielerList _spielerList = SpielerList();
   // alle Spieler, wird einmal eingelesen, für reset, wenn alle anzeigen
-  List? _spielerAlle;
+  List<SpielerShort> _spielerAlle = [];
   // Spieler eines Tableau
-  List? _spielerTableau;
+  List<SpielerShort> _spielerTableau = [];
   // Die angezeigte Liste der Spieler
-  List? _spielerShow;
+  List<SpielerShort> _spielerShow = [];
 
   @override
   void initState() {
@@ -56,26 +58,23 @@ class _HomeState extends State<Home> {
   Future _initConfig() async {
     String message = await Config.readConfig();
     if (message.length > 0) {
-      AlertPopup alert =
-          AlertPopup('Config', message, context);
+      AlertPopup alert = AlertPopup('Config', message, context);
       await alert.showMyDialog();
       return;
     }
     // wenn abDatumAnzeigen noch nicht gesetzt, dann wurde locals nicht
     // richtig eingelesen
     if ((global.abDatumAnzeigen.compareTo(global.startDatum) < 0) ||
-            (global.abDatumAnzeigen.compareTo(global.endDatum) > 0))
-    {
+        (global.abDatumAnzeigen.compareTo(global.endDatum) > 0)) {
       global.abDatumAnzeigen = global.startDatum;
     }
-
   }
 
   Future _initSpieler() async {
     // Spieler Date
     _spielerAlle = await _spielerList.readAllSpielerShort();
     setState(() {
-      _spielerShow = _spielerAlle;
+      _spielerShow.addAll(_spielerAlle);
     });
   }
 
@@ -84,7 +83,7 @@ class _HomeState extends State<Home> {
     _tableauList = new TableauList();
     _allTableau = await _tableauList.readAllTableau();
     setState(() {
-      _buildDropDownMenuItems(_allTableau!);
+      _buildDropDownMenuItems(_allTableau);
     });
   }
 
@@ -141,13 +140,19 @@ class _HomeState extends State<Home> {
           // _tableauDropDown();
           Row(
             children: [
-              Text("Tableau: "),
-              DropdownButton<dynamic>(
+              Container(
+                padding: EdgeInsets.only(right: 10),
+                child: Text(
+                  "Tableau:",
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+              DropdownButton<Tableau>(
                   value: _selectedTableau,
-                  items: _dropdownTableauItems as List<DropdownMenuItem<dynamic>>?,
-                  onChanged: (value) {
-                    _selectedTableau = value;
-                    _readSpielerTableau(value.tableauID);
+                  items: _dropdownTableauItems,
+                  onChanged: (Tableau? newValue) {
+                    _selectedTableau = newValue!;
+                    _readSpielerTableau(newValue.tableauID);
                   }),
             ],
           ),
@@ -161,7 +166,7 @@ class _HomeState extends State<Home> {
                   onChanged: (value) {
                     _filterSearchResults(value);
                   },
-                  controller: txtNameSuchen,
+                  controller: _txtNameSuchen,
                   decoration: InputDecoration(
                       labelText: "Name eingeben",
                       hintText: "Name",
@@ -179,7 +184,7 @@ class _HomeState extends State<Home> {
                 child: TextButton(
                   child: Text(
                     'alle',
-//                  style: TextStyle(fontSize: 20.0),
+                    style: TextStyle(fontSize: 16.0),
                   ),
                   onPressed: _selectAll,
                 ),
@@ -192,7 +197,7 @@ class _HomeState extends State<Home> {
                 child: TextButton(
                   child: Text(
                     'keine',
-//                  style: TextStyle(fontSize: 20.0),
+                    style: TextStyle(fontSize: 16.0),
                   ),
                   onPressed: _unselectAll,
                 ),
@@ -203,7 +208,7 @@ class _HomeState extends State<Home> {
           Expanded(
               child: ListView.builder(
             shrinkWrap: true,
-            itemCount: _spielerShow == null ? 0 : _spielerShow!.length,
+            itemCount: _spielerShow.length,
             itemBuilder: _getListOfSpieler,
           )),
         ]),
@@ -219,27 +224,27 @@ class _HomeState extends State<Home> {
   // Wenn ein Tableau selektiert wurde
   void _readSpielerTableau(int tableauID) async {
     if (tableauID < 0) {
-      setState(() {
-        _spielerShow = _spielerAlle;
-      });
+      _spielerShow.clear();
+      _spielerShow.addAll(_spielerAlle);
     } else {
       _spielerTableau = await _spielerList.readTableauSpielerShort(tableauID);
-      setState(() {
-        _spielerShow = _spielerTableau;
-      });
+      _spielerShow.clear();
+      _spielerShow.addAll(_spielerTableau);
     }
+    setState(() {
+      _txtNameSuchen.text = "";
+    });
   }
 
   // Den Dropdown für Tableau erstellen
-  void _buildDropDownMenuItems(List listItems) {
-    List<DropdownMenuItem> items = [];
+  void _buildDropDownMenuItems(List<Tableau> listItems) {
+    List<DropdownMenuItem<Tableau>> items = [];
     // erster Eintrag leer
-    Tableau tabLeer = new Tableau(-1, ' ', ' ', '0');
     items.add(DropdownMenuItem(
-      child: Text(tabLeer.bezeichnung!),
-      value: tabLeer,
+      child: Text(tableauAlle.bezeichnung!),
+      value: tableauAlle,
     ));
-    for (Tableau tableau in listItems as Iterable<Tableau>) {
+    for (Tableau tableau in listItems) {
       items.add(
         DropdownMenuItem(
           child: Text(tableau.bezeichnung!),
@@ -254,18 +259,18 @@ class _HomeState extends State<Home> {
   Widget _getListOfSpieler(BuildContext context, int index) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 2),
-      color: _spielerShow![index].isSelected ? Colors.orange[300] : Colors.white,
+      color: _spielerShow[index].isSelected ? Colors.orange[300] : Colors.white,
       // height: 30.0,
       child: ListTile(
         title: Text(
-          '${_spielerShow!.elementAt(index).names}',
+          '${_spielerShow.elementAt(index).names}',
           style: TextStyle(fontSize: 18.0),
 //          style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 1.2),
         ),
         dense: true,
         onTap: () {
           setState(() {
-            _spielerShow![index].isSelected = !_spielerShow![index].isSelected;
+            _spielerShow[index].isSelected = !_spielerShow[index].isSelected;
           });
         },
         onLongPress: () {
@@ -277,36 +282,42 @@ class _HomeState extends State<Home> {
 
   /// Wenn etwas im search-feld eingegeben wurde.
   void _filterSearchResults(String query) {
-    late List tempList = [];
+    List<SpielerShort> tempList = [];
     if (query.isNotEmpty) {
-      _spielerAlle!.forEach((item) {
-        if (item.names.toLowerCase().contains(query.toLowerCase())) {
+      _spielerShow.forEach((item) {
+        if (item.names!.toLowerCase().contains(query.toLowerCase())) {
           tempList.add(item);
         }
       });
       setState(() {
-        _spielerShow!.clear();
-        _spielerShow!.addAll(tempList);
+        _spielerShow.clear();
+        _spielerShow.addAll(tempList);
       });
       return;
     } else {
+      _spielerShow.clear();
+      if (_selectedTableau == null || _selectedTableau!.tableauID < 0) {
+        _spielerShow.addAll(_spielerAlle);
+      }
+      else {
+        _spielerShow.addAll(_spielerTableau);
+      }
       setState(() {
         // zurücksetzen auf Ausgang: alle oder Tableau
-        _spielerShow!.clear();
-        _spielerShow!.addAll(_spielerAlle!);
+        _txtNameSuchen.text = "";
       });
     }
   }
 
   // alle Spieler selektieren,
   void _selectAll() {
-    if (_spielerShow!.length > 20) {
+    if (_spielerShow.length > 20) {
       AlertPopup popup =
           AlertPopup("Spieler anzeigen", "das wären zuviele Spieler", context);
       popup.showMyDialog();
       return;
     }
-    _spielerShow!.forEach((element) {
+    _spielerShow.forEach((element) {
       element.isSelected = true;
     });
     setState(() {});
@@ -314,7 +325,7 @@ class _HomeState extends State<Home> {
 
   /// keine selektieren
   void _unselectAll() {
-    _spielerShow!.forEach((element) {
+    _spielerShow.forEach((element) {
       element.isSelected = false;
     });
     setState(() {});
@@ -327,9 +338,9 @@ class _HomeState extends State<Home> {
     } else {
       global.spielerIdList = [];
     }
-    _spielerShow!.forEach((element) {
+    _spielerShow.forEach((element) {
       if (element.isSelected) {
-        global.spielerIdList.add(int.parse(element.spielerID));
+        global.spielerIdList.add(int.parse(element.spielerID!));
       }
     });
   }

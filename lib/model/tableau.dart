@@ -51,10 +51,10 @@ class Tableau {
 
 // Die Liste alller Tabelaux
 class TableauList {
-  List? allTableau;
+  List<Tableau> allTableau = [];
 
   /// Alle Tableau von der DB lesen, diese werden in json-format geliefert
-  Future<List?> readAllTableau() async {
+  Future<List<Tableau>> readAllTableau() async {
     try {
       final response = await http.post(MyUri.getUri("/readTableau.php"), body: {
         "dbname": global.dbName,

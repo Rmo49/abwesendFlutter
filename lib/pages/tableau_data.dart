@@ -27,7 +27,7 @@ class _TableauDataState extends State<TableauData> {
     TableauList tList = TableauList();
     await tList.readAllTableau();
     setState(() {
-      _tableauList = tList.allTableau as List<Tableau>?;
+      _tableauList = tList.allTableau;
     });
   }
 
@@ -134,10 +134,10 @@ class _TableauDataState extends State<TableauData> {
               scrollDirection: Axis.vertical,
               child: DataTable(
                     columns: [
-                      DataColumn(label: Text('id'), numeric: true),
                       DataColumn(label: Text('pos'), numeric: true),
                       DataColumn(label: Text('bezeichnung')),
-                      DataColumn(label: Text('konkurrenz'))
+                      DataColumn(label: Text('konkurrenz')),
+                      DataColumn(label: Text('id'), numeric: true)
                     ],
                     rows: _getTableauRows(),
                     columnSpacing: 8,
@@ -156,10 +156,10 @@ class _TableauDataState extends State<TableauData> {
     _tableauList!.forEach((element) {
       DataRow row = DataRow(
           cells: [
-            DataCell(Text(element.tableauID.toString())),
             DataCell(Text(element.position.toString())),
             DataCell(Text(element.bezeichnung.toString())),
             DataCell(Text(element.konkurrenz.toString())),
+            DataCell(Text(element.tableauID.toString())),
           ],
           selected: element.tableauID == _selectedID,
           onSelectChanged: (val) {
