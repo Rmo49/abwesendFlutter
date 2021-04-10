@@ -186,7 +186,6 @@ class _TableauDataState extends State<TableauData> {
 
   /// Ein neues Tableau eingeben
   void _neuesTableau() {
-    // TODO: zuerst verifizieren, ob etwas gespeichert werden muss
     _txtPos.clear();
     _txtBezeichnung.clear();
     _txtKonkurren.clear();
@@ -197,9 +196,6 @@ class _TableauDataState extends State<TableauData> {
 
   /// Speichern der bestehenden Eingabe
   void _speichern() async {
-    if (_selectedID >= 0) {
-      // TODO: zuerst vergleichen mit dem bestehenden Eintrag
-    }
     if (_formKey.currentState!.validate()) {
       Tableau tableau = new Tableau(
           _selectedID, _txtPos.text, _txtBezeichnung.text, _txtKonkurren.text);

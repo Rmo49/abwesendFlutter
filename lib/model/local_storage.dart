@@ -53,7 +53,6 @@ class LocalStorage {
 
   Future<String> _localPath() async {
     if    (kIsWeb) {
-      // TODO: evt. speichern wenn in Web läuft
       return "xx";
     } else {
       final directory = await getApplicationDocumentsDirectory();
