@@ -47,24 +47,26 @@ class _LoginState extends State<Login> {
       setStateError(error);
     }
     global.abDatumAnzeigen = global.dateFormDb.parse(localStorage.showAbDatum!);
+
   }
 
   _setVars() async {
-    _txtErrorLines = 2;
+    _txtErrorLines = 1;
     _dropdownScheme = localStorage.scheme;
-    _txtHost.text = localStorage.host!;
-    _txtPort.text = localStorage.port.toString();
-    _txtPath.text = localStorage.path!;
-    _txtDbPw.text = localStorage.dbPw!;
-    _txtUser.text = localStorage.userName!;
-    _txtUserPw.text = localStorage.userPw!;
-    setState(() {});
+    setState(() {
+      _txtHost.text = localStorage.host!;
+      _txtPort.text = localStorage.port.toString();
+      _txtPath.text = localStorage.path!;
+      _txtDbPw.text = localStorage.dbPw!;
+      _txtUser.text = localStorage.userName!;
+      _txtUserPw.text = localStorage.userPw!;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     if (_txtErrorLines <= 0) {
-      _txtErrorLines = 2;
+      _txtErrorLines = 1;
     }
     return new Scaffold(
       appBar: new AppBar(
@@ -74,56 +76,58 @@ class _LoginState extends State<Login> {
           child: Column(children: <Widget>[
             Text('Verbindung zum Server',
                 style: Theme.of(context).textTheme.bodyText1),
-        Row(
-          children: [
-            Flexible(
-              flex: 1,
-              child: DropdownButton<String>(
-                  value: _dropdownScheme,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _dropdownScheme = newValue;
-                    });
-                  },
-                  items: <String>['http', 'https']
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList()),
-            ),
-            Flexible(
-              flex: 2,
-              child: TextField(
-                controller: _txtHost,
-                decoration: InputDecoration(
-                    labelText: "Host",
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(5.0)))),
+            Expanded(
+          child: Row(
+            children: [
+              Flexible(
+                flex: 1,
+                child: DropdownButton<String>(
+                    value: _dropdownScheme,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _dropdownScheme = newValue;
+                      });
+                    },
+                    items: <String>['http', 'https']
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList()),
               ),
-            ),
-            Flexible(
-              flex: 1,
-              child: TextField(
-                controller: _txtPort,
-                decoration: InputDecoration(
-                    labelText: "Port",
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(5.0)))),
+              Flexible(
+                flex: 2,
+                child: TextField(
+                  controller: _txtHost,
+                  decoration: InputDecoration(
+                      labelText: "Host",
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(5.0)))),
+                ),
               ),
-            ),
-            Flexible(
-              flex: 2,
-              child: TextField(
-                controller: _txtPath,
-                decoration: InputDecoration(
-                    labelText: "Pfad",
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(5.0)))),
+              Flexible(
+                flex: 1,
+                child: TextField(
+                  controller: _txtPort,
+                  decoration: InputDecoration(
+                      labelText: "Port",
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(5.0)))),
+                ),
               ),
-            )
-          ],
+              Flexible(
+                flex: 2,
+                child: TextField(
+                  controller: _txtPath,
+                  decoration: InputDecoration(
+                      labelText: "Pfad",
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(5.0)))),
+                ),
+              )
+            ],
+          ),
         ),
         Expanded(
           child: ElevatedButton(
@@ -173,7 +177,6 @@ class _LoginState extends State<Login> {
                     controller: _txtUser,
                     decoration: InputDecoration(
                         labelText: "Benutzer Name",
-                        hintText: "Vorname",
                         border: OutlineInputBorder(
                             borderRadius:
                                 BorderRadius.all(Radius.circular(5.0)))),
@@ -216,7 +219,7 @@ class _LoginState extends State<Login> {
           ),
         ),
         Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(2.0),
             child: TextField(
               maxLines: _txtErrorLines,
               controller: _txtError,

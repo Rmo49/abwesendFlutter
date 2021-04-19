@@ -26,6 +26,11 @@ class MyApp extends StatelessWidget {
     )
   );
 
+  final ButtonStyle textButtonStyle = TextButton.styleFrom(
+    primary: Colors.white,
+    backgroundColor: Colors.blue[300],
+    padding: EdgeInsets.all(16),
+  );
 
   // This widget is the root of your application.
   @override
@@ -33,7 +38,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'TCA CM',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.orange,
         primaryColor: Colors.blue,
         textTheme: TextTheme(
           bodyText1: TextStyle(fontSize: 20.0),
@@ -42,6 +47,8 @@ class MyApp extends StatelessWidget {
         ),
         elevatedButtonTheme:
             ElevatedButtonThemeData(style: elevatedButtonStyle),
+        textButtonTheme:
+        TextButtonThemeData(style: textButtonStyle),
       ),
 
       initialRoute: '/login',

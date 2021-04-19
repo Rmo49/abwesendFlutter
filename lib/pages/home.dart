@@ -141,19 +141,23 @@ class _HomeState extends State<Home> {
           Row(
             children: [
               Container(
-                padding: EdgeInsets.only(right: 10),
+                padding: EdgeInsets.only(right: 10, top: 10),
                 child: Text(
                   "Tableau:",
                   style: TextStyle(fontSize: 16),
                 ),
               ),
-              DropdownButton<Tableau>(
-                  value: _selectedTableau,
-                  items: _dropdownTableauItems,
-                  onChanged: (Tableau? newValue) {
-                    _selectedTableau = newValue!;
-                    _readSpielerTableau(newValue.tableauID);
-                  }),
+              Container(
+                padding: EdgeInsets.only(top: 10),
+                child: DropdownButton<Tableau>(
+                    items: _dropdownTableauItems,
+                    isDense: true,
+                    value: _selectedTableau,
+                    onChanged: (Tableau? newValue) {
+                      _selectedTableau = newValue!;
+                      _readSpielerTableau(newValue.tableauID);
+                    }),
+              ),
             ],
           ),
 
@@ -298,8 +302,7 @@ class _HomeState extends State<Home> {
       _spielerShow.clear();
       if (_selectedTableau == null || _selectedTableau!.tableauID < 0) {
         _spielerShow.addAll(_spielerAlle);
-      }
-      else {
+      } else {
         _spielerShow.addAll(_spielerTableau);
       }
       setState(() {
@@ -313,7 +316,8 @@ class _HomeState extends State<Home> {
   void _selectAll() {
     if (_spielerShow.length > 20) {
       AlertPopup popup =
-          AlertPopup("Spieler anzeigen", "das wären zuviele Spieler", context);
+          AlertPopup("Spieler anzeigen", "das wären zuviele Spieler\n" +
+              "zuerst ein Tableau wählen", context);
       popup.showMyDialog();
       return;
     }

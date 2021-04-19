@@ -59,7 +59,7 @@ class Config {
   }
 
   static updateConfig(String key, String newValue) {
-    if (key.isNotEmpty) {
+    if (key.isNotEmpty && newValue.length > 0) {
       configMap!.update(key, (value) => newValue);
     }
   }

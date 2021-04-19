@@ -69,7 +69,7 @@ class AbwesendTable extends StatelessWidget {
         TableCell(
             child: Container(
               child: Text(dateFormList.format(datum!)),
-              color: isWeekend(i) ? Colors.grey : Colors.white,
+              color: isWeekend(i) ? Colors.lightBlueAccent : Colors.white,
             )),
       );
       datum = datum.add(Duration(days: 1));
@@ -251,8 +251,8 @@ class MyPainter extends CustomPainter {
   MyPainter(this.posStart, this.posEnd, this.matchDisplayList);
 
   final painterAbw = Paint()..color = Colors.deepOrangeAccent;
-  final painterEinzel = Paint()..color = Colors.blue[700]!;
-  final painterDoppel = Paint()..color = Colors.green[700]!;
+  final painterEinzel = Paint()..color = Colors.blue[500]!;
+  final painterDoppel = Paint()..color = Colors.green[500]!;
 
   @override
   void paint(Canvas canvas, Size size) {

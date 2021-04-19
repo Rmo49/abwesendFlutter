@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 
 // das Datenformat in der DB
 final DateFormat dateFormDb = new DateFormat('yyyy-MM-dd');
+// das Datenformat in Anzeige
+final DateFormat dateFormDisplay = new DateFormat('d.M.yyyy');
 // Werte initialisieren 0=Internet, 1=lokal
 final int initWerte = 1;
 

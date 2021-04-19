@@ -23,53 +23,65 @@ class HomeDrawer {
             'Setup',
             style: Theme.of(context).textTheme.bodyText1,
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/einstellungen', arguments: {});
-            },
-            child: Row(children: <Widget>[
-              Icon(Icons.settings),
-              Text(
-                '  Einstellungen',
-                style: TextStyle(fontSize: 20.0),
-              ),
-            ]),
+          Container(
+            padding: EdgeInsets.all(5),
+            child: TextButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/einstellungen', arguments: {});
+              },
+              child: Row(children: <Widget>[
+                Icon(Icons.settings),
+                Text(
+                  '  Einstellungen',
+                  style: TextStyle(fontSize: 20.0),
+                ),
+              ]),
+            ),
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/tableau_data', arguments: {
-                'tableauID': -1,
-              });
-            },
-            child: Row(children: <Widget>[
-              Icon(Icons.article_outlined),
-              Text(
-                '  Tableau verwalten',
-                style: TextStyle(fontSize: 20.0),
-              ),
-            ]),
+          Container(
+            padding: EdgeInsets.all(5),
+            child: TextButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/tableau_data', arguments: {
+                  'tableauID': -1,
+                });
+              },
+              child: Row(children: <Widget>[
+                Icon(Icons.article_outlined),
+                Text(
+                  '  Tableau verwalten',
+                  style: TextStyle(fontSize: 20.0),
+                ),
+              ]),
+            ),
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/config_data', arguments: {});
-            },
-            child: Row(children: <Widget>[
-              Icon(Icons.apps),
-              Text(
-                ' Config verwalten',
-                style: TextStyle(fontSize: 20.0),
-              ),
-            ]),
+          Container(
+            padding: EdgeInsets.all(5),
+            child: TextButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/config_data', arguments: {});
+              },
+              child: Row(children: <Widget>[
+                Icon(Icons.apps),
+                Text(
+                  ' Config verwalten',
+                  style: TextStyle(fontSize: 20.0),
+                ),
+              ]),
+            ),
           ),
-          TextButton(
-            onPressed: () => _passwortAendern(context),
-            child: Row(children: <Widget>[
-              Icon(Icons.accessibility),
-              Text(
-                ' Passwort ändern',
-                style: TextStyle(fontSize: 20.0),
-              ),
-            ]),
+          Container(
+            padding: EdgeInsets.all(5),
+            child: TextButton(
+              onPressed: () => _passwortAendern(context),
+              child: Row(children: <Widget>[
+                Icon(Icons.accessibility),
+                Text(
+                  ' Passwort ändern',
+                  style: TextStyle(fontSize: 20.0),
+                ),
+              ]),
+            ),
           ),
           Container(
             padding: EdgeInsets.all(5),
@@ -103,6 +115,8 @@ class HomeDrawer {
   }
 
   void _logout(BuildContext context) {
+    LocalStorage localStorage = LocalStorage();
+    localStorage.saveLocalData();
     Navigator.pushReplacementNamed(context, '/login');
   }
 
@@ -176,14 +190,15 @@ class HomeDrawer {
   }
 
   void _savePassword() async {
+    LocalStorage localStorage = LocalStorage();
     try {
       final response = await http.post(MyUri.getUri("/userSet.php"), body: {
         "userName": global.userName,
+        "passwortAlt": localStorage.userPw,
         "passwort": txtPasswort.text,
       });
 
       if (response.statusCode == 200) {
-        LocalStorage localStorage = LocalStorage();
         if (response.body.startsWith("OK")) {
           localStorage.userPw = txtPasswort.text;
           localStorage.saveLocalData();

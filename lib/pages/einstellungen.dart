@@ -31,6 +31,7 @@ class _EinstellungenState extends State<Einstellungen> {
         Text(' '),
         Container(
           color: Colors.orange[300],
+          width: 300,
           child: CheckboxListTile(
             title: Text(
               'nur Grafik anzeigen',

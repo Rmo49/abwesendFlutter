@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 /// Die Lokalen-Daten lesen und speichern, ist ein Singelton
 class LocalStorage {
-  String? webAdress;
   String? scheme;
   String? host;
   int? port;
@@ -99,8 +98,8 @@ class LocalStorage {
       path = "tca/db";
       port = int.parse("0");
       dbPw = "Php.4123";
-      userName = "Vorname";
-      userPw = "pw";
+      userName = "";
+      userPw = "";
       showAbDatum = "2020-01-01";
     }
     if (global.initWerte == 1) {
@@ -109,8 +108,8 @@ class LocalStorage {
       path = "db";
       port = int.parse("8081");
       dbPw = "Php.4123";
-      userName = "Vorname";
-      userPw = "pw";
+      userName = "";
+      userPw = "";
       showAbDatum = "2020-01-01";
     }
   }

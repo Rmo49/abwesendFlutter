@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 
@@ -52,6 +53,9 @@ class _AbwesendShowState extends State<AbwesendShow> {
       ),
       body: Column(
         children: <Widget>[
+          Container(
+            margin: EdgeInsets.all(10),
+          ),
           AbwesendTable(
             spielerList: _spielerList,
           ),

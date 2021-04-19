@@ -101,11 +101,13 @@ class _ConfigDataState extends State<ConfigData> {
 
   /// Speichern, wenn was geändert
   Future _speichern() async {
-    String message = await Config.saveConfig(_selectedKey, _txtValue.text);
-    if (message.startsWith('OK')) {
-      Config.updateConfig(_selectedKey, _txtValue.text);
+    if (_txtValue.text.isNotEmpty) {
+      String message = await Config.saveConfig(_selectedKey, _txtValue.text);
+      if (message.startsWith('OK')) {
+        Config.updateConfig(_selectedKey, _txtValue.text);
+      }
+      _txtValue.text = message;
     }
-    _txtValue.text = message;
     setState(() {
       _selectedKey = " ";
     });
