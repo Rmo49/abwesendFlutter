@@ -8,11 +8,12 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 /// Die Lokalen-Daten lesen und speichern, ist ein Singelton
 class LocalStorage {
-  String? scheme;
-  String? host;
-  int? port;
-  String? path;
-  String? dbPw;
+  String scheme = "";
+  String host = "";
+  int port = 0;
+  String path = "";
+  String database = "";
+  String dbPw ="";
   String? userName;
   String? userPw;
   String? showAbDatum;
@@ -33,6 +34,7 @@ class LocalStorage {
         'host': host,
         'port': port,
         'path': path,
+    'database': database,
         'dbPw': dbPw,
         'userName': userName,
         'userPw': userPw,
@@ -44,6 +46,7 @@ class LocalStorage {
     _instance.host = map['host'];
     _instance.port = map['port'];
     _instance.path = map['path'];
+    _instance.database = map['database'];
     _instance.dbPw = map['dbPw'];
     _instance.userName = map['userName'];
     _instance.userPw = map['userPw'];
@@ -60,8 +63,8 @@ class LocalStorage {
   }
 
   Future<File> _localFile() async {
-    final path = await _localPath();
-    return File('$path/loginData.txt');
+    final localPath = await _localPath();
+    return File('$localPath/loginData.txt');
   }
 
   /// Die  Daten von einem lokalenfile lesen
@@ -95,8 +98,9 @@ class LocalStorage {
     if (global.initWerte == 0) {
       scheme = "https";
       host = "nomadus.ch";
+      port = 0;
       path = "tca/db";
-      port = int.parse("0");
+      database = 'tennis';
       dbPw = "Php.4123";
       userName = "";
       userPw = "";
@@ -105,8 +109,8 @@ class LocalStorage {
     if (global.initWerte == 1) {
       scheme = "http";
       host = "192.168.0.59";
-      path = "db";
       port = int.parse("8081");
+      path = "db";
       dbPw = "Php.4123";
       userName = "";
       userPw = "";

@@ -93,7 +93,7 @@ class _HomeState extends State<Home> {
 
     return new Scaffold(
       appBar: AppBar(
-        title: Text('Abwesend TCA'),
+        title: Text(global.titel),
         // das Menu links
         leading: Builder(
           builder: (BuildContext context) {
@@ -371,8 +371,8 @@ class _HomeState extends State<Home> {
   /// index ist die position in der Liste
   void _spielerAdmin(BuildContext context) {
     _fillSpielerList();
-    if (global.spielerIdList.length > 0) {
+//    if (global.spielerIdList.length > 0) {
       Navigator.pushNamed(context, '/spieler_admin', arguments: {});
-    }
+ //   }
   }
 }

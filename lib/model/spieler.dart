@@ -5,11 +5,11 @@ import 'package:abwesend/model/globals.dart' as global;
 import 'package:abwesend/model/match.dart';
 
 class Spieler {
-  int? spielerID;
+  int spielerID = -1;
   String? name;
   String? vorname;
   String? email;
-  String? abwesend;
+  String? abwesendStr;
   String? begin; // Begin datum des Truniers
   late List<Match> matches;
   List<int>? tableauList;
@@ -23,7 +23,7 @@ class Spieler {
         name = map['name'],
         vorname = map['vorname'],
         email = map['email'],
-        abwesend = map['abwesendArray'],
+        abwesendStr = map['abwesendArray'],
         begin = map['begin'];
 
   Map<String, dynamic> toJson() => {
@@ -31,8 +31,18 @@ class Spieler {
         'name': name,
         'vorname': vorname,
         'email': email,
-        'abwesend': abwesend
+        'abwesend': abwesendStr
       };
+
+
+  /// Den AbwesendArray leeren
+  abwesendStrLeeren() {
+    StringBuffer sb = new StringBuffer();
+    for (int i = 0; i < global.arrayLen; i++) {
+      sb.write(";");
+    }
+    abwesendStr = sb.toString();
+  }
 
   setMatches(List<dynamic> matchList) {
     matches = [];
@@ -53,7 +63,9 @@ class Spieler {
 
   // Die Liste der Tableau wieder setzen (falls geändert)
   void resetTableauList(List<int> newList) {
-    tableauList!.clear();
+    if (tableauList != null) {
+      tableauList!.clear();
+    }
     tableauList = newList;
   }
 

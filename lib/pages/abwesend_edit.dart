@@ -39,7 +39,7 @@ class _AbwesendEditState extends State<AbwesendEdit> {
   void doSetState(List<Spieler?> spielerList) {
     _spieler = spielerList.first;
     if (_spieler != null) {
-      _abwesendList = _spieler!.abwesend!.split(';');
+      _abwesendList = _spieler!.abwesendStr!.split(';');
       _initTxtController();
     }
     setState(() {
@@ -179,7 +179,7 @@ class _AbwesendEditState extends State<AbwesendEdit> {
     for (int i = 0; i < _anzCol; i++) {
       _abwesendList![i] = _txtList[i].text;
     }
-    _spieler!.abwesend = _abwesendList!.join(';');
+    _spieler!.abwesendStr = _abwesendList!.join(';');
     String result = await _spieler!.saveSpieler();
     setState(() {
       txtMeldung.text = result;

@@ -79,7 +79,7 @@ class AbwesendTable extends StatelessWidget {
 
   /// Die Tabelle eines Spielers
   Table getTableSpieler(Spieler spieler) {
-    List abwesendList = spieler.abwesend!.split(';');
+    List abwesendList = spieler.abwesendStr!.split(';');
     List<TableRow> rowList = [];
     if (!global.nurGrafik!) {
       rowList.add(getRowAbwesend(spieler.vorname!, abwesendList));

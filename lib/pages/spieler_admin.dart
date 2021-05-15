@@ -34,10 +34,12 @@ class _SpielerAdminState extends State<SpielerAdmin> {
   }
 
   void _readData() async {
-    await _readSpieler(global.spielerIdList);
-    await _readSpielerTableau();
+    if (global.spielerIdList.length > 0) {
+      await _readSpieler(global.spielerIdList);
+      await _readSpielerTableau();
+    }
     await _readTableau();
-    await _setData();
+    await _setData(global.spielerIdList);
     _doSetState();
   }
 
@@ -61,20 +63,26 @@ class _SpielerAdminState extends State<SpielerAdmin> {
     await _spieler!.readTableau();
   }
 
-  Future _setData() async {
-    _txtName.text = _spieler!.name!;
-    _txtVorname.text = _spieler!.vorname!;
-    _txtEmail.text = _spieler!.email!;
-    _txtId.text = _spieler!.spielerID.toString();
-    // Tableau setzen
-    Iterator iter = _spieler!.tableauList!.iterator;
-    while (iter.moveNext()) {
-      for (int i = 0; i < _tableauList!.length; i++) {
-        if (_tableauList![i].tableauID == iter.current) {
-          _tableauList![i].isSelected = true;
-          break;
+  /// Daten der Anzeige-Felder setzen
+  Future _setData(List<int> spielerIdList) async {
+    if (spielerIdList.length > 0) {
+      _txtName.text = _spieler!.name!;
+      _txtVorname.text = _spieler!.vorname!;
+      _txtEmail.text = _spieler!.email!;
+      _txtId.text = _spieler!.spielerID.toString();
+      // Tableau setzen
+      Iterator iter = _spieler!.tableauList!.iterator;
+      while (iter.moveNext()) {
+        for (int i = 0; i < _tableauList!.length; i++) {
+          if (_tableauList![i].tableauID == iter.current) {
+            _tableauList![i].isSelected = true;
+            break;
+          }
         }
       }
+    }
+    else {
+      _spielerNeu();
     }
   }
 
@@ -275,7 +283,12 @@ class _SpielerAdminState extends State<SpielerAdmin> {
       _spieler!.name = _txtName.text;
       _spieler!.vorname = _txtVorname.text;
       _spieler!.email = _txtEmail.text;
-      await _spieler!.saveSpieler();
+      var _spielerId = await _spieler!.saveSpieler();
+
+      // wenn neu, dann SpielerId setzen
+      if (_spieler!.spielerID < 0) {
+        _spieler!.spielerID = int.parse(_spielerId);
+      }
       // Tableau-Liste neu setzen, falls geändert
       List<int> tabList = [];
       _tableauList!.forEach((element) {
@@ -293,16 +306,19 @@ class _SpielerAdminState extends State<SpielerAdmin> {
     }
   }
 
-  void _spielerNeu() {
-    _txtName.text = '';
-    _txtVorname.text = '';
-    _txtEmail.text = '';
-    _txtId.text = "-1";
+  void _spielerNeu() async {
+    _spieler = new Spieler("", "", "");
     _spieler!.spielerID = -1;
+    _spieler!.abwesendStrLeeren();
     _tableauList!.forEach((element) {
       element.isSelected = false;
     });
-    setState(() {});
+    setState(() {
+      _txtName.text = '';
+      _txtVorname.text = '';
+      _txtEmail.text = '';
+      _txtId.text = "-1";
+    });
   }
 
   void _showDeleteDialog(BuildContext context) {

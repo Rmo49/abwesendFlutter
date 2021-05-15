@@ -1,19 +1,22 @@
 library my_pri.globals;
 import 'package:intl/intl.dart';
 
+// Der Titel, der angezeigt wird
+final String titel = "TCA CM (19.0)";
+// Werte initialisieren 0=Internet, 1=lokal
+final int initWerte = 0;
+
 // das Datenformat in der DB
 final DateFormat dateFormDb = new DateFormat('yyyy-MM-dd');
 // das Datenformat in Anzeige
 final DateFormat dateFormDisplay = new DateFormat('d.M.yyyy');
-// Werte initialisieren 0=Internet, 1=lokal
-final int initWerte = 1;
 
 // der Name des Benutzers
 String userName = '';
 // der Name der DB, wird von login gelesen
 String? dbName;
 // der DB-User, muss bei der DB gesetzt sein
-String? dbUser;
+String dbUser = 'phpuser';
 // das DB-Passwort ist immer gleich
 String? dbPass;
 // Das Schema für Web (http / https)

@@ -1,10 +1,16 @@
+Fehler:
 
+Verbessern:
+Bei Abwesenheiten anzeigen, nur die mögliche Breite, damit Liste angezeigt werden kann.
+Swiss-Tennis aufrufen
 Icons inaktiv, wenn noch nicht verwendet werden kann
+Wochenwerte eintragen: Haken wenn bestehende Werte überschreiben.
 
 Check Start wenn keine Internet Verbindung, wie kann ich das anzeigen?
 
 
 Einstellungen Test:
+10.0.2.2
 http://192.168.0.59:8081/db
 Php.4123
 ruedi, tca4
@@ -13,4 +19,12 @@ https://nomadus.ch/tca/db
 
 Local Data:
 /data/user/0/ch.nomadus.abwesend/app_flutter
+
+
+var settings = ConnectionSettings(
+        host: 'server41.hostfactory.ch',
+        port: 3306,
+        user: 'phpuser',
+        password: 'Php.4123',
+        db: 'tennis');
 
