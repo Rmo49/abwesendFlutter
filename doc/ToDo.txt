@@ -45,28 +45,6 @@ Vorher Fehler, Anleitung: https://docs.flutter.dev/deployment/android#signing-th
 --------------------
 Setup Android Studio
 
-16.8.22: Neues Flutter-Projekt angelegt, libs kopiert
-
-pubspec.yaml
- flutter:
-    sdk: flutter
-
-  http: ^0.13.5
-  json_annotation: ^4.0.1
-  intl: ^0.17.0
-  path_provider: ^2.0.2
-  package_info: ^2.0.2
-  device_info: ^2.0.2
-  percent_indicator: ^4.2.2
-  shared_preferences: ^2.0.6
-  mysql1: ^0.20.0
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.2
-
-------------------
-Versuch mit bestehendem Projekt (ist gescheitert)
 
 29.7.22: File: android/app/src/main/kotlin/ch.nomadus.abwesend/MainActivity.kt
     habe auskommentiert, da Fehler.
@@ -83,11 +61,4 @@ android/gradle/wrapper/gradle-wrapper.properties:
       {"asset":"fonts/MaterialIcons-Regular.otf"} <== falsche, aber alle werden angezeigt
       neu:  {"asset":"MaterialIcons-Regular.ttf"} <== falsche, einige Symbole leer
             {"asset":"fonts/MaterialIcons-Extended.otf"} <== leere Icons werden angezeigt
-
-gelöscht:
-  {"family":"packages/cupertino_icons/CupertinoIcons",
-    "fonts":[
-      {"asset":"packages/cupertino_icons/assets/CupertinoIcons.ttf"}
-    ]
-  }
 
