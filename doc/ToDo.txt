@@ -30,16 +30,16 @@ var settings = ConnectionSettings(
 
 --------------------
 Probleme mit signieren des appbundles
-in android\build.gradle 
+
+in android\app\build.gradle
 	buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            minifyEnabled true
-            shrinkResources true
-            signingConfig signingConfigs.release <== statt debug, dann Fehler
+            signingConfig signingConfigs.release <== statt debug, jetzt funktionierts
         }
 
+Vorher Fehler, Anleitung: https://docs.flutter.dev/deployment/android#signing-the-app
 
 
 --------------------
